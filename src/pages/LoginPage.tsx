@@ -57,7 +57,7 @@ export const LoginPage: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full pl-12 pr-4 py-4 rounded-2xl bg-secondary/50 border border-transparent focus:border-primary focus:bg-background outline-none transition-all shadow-sm"
-                placeholder="manali@example.com"
+                placeholder="Enter your email"
               />
             </div>
           </div>
@@ -65,7 +65,7 @@ export const LoginPage: React.FC = () => {
           <div className="space-y-2">
             <div className="flex justify-between items-center ml-1">
               <label className="text-sm font-semibold">Password</label>
-              <Link to="/forgot-password" title="Mocked flow" className="text-xs font-bold text-primary hover:underline">Forgot?</Link>
+              <Link to="/forgot-password" title="Mocked flow" className="text-xs font-bold text-primary hover:underline">Forgot your password?</Link>
             </div>
             <div className="relative group">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -75,7 +75,7 @@ export const LoginPage: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-12 pr-4 py-4 rounded-2xl bg-secondary/50 border border-transparent focus:border-primary focus:bg-background outline-none transition-all shadow-sm"
-                placeholder="••••••••"
+                placeholder="Enter your password"
               />
             </div>
           </div>

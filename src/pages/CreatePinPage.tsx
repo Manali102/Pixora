@@ -66,7 +66,7 @@ export const CreatePinPage: React.FC = () => {
         description,
         imageUrl: preview || '',
         authorId: user?.id || 'u1',
-        authorName: user?.name || 'Manali',
+        authorName: user?.name || 'Admin',
         authorAvatar: user?.avatar || '',
         likes: 0,
         category,

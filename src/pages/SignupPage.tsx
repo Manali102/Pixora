@@ -48,7 +48,7 @@ export const SignupPage: React.FC = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full pl-12 pr-4 py-4 rounded-2xl bg-secondary/50 border border-transparent focus:border-primary focus:bg-background outline-none transition-all shadow-sm"
-                placeholder="Manali"
+                placeholder="Enter your name"
               />
             </div>
           </div>
@@ -63,7 +63,7 @@ export const SignupPage: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full pl-12 pr-4 py-4 rounded-2xl bg-secondary/50 border border-transparent focus:border-primary focus:bg-background outline-none transition-all shadow-sm"
-                placeholder="manali@example.com"
+                placeholder="Enter your email"
               />
             </div>
           </div>
@@ -78,7 +78,7 @@ export const SignupPage: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-12 pr-4 py-4 rounded-2xl bg-secondary/50 border border-transparent focus:border-primary focus:bg-background outline-none transition-all shadow-sm"
-                placeholder="••••••••"
+                placeholder="Enter your password"
               />
             </div>
           </div>

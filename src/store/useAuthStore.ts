@@ -27,7 +27,7 @@ export const useAuthStore = create<AuthState>()(
         if (email && password) {
           const mockUser: User = {
             id: 'u1',
-            name: 'Manali',
+            name: 'Admin',
             email,
             avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
             role: 'admin',
