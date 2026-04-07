@@ -20,7 +20,8 @@ jobs:
         with:
           node-version: 18
 
-      - run: npm install --no-package-lock
+      - run: rm -f package-lock.json
+      - run: npm install
       - run: npm run build
 
       - uses: actions/upload-pages-artifact@v3
