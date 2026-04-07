@@ -1,3 +1,4 @@
+import React from 'react';
 import { create } from 'zustand';
 import { Pin } from '../mock/data';
 import { mockFetchPins } from '../mock/api';
@@ -43,15 +44,20 @@ export const usePinStore = create<PinState>()((set, get) => ({
     })),
 }));
 
-// Selector: filtered pins derived from store state (memoized by Zustand)
-export const useFilteredPins = () =>
-  usePinStore((state) => {
-    const q = state.searchQuery.toLowerCase();
-    if (!q) return state.pins;
-    return state.pins.filter(
+// Selector: filtered pins derived from store state
+export const useFilteredPins = () => {
+  const pins = usePinStore((state) => state.pins);
+  const searchQuery = usePinStore((state) => state.searchQuery);
+
+  return React.useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return pins;
+
+    return pins.filter(
       (pin) =>
         pin.title.toLowerCase().includes(q) ||
         pin.category.toLowerCase().includes(q) ||
         pin.description.toLowerCase().includes(q)
     );
-  });
+  }, [pins, searchQuery]);
+};

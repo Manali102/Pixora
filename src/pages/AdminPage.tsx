@@ -13,6 +13,14 @@ const breakpointColumnsObj = {
 };
 
 export const AdminPage: React.FC = () => {
+  const [userSearchTerm, setUserSearchTerm] = React.useState('');
+
+  const filteredUsers = MOCK_USERS.filter(u => 
+    u.name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+    u.email.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+    u.subscription.toLowerCase().includes(userSearchTerm.toLowerCase())
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.98 }}
@@ -103,6 +111,8 @@ export const AdminPage: React.FC = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input 
                 placeholder="Search users..." 
+                value={userSearchTerm}
+                onChange={(e) => setUserSearchTerm(e.target.value)}
                 className="pl-10 pr-4 py-2 bg-secondary rounded-xl text-sm outline-none w-full border border-transparent focus:border-primary transition-all"
               />
             </div>
@@ -121,8 +131,15 @@ export const AdminPage: React.FC = () => {
                 <th className="p-6 text-sm font-black uppercase tracking-widest text-muted-foreground text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y">
-              {MOCK_USERS.map((u) => (
+            <tbody className="divide-y text-sm">
+              {filteredUsers.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="p-10 text-center text-muted-foreground font-medium">
+                    No users found matching "{userSearchTerm}"
+                  </td>
+                </tr>
+              )}
+              {filteredUsers.map((u) => (
                 <tr key={u.id} className="hover:bg-secondary/20 transition-colors group">
                   <td className="p-6">
                     <div className="flex items-center gap-4">

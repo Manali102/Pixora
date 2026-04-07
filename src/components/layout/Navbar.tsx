@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Search, Bell, MessageCircle, User, Plus, LogOut, LayoutDashboard, Settings, Crown } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { usePinStore } from '../../store/usePinStore';
@@ -13,6 +13,7 @@ export const Navbar: React.FC = () => {
   const searchQuery = usePinStore((store) => store.searchQuery);
   const setSearchQuery = usePinStore((store) => store.setSearchQuery);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const location = useLocation();
   const navigate = useNavigate();
 
   return (
@@ -45,7 +46,12 @@ export const Navbar: React.FC = () => {
           type="text"
           placeholder="Search for amazing ideas..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            if (location.pathname !== '/' && e.target.value.length > 0) {
+              navigate('/');
+            }
+          }}
           className="w-full bg-secondary hover:bg-secondary/80 focus:bg-background outline-none rounded-full py-3 pl-12 pr-4 transition-all border-2 border-transparent focus:border-primary shadow-sm"
         />
       </div>

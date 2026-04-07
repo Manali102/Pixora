@@ -1,9 +1,14 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { User } from '../mock/data';
+import { User, MOCK_USERS } from '../mock/data';
+
+interface RegisteredUser extends User {
+  password: string;
+}
 
 interface AuthState {
   user: User | null;
+  registeredUsers: RegisteredUser[];
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<boolean>;
@@ -13,8 +18,11 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
+      registeredUsers: [
+        ...MOCK_USERS.map(u => ({ ...u, password: 'password' }))
+      ],
       isLoading: false,
       isAuthenticated: false,
 
@@ -24,18 +32,15 @@ export const useAuthStore = create<AuthState>()(
         // Simulate network latency
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        if (email && password) {
-          const mockUser: User = {
-            id: 'u1',
-            name: 'Admin',
-            email,
-            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-            role: 'admin',
-            subscription: 'pro',
-            storageUsed: 450,
-            storageLimit: 1024,
-          };
-          set({ user: mockUser, isAuthenticated: true, isLoading: false });
+        const state = get();
+        const foundUser = state.registeredUsers.find(
+          (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+        );
+
+        if (foundUser) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { password: _, ...userWithoutPassword } = foundUser;
+          set({ user: userWithoutPassword, isAuthenticated: true, isLoading: false });
           return true;
         }
 
@@ -48,18 +53,33 @@ export const useAuthStore = create<AuthState>()(
 
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
+        const state = get();
+        const exists = state.registeredUsers.some(u => u.email.toLowerCase() === email.toLowerCase());
+
+        if (exists) {
+          set({ isLoading: false });
+          return false;
+        }
+
         if (email && password && name) {
-          const mockUser: User = {
+          const newUser: RegisteredUser = {
             id: `u${Date.now()}`,
             name,
             email,
+            password,
             avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`,
             role: 'user',
             subscription: 'starter',
             storageUsed: 0,
             storageLimit: 250,
           };
-          set({ user: mockUser, isAuthenticated: true, isLoading: false });
+          
+          set((s) => ({ 
+            registeredUsers: [...s.registeredUsers, newUser],
+            user: { ...newUser }, // Auto login after signup
+            isAuthenticated: true, 
+            isLoading: false 
+          }));
           return true;
         }
 
