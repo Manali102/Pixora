@@ -9,7 +9,9 @@ import { DashboardPage } from './pages/DashboardPage';
 import { AdminPage } from './pages/AdminPage';
 import { PricingPage } from './pages/PricingPage';
 import { CreatePinPage } from './pages/CreatePinPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { AnimatePresence } from 'framer-motion';
 import { usePinStore } from './store/usePinStore';
 
@@ -32,8 +34,16 @@ const App: React.FC = () => {
             <Route path="/" element={<ProtectedRoute>
               <HomePage />
             </ProtectedRoute>} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/login" element={
+              <ErrorBoundary>
+                <LoginPage />
+              </ErrorBoundary>
+            } />
+            <Route path="/signup" element={
+              <ErrorBoundary>
+                <SignupPage />
+              </ErrorBoundary>
+            } />
 
             <Route path="/dashboard" element={
               <ProtectedRoute>
@@ -58,6 +68,9 @@ const App: React.FC = () => {
                 <CreatePinPage />
               </ProtectedRoute>
             } />
+
+            {/* 404 catch-all */}
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </AnimatePresence>
       </main>
