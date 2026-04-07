@@ -1,7 +1,6 @@
 {
   "name": "pixora",
   "private": true,
-  "homepage": "https://Manali102.github.io/Pixora",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
