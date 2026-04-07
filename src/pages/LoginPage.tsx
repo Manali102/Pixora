@@ -1,29 +1,35 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuthStore } from '../store/useAuthStore';
 import { Button } from '../components/ui/button';
-import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
+import { loginSchema, type LoginFormData } from '../lib/validationSchemas';
 
 export const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const login = useAuthStore((store) => store.login);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError('');
-    
-    const success = await login(email, password);
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
+    const success = await login(data.email, data.password);
     if (success) {
       navigate('/', { replace: true });
     } else {
-      setError('Invalid email or password. Use "password" for demo.');
-      setIsSubmitting(false);
+      setError('root', {
+        message: 'Invalid email or password. Use "password" for demo.',
+      });
     }
   };
 
@@ -46,57 +52,112 @@ export const LoginPage: React.FC = () => {
           <p className="text-muted-foreground mt-2">Log in to discover more ideas</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-2">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
+          {/* Email */}
+          <div className="space-y-1">
             <label className="text-sm font-semibold ml-1">Email</label>
             <div className="relative group">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
               <input
+                id="login-email"
                 type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-secondary/50 border border-transparent focus:border-primary focus:bg-background outline-none transition-all shadow-sm"
+                autoComplete="email"
+                {...register('email')}
+                className={`w-full pl-12 pr-4 py-4 rounded-2xl bg-secondary/50 border transition-all shadow-sm outline-none
+                  ${errors.email
+                    ? 'border-destructive focus:border-destructive bg-destructive/5'
+                    : 'border-transparent focus:border-primary focus:bg-background'
+                  }`}
                 placeholder="Enter your email"
               />
             </div>
+            {errors.email && (
+              <motion.p
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-1.5 text-destructive text-xs font-medium ml-1 mt-1"
+              >
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                {errors.email.message}
+              </motion.p>
+            )}
           </div>
 
-          <div className="space-y-2">
+          {/* Password */}
+          <div className="space-y-1">
             <div className="flex justify-between items-center ml-1">
               <label className="text-sm font-semibold">Password</label>
-              <Link to="/forgot-password" title="Mocked flow" className="text-xs font-bold text-primary hover:underline">Forgot your password?</Link>
+              <Link to="/forgot-password" title="Mocked flow" className="text-xs font-bold text-primary hover:underline">
+                Forgot your password?
+              </Link>
             </div>
             <div className="relative group">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
               <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 rounded-2xl bg-secondary/50 border border-transparent focus:border-primary focus:bg-background outline-none transition-all shadow-sm"
+                id="login-password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                {...register('password')}
+                className={`w-full pl-12 pr-12 py-4 rounded-2xl bg-secondary/50 border transition-all shadow-sm outline-none
+                  ${errors.password
+                    ? 'border-destructive focus:border-destructive bg-destructive/5'
+                    : 'border-transparent focus:border-primary focus:bg-background'
+                  }`}
                 placeholder="Enter your password"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-4 cursor-pointer top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors focus:outline-none"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
             </div>
+            {errors.password && (
+              <motion.p
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-1.5 text-destructive text-xs font-medium ml-1 mt-1"
+              >
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                {errors.password.message}
+              </motion.p>
+            )}
           </div>
 
-          {error && <p className="text-destructive text-xs font-bold bg-destructive/10 p-3 rounded-xl animate-shake">{error}</p>}
+          {/* Root / server error */}
+          {errors.root && (
+            <motion.p
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex items-center gap-2 text-destructive text-xs font-bold bg-destructive/10 p-3 rounded-xl"
+            >
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              {errors.root.message}
+            </motion.p>
+          )}
 
-          <Button 
+          <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-7 rounded-2xl text-lg font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20 active:scale-95 transition-all group"
+            className="w-full py-7 rounded-2xl cursor-pointer text-lg font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20 active:scale-95 transition-all group"
           >
             {isSubmitting ? (
               <Loader2 className="w-6 h-6 animate-spin" />
             ) : (
-              <span className="flex items-center gap-2">Log In <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></span>
+              <span className="flex items-center gap-2">
+                Log In <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </span>
             )}
           </Button>
         </form>
 
         <p className="text-center mt-8 text-sm text-muted-foreground font-medium">
-          Don't have an account? <Link to="/signup" className="text-primary font-bold hover:underline">Create one</Link>
+          Don't have an account?{' '}
+          <Link to="/signup" className="text-primary font-bold hover:underline">
+            Create one
+          </Link>
         </p>
       </motion.div>
     </div>
