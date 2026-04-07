@@ -1,16 +1,34 @@
-# React + Vite
+# Implementation Plan - Pixora (Pinterest Clone)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Building a high-performance, scalable Pinterest-style frontend with mocked data and rich UI/UX.
 
-Currently, two official plugins are available:
+## 1. Project Setup
+- [ ] Initialize `react-router-dom` and Framer Motion.
+- [ ] Set up clean folder structure.
+- [ ] Configure global styles (Tailwind + Shadcn).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 2. Mock Data & API Layer
+- [ ] Create `src/mock/data.ts` with comprehensive JSON for pins, users, and stats.
+- [ ] Create `src/mock/api.ts` to simulate async operations with latency.
 
-## React Compiler
+## 3. Global State
+- [ ] `AuthContext`: Manage session tokens and user profile.
+- [ ] `PinContext`: Centralized store for grid data and user interactions.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 4. Core Components
+- [ ] **Masonry Grid**: Responsive CSS Columns / Grid layout for pins.
+- [ ] **Pin Card**: Interactive cards with hover effects and quick actions.
+- [ ] **Navigation**: Global Navbar with search and user dropdowns.
+- [ ] **Layouts**: Separate layouts for Feed, Auth, and Dashboard.
 
-## Expanding the ESLint configuration
+## 5. Feature Implementation
+- [ ] **Auth Flow**: Completed login, signup, and reset screens.
+- [ ] **Dashboard**: Storage visualization using Recharts and pin management.
+- [ ] **Upload System**: Drag & drop handling with preview and quota logic.
+- [ ] **Subscription**: Pricing cards with mock Stripe checkout flow.
+- [ ] **Admin Panel**: Management interface with analytics.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 6. Performance & UX Polish
+- [ ] Image lazy loading and code splitting.
+- [ ] Glassmorphism effects and smooth transitions.
+- [ ] Responsive design verification.
