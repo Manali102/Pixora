@@ -20,13 +20,13 @@ jobs:
         with:
           node-version: 18
 
-      - run: rm -f package-lock.json
-      - run: npm install
+      - run: npm ci --legacy-peer-deps
+      - run: npm rebuild
       - run: npm run build
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: build
+          path: dist
 
   deploy:
     needs: build
