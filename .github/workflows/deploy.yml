@@ -18,15 +18,15 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20   # ✅ upgrade node
 
-      - run: npm ci --legacy-peer-deps
+      - run: npm ci
       - run: npm rebuild
       - run: npm run build
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: dist   # ✅ Vite output
 
   deploy:
     needs: build
