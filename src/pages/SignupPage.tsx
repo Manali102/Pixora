@@ -64,18 +64,35 @@ export const SignupPage: React.FC = () => {
     register,
     handleSubmit,
     watch,
+    setError,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
     mode: 'onTouched',
+    reValidateMode: 'onChange',
   });
 
-  const passwordValue = watch('password', '');
+  const formValues = watch();
+  const passwordValue = formValues.password || '';
+
+  // Clear errors when the user starts typing in a field
+  React.useEffect(() => {
+    Object.keys(formValues).forEach((key) => {
+      if (errors[key as keyof SignupFormData]) {
+        clearErrors(key as keyof SignupFormData);
+      }
+    });
+  }, [formValues.name, formValues.email, formValues.password, formValues.confirmPassword, clearErrors]);
 
   const onSubmit = async (data: SignupFormData) => {
     const success = await signup(data.email, data.password, data.name);
     if (success) {
       navigate('/pricing');
+    } else {
+      setError('email', {
+        message: 'An account with this email already exists.',
+      });
     }
   };
 

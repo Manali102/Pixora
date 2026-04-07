@@ -18,9 +18,19 @@ export const LoginPage: React.FC = () => {
     handleSubmit,
     setError,
     formState: { errors, isSubmitting },
+    watch,
+    clearErrors,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
+
+  // Clear root error when user starts typing again
+  const formValues = watch();
+  React.useEffect(() => {
+    if (errors.root) {
+      clearErrors('root');
+    }
+  }, [formValues.email, formValues.password, clearErrors]);
 
   const onSubmit = async (data: LoginFormData) => {
     const success = await login(data.email, data.password);
@@ -28,7 +38,7 @@ export const LoginPage: React.FC = () => {
       navigate('/', { replace: true });
     } else {
       setError('root', {
-        message: 'Invalid email or password. Use "password" for demo.',
+        message: 'Invalid email or password',
       });
     }
   };
