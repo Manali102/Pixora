@@ -20,6 +20,7 @@ export interface Pin {
   authorAvatar: string;
   likes: number;
   isLiked?: boolean;
+  isSaved?: boolean;
   category: string;
   createdAt: string;
   type: 'image' | 'video';

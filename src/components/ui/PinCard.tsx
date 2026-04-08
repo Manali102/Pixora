@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Pin } from '../../mock/data';
 import { usePinStore } from '../../store/usePinStore';
 import { Button } from './button';
+import { cn } from '../../lib/utils';
 
 interface PinCardProps {
   pin: Pin;
@@ -11,13 +12,16 @@ interface PinCardProps {
 
 export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
-  const toggleLike = usePinStore((store) => store.toggleLike);
+  const { toggleLike, toggleSave, setSelectedPin } = usePinStore();
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigator.clipboard.writeText(`https://pixora.app/pin/${pin.id}`);
     alert('Link copied to clipboard!');
+  };
+
+  const handleOpenModal = () => {
+    setSelectedPin(pin);
   };
 
   return (
@@ -29,6 +33,7 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
       className="masonry-item group relative cursor-zoom-in"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={handleOpenModal}
     >
       <div className="relative overflow-hidden rounded-2xl bg-muted transition-all duration-300">
         <img
@@ -52,11 +57,11 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
                 <Button
                   onClick={(e) => {
                     e.stopPropagation();
-                    setIsSaved(!isSaved);
+                    toggleSave(pin.id);
                   }}
-                  className={`rounded-full px-6 font-bold transition-all ${isSaved ? 'bg-black text-white hover:bg-black' : 'bg-red-600 hover:bg-red-700'}`}
+                  className={`rounded-full px-6 font-bold transition-all ${pin.isSaved ? 'bg-black text-white hover:bg-black' : 'bg-red-600 hover:bg-red-700'}`}
                 >
-                  {isSaved ? <span className="flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span> : 'Save'}
+                  {pin.isSaved ? <span className="flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span> : 'Save'}
                 </Button>
               </div>
 
@@ -69,7 +74,10 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
                   >
                     <Share2 className="w-5 h-5" />
                   </button>
-                  <button className="w-10 h-10 flex items-center justify-center bg-white/80 hover:bg-white rounded-full text-black transition-colors backdrop-blur-sm">
+                  <button 
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-10 h-10 flex items-center justify-center bg-white/80 hover:bg-white rounded-full text-black transition-colors backdrop-blur-sm"
+                  >
                     <Download className="w-5 h-5" />
                   </button>
                 </div>
@@ -89,19 +97,19 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
       </div>
 
       {/* Info Row */}
-      <div className="mt-2 flex items-center justify-between px-1">
-        <div className="flex items-center gap-2">
+      <div className="mt-2 flex items-center justify-between px-1" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
           <img src={pin.authorAvatar} alt={pin.authorName} className="w-7 h-7 rounded-full object-cover shadow-sm" />
           <span className="text-xs font-semibold truncate max-w-[120px]">{pin.authorName}</span>
         </div>
-        <div className="flex items-center gap-1 text-muted-foreground">
-          <Heart className="w-3.5 h-3.5" />
+        <div className="flex items-center gap-1 text-muted-foreground transition-colors hover:text-red-500 cursor-pointer" onClick={() => toggleLike(pin.id)}>
+          <Heart className={cn("w-3.5 h-3.5", pin.isLiked && "fill-current text-red-500")} />
           <span className="text-[10px] font-medium">{pin.likes}</span>
         </div>
       </div>
       
-      {/* Title (Hidden until hover? No, let's keep it visible but subtle) */}
-      <h3 className="text-sm font-medium mt-1 truncate px-1">{pin.title}</h3>
+      {/* Title */}
+      <h3 className="text-sm font-medium mt-1 truncate px-1 text-zinc-900 dark:text-zinc-100">{pin.title}</h3>
     </motion.div>
   );
 };
