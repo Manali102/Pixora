@@ -5,7 +5,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { usePinStore } from '../store/usePinStore';
 import { PinCard } from '../components/ui/PinCard';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { HardDrive, Share2, Plus, Edit3, Heart, Eye, X, Check, Camera } from 'lucide-react';
+import { HardDrive, Share2, Plus, Edit3, Heart, Eye, X, Check, Camera, Crown } from 'lucide-react';
 import Masonry from 'react-masonry-css';
 import { Tooltip } from '../components/ui/Tooltip';
 import { Button } from '../components/ui/button';
@@ -362,17 +362,23 @@ const ProfilePage: React.FC = () => {
                 <span className="text-muted-foreground text-sm font-medium">MB Used</span>
               </div>
               <div className="mt-3">
-                <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
-                  <motion.div
-                    className="h-full rounded-full bg-primary"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${((user?.storageUsed || 0) / (user?.storageLimit || 1)) * 100}%` }}
-                    transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
-                  />
-                </div>
-                <p className="label-dim mt-2 text-[10px]">
-                  {((user?.storageUsed || 0) / (user?.storageLimit || 1) * 100).toFixed(1)}% of {user?.storageLimit}MB
-                </p>
+                {user?.role === 'admin' ? (
+                  <p className="label-dim mt-2 text-[10px]">Unlimited storage for Admin role</p>
+                ) : (
+                  <>
+                    <div className="w-full h-1.5 rounded-full bg-secondary overflow-hidden">
+                      <motion.div
+                        className="h-full rounded-full bg-primary"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${((user?.storageUsed || 0) / (user?.storageLimit || 1)) * 100}%` }}
+                        transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
+                      />
+                    </div>
+                    <p className="label-dim mt-2 text-[10px]">
+                      {((user?.storageUsed || 0) / (user?.storageLimit || 1) * 100).toFixed(1)}% of {user?.storageLimit}MB
+                    </p>
+                  </>
+                )}
               </div>
             </div>
             <div className="w-24 h-24 shrink-0">
@@ -414,33 +420,39 @@ const ProfilePage: React.FC = () => {
         </motion.div>
 
         {/* Membership Banner */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.5 }}
-          className="mt-4 glass-card border border-primary/50 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 overflow-hidden relative"
-        >
-          {/* Decorative glow */}
-          <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-primary/5 blur-3xl" />
-          <div className="relative z-10">
-            <div className="flex items-center gap-2">
-              <span className="text-foreground font-display font-semibold">Member Tier</span>
-              <span className="px-2.5 py-0.5 rounded-md bg-primary/15 text-primary text-xs font-semibold">
-                {user?.subscription}
-              </span>
-            </div>
-            <p className="text-muted-foreground text-sm mt-1">Unlock premium features &amp; unlimited storage</p>
-          </div>
-          <button
-            onClick={() => navigate('/pricing')}
-            className="btn-primary-glow flex items-center gap-2 text-sm relative z-10 cursor-pointer"
+        {user?.role !== 'admin' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35, duration: 0.5 }}
+            className="mt-4 glass-card border border-primary/50 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 overflow-hidden relative"
           >
-            Upgrade Now
-            <motion.span animate={{ x: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity }}>
-              →
-            </motion.span>
-          </button>
-        </motion.div>
+            {/* Decorative glow */}
+            <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-primary/5 blur-3xl" />
+            <div className="relative z-10">
+              <div className="flex items-center gap-2">
+                <span className="text-foreground font-display font-semibold">Member Tier</span>
+                <span className="px-2.5 py-0.5 rounded-md bg-primary/15 text-primary text-xs font-black uppercase tracking-wider">
+                  {user?.subscription}
+                </span>
+                <span className="text-muted-foreground text-[10px] font-black uppercase italic">
+                   {user?.billingCycle} billing
+                </span>
+              </div>
+              <p className="text-muted-foreground text-sm mt-1">
+                {user?.billingCycle === 'annual' 
+                  ? 'Your storage quota resets every month automatically.' 
+                  : 'Unlock premium features & more storage by upgrading.'}
+              </p>
+            </div>
+            <button
+              onClick={() => navigate('/pricing')}
+              className="btn-primary-glow flex items-center gap-2 text-sm relative z-10 cursor-pointer"
+            >
+              <Crown className="w-4 h-4" /> Manage Plan
+            </button>
+          </motion.div>
+        )}
 
         {/* Pins Section */}
         <motion.div

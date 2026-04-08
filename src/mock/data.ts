@@ -6,10 +6,12 @@ export interface User {
   avatar: string;
   bio: string;
   role: 'user' | 'admin';
-  subscription: 'starter' | 'pro' | 'enterprise';
+  subscription: 'free' | 'starter' | 'pro' | 'enterprise';
+  billingCycle: 'monthly' | 'annual';
   storageUsed: number; // in MB
   storageLimit: number; // in MB
   followers: number;
+  lastResetDate?: string; // For annual reset logic
 }
 
 export interface Comment {
@@ -46,11 +48,13 @@ export const MOCK_USERS: User[] = [
     email: 'admin@example.com',
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Admin',
     role: 'admin',
-    subscription: 'pro',
+    subscription: 'enterprise',
+    billingCycle: 'annual',
     storageUsed: 450,
     storageLimit: 1024,
     bio: 'Enthusiastic photographer and content creator',
     followers: 100,
+    lastResetDate: new Date().toISOString(),
   },
   {
     id: 'u2',
@@ -59,8 +63,9 @@ export const MOCK_USERS: User[] = [
     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jane',
     role: 'user',
     subscription: 'starter',
-    storageUsed: 80,
-    storageLimit: 250,
+    billingCycle: 'monthly',
+    storageUsed: 35,
+    storageLimit: 50,
     bio: 'Enthusiastic photographer and content creator',
     followers: 100,
   }

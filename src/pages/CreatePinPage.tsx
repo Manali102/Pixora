@@ -41,6 +41,17 @@ export const CreatePinPage: React.FC = () => {
     e.preventDefault();
     if (!file || !title) return;
 
+    // Storage Check
+    const fileSizeMB = file.size / (1024 * 1024);
+    const currentUsed = user?.storageUsed || 0;
+    const limit = user?.storageLimit || 0;
+    const isAdmin = user?.role === 'admin';
+
+    if (!isAdmin && (currentUsed + fileSizeMB > limit)) {
+      alert(`Storage limit reached! You have used ${currentUsed.toFixed(2)}MB of ${limit}MB. This file is ${fileSizeMB.toFixed(2)}MB.`);
+      return;
+    }
+
     setIsUploading(true);
     
     // Simulate upload progress
@@ -74,7 +85,13 @@ export const CreatePinPage: React.FC = () => {
         views: 0,
       };
 
+      // Add Pin
       addPin(newPin);
+
+      // Update Storage Used
+      const updateUser = useAuthStore.getState().updateUser;
+      updateUser({ storageUsed: currentUsed + fileSizeMB });
+
       setSuccess(true);
       setTimeout(() => navigate('/'), 2000);
     }, 2500);
@@ -109,8 +126,15 @@ export const CreatePinPage: React.FC = () => {
     >
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-4xl font-black tracking-tight">Create a Pin</h1>
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 text-green-600 rounded-full text-xs font-black uppercase">
-          <Shield className="w-3.5 h-3.5" /> Quota Status: OK
+        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black uppercase ${
+          user?.role === 'admin' 
+            ? 'bg-blue-500/10 text-blue-600'
+            : (user?.storageUsed || 0) > (user?.storageLimit || 0) * 0.9 
+              ? 'bg-red-500/10 text-red-600' 
+              : 'bg-green-500/10 text-green-600'
+        }`}>
+          <Shield className="w-3.5 h-3.5" /> 
+          {user?.role === 'admin' ? 'Admin: Unlimited Storage' : `Storage: ${((user?.storageUsed || 0) / (user?.storageLimit || 0) * 100).toFixed(1)}% Used`}
         </div>
       </div>
 

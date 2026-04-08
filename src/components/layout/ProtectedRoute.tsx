@@ -5,9 +5,14 @@ import { useAuthStore } from '../../store/useAuthStore';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   requireAdmin?: boolean;
+  excludeAdmin?: boolean;
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin = false }) => {
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
+  children, 
+  requireAdmin = false,
+  excludeAdmin = false 
+}) => {
   const isAuthenticated = useAuthStore((store) => store.isAuthenticated);
   const isLoading = useAuthStore((store) => store.isLoading);
   const user = useAuthStore((store) => store.user);
@@ -27,6 +32,10 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requir
   }
 
   if (requireAdmin && user?.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
+
+  if (excludeAdmin && user?.role === 'admin') {
     return <Navigate to="/" replace />;
   }
 
