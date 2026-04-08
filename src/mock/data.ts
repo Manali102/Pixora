@@ -4,10 +4,12 @@ export interface User {
   name: string;
   email: string;
   avatar: string;
+  bio: string;
   role: 'user' | 'admin';
   subscription: 'starter' | 'pro' | 'enterprise';
   storageUsed: number; // in MB
   storageLimit: number; // in MB
+  followers: number;
 }
 
 export interface Comment {
@@ -34,6 +36,7 @@ export interface Pin {
   createdAt: string;
   type: 'image' | 'video';
   comments?: Comment[];
+  views: number;
 }
 
 export const MOCK_USERS: User[] = [
@@ -46,6 +49,8 @@ export const MOCK_USERS: User[] = [
     subscription: 'pro',
     storageUsed: 450,
     storageLimit: 1024,
+    bio: 'Enthusiastic photographer and content creator',
+    followers: 100,
   },
   {
     id: 'u2',
@@ -56,6 +61,8 @@ export const MOCK_USERS: User[] = [
     subscription: 'starter',
     storageUsed: 80,
     storageLimit: 250,
+    bio: 'Enthusiastic photographer and content creator',
+    followers: 100,
   }
 ];
 
@@ -72,6 +79,7 @@ export const MOCK_PINS: Pin[] = [
     category: 'Interior',
     createdAt: '2024-03-20',
     type: 'image',
+    views: 1000,
   },
   {
     id: 'p2',
@@ -85,6 +93,7 @@ export const MOCK_PINS: Pin[] = [
     category: 'Nature',
     createdAt: '2024-03-21',
     type: 'image',
+    views: 1000,
   },
   {
     id: 'p3',
@@ -98,6 +107,7 @@ export const MOCK_PINS: Pin[] = [
     category: 'Art',
     createdAt: '2024-03-22',
     type: 'image',
+    views: 1000,
   },
   {
     id: 'p4',
@@ -111,6 +121,7 @@ export const MOCK_PINS: Pin[] = [
     category: 'Sci-Fi',
     createdAt: '2024-03-23',
     type: 'image',
+    views: 1000,
   },
   {
     id: 'p5',
@@ -124,6 +135,7 @@ export const MOCK_PINS: Pin[] = [
     category: 'Lifestyle',
     createdAt: '2024-03-24',
     type: 'image',
+    views: 1000,
   },
   {
     id: 'p6',
@@ -137,6 +149,7 @@ export const MOCK_PINS: Pin[] = [
     category: 'Nature',
     createdAt: '2024-03-25',
     type: 'image',
+    views: 1000,
   },
   {
     id: 'p7',
@@ -150,6 +163,7 @@ export const MOCK_PINS: Pin[] = [
     category: 'Food',
     createdAt: '2024-03-26',
     type: 'image',
+    views: 1000,
   },
   {
     id: 'p8',
@@ -163,6 +177,7 @@ export const MOCK_PINS: Pin[] = [
     category: 'Photography',
     createdAt: '2024-03-27',
     type: 'image',
+    views: 1000,
   }
 ];
 

@@ -89,7 +89,7 @@ export const Navbar: React.FC = () => {
                       </div>
                     </div>
                     <div className="p-2">
-                      <Link to="/dashboard" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 p-2 rounded-xl hover:bg-secondary transition-colors">
+                      <Link to="/profile" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 p-2 rounded-xl hover:bg-secondary transition-colors">
                         <User className="w-5 h-5" /> Profile
                       </Link>
                       {user?.role === 'admin' && (
