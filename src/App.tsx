@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { Navbar } from './components/layout/Navbar';
+import { BottomNav } from './components/layout/BottomNav';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
@@ -14,6 +15,7 @@ import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AnimatePresence } from 'framer-motion';
 import { usePinStore } from './store/usePinStore';
+import { PinModal } from './components/ui/PinModal';
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -28,7 +30,7 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
       {showNavbar && <Navbar />}
 
-      <main className={`${showNavbar ? 'pt-24 pb-12 px-4 sm:px-8' : ''}`}>
+      <main className={`${showNavbar ? 'pt-24 pb-20 md:pb-12 px-4 sm:px-8' : ''}`}>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<ProtectedRoute>
@@ -74,6 +76,9 @@ const App: React.FC = () => {
           </Routes>
         </AnimatePresence>
       </main>
+
+      {showNavbar && <BottomNav />}
+      <PinModal />
 
       {/* Background Decor */}
       <div className="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none opacity-20">

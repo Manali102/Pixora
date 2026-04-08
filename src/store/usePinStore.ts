@@ -7,18 +7,21 @@ interface PinState {
   pins: Pin[];
   isLoading: boolean;
   searchQuery: string;
-  // Derived (computed inline via selector)
+  selectedPin: Pin | null;
   fetchPins: () => Promise<void>;
   setSearchQuery: (query: string) => void;
+  setSelectedPin: (pin: Pin | null) => void;
   addPin: (pin: Pin) => void;
   deletePin: (id: string) => void;
   toggleLike: (id: string) => void;
+  toggleSave: (id: string) => void;
 }
 
 export const usePinStore = create<PinState>()((set, get) => ({
   pins: [],
   isLoading: false,
   searchQuery: '',
+  selectedPin: null,
 
   fetchPins: async () => {
     set({ isLoading: true });
@@ -28,6 +31,8 @@ export const usePinStore = create<PinState>()((set, get) => ({
 
   setSearchQuery: (query: string) => set({ searchQuery: query }),
 
+  setSelectedPin: (pin: Pin | null) => set({ selectedPin: pin }),
+
   addPin: (pin: Pin) =>
     set((state) => ({ pins: [pin, ...state.pins] })),
 
@@ -35,13 +40,38 @@ export const usePinStore = create<PinState>()((set, get) => ({
     set((state) => ({ pins: state.pins.filter((p) => p.id !== id) })),
 
   toggleLike: (id: string) =>
-    set((state) => ({
-      pins: state.pins.map((p) =>
+    set((state) => {
+      const updatedPins = state.pins.map((p) =>
         p.id === id
           ? { ...p, isLiked: !p.isLiked, likes: p.isLiked ? p.likes - 1 : p.likes + 1 }
           : p
-      ),
-    })),
+      );
+      
+      const updatedSelectedPin = state.selectedPin?.id === id
+        ? updatedPins.find(p => p.id === id) || null
+        : state.selectedPin;
+
+      return {
+        pins: updatedPins,
+        selectedPin: updatedSelectedPin
+      };
+    }),
+
+  toggleSave: (id: string) =>
+    set((state) => {
+      const updatedPins = state.pins.map((p) =>
+        p.id === id ? { ...p, isSaved: !p.isSaved } : p
+      );
+
+      const updatedSelectedPin = state.selectedPin?.id === id
+        ? updatedPins.find(p => p.id === id) || null
+        : state.selectedPin;
+
+      return {
+        pins: updatedPins,
+        selectedPin: updatedSelectedPin
+      };
+    }),
 }));
 
 // Selector: filtered pins derived from store state
