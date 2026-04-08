@@ -55,13 +55,13 @@ export const PinModal: React.FC = () => {
   };
 
   const shareOptions = [
-    { 
-      name: 'Copy link', 
-      icon: isCopied ? <Check className="w-6 h-6" /> : <Link2 className="w-6 h-6" />, 
-      bg: 'bg-zinc-100 dark:bg-zinc-800', 
-      color: 'text-zinc-600 dark:text-zinc-300',
-      action: handleCopyLink 
-    },
+    // { 
+    //   name: 'Copy link', 
+    //   icon: isCopied ? <Check className="w-6 h-6" /> : <Link2 className="w-6 h-6" />, 
+    //   bg: 'bg-zinc-100 dark:bg-zinc-800', 
+    //   color: 'text-zinc-600 dark:text-zinc-300',
+    //   action: handleCopyLink 
+    // },
     { 
       name: 'WhatsApp', 
       icon: <WhatsAppIcon className="w-6 h-6" />, 
