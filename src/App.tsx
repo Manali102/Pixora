@@ -6,7 +6,7 @@ import { BottomNav } from './components/layout/BottomNav';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
-import { DashboardPage } from './pages/DashboardPage';
+import ProfilePage from './pages/ProfilePage';
 import { AdminPage } from './pages/AdminPage';
 import { PricingPage } from './pages/PricingPage';
 import { CreatePinPage } from './pages/CreatePinPage';
@@ -47,9 +47,9 @@ const App: React.FC = () => {
               </ErrorBoundary>
             } />
 
-            <Route path="/dashboard" element={
+            <Route path="/profile" element={
               <ProtectedRoute>
-                <DashboardPage />
+                <ProfilePage />
               </ProtectedRoute>
             } />
 

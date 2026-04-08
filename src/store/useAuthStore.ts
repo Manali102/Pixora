@@ -14,6 +14,7 @@ interface AuthState {
   login: (email: string, password: string) => Promise<boolean>;
   signup: (email: string, password: string, name: string) => Promise<boolean>;
   logout: () => void;
+  updateUser: (fields: Partial<User>) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -72,6 +73,8 @@ export const useAuthStore = create<AuthState>()(
             subscription: 'starter',
             storageUsed: 0,
             storageLimit: 250,
+            bio: '',
+            followers: 0,
           };
           
           set((s) => ({ 
@@ -89,6 +92,17 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         set({ user: null, isAuthenticated: false });
+      },
+
+      updateUser: (fields: Partial<User>) => {
+        set((state) => {
+          if (!state.user) return {};
+          const updatedUser = { ...state.user, ...fields };
+          const updatedRegistered = state.registeredUsers.map((u) =>
+            u.id === updatedUser.id ? { ...u, ...fields } : u
+          );
+          return { user: updatedUser, registeredUsers: updatedRegistered };
+        });
       },
     }),
     {

@@ -14,7 +14,7 @@ export const BottomNav: React.FC = () => {
     { icon: Home, label: 'Home', path: '/' },
     { icon: CreditCard, label: 'Pricing', path: '/pricing' },
     { icon: Plus, label: 'Create', path: '/create', protected: true },
-    { icon: LayoutDashboard, label: 'Profile', path: '/dashboard', protected: true },
+    { icon: LayoutDashboard, label: 'Profile', path: '/profile', protected: true },
   ];
 
   if (!isAuthenticated) {
