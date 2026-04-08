@@ -7,6 +7,8 @@ import { useAuthStore } from '../store/useAuthStore';
 import { Button } from '../components/ui/button';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { loginSchema, type LoginFormData } from '../lib/validationSchemas';
+import { Input } from '../components/ui/input';
+import { PasswordValidation } from '../components/PasswordValidation';
 
 export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -44,15 +46,11 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-premium relative overflow-hidden">
-      {/* Decorative Circles */}
-      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-white/10 rounded-full blur-[100px] animate-pulse"></div>
-      <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-black/20 rounded-full blur-[100px]"></div>
-
+    <div className="auth-page min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md glass p-10 rounded-[2.5rem] shadow-2xl relative z-10"
+        className="w-full max-w-md glass p-10 rounded-2xl shadow-xl border relative z-10"
       >
         <div className="text-center mb-10">
           <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 rotate-6 group hover:rotate-0 transition-transform duration-500 shadow-lg">
@@ -68,12 +66,12 @@ export const LoginPage: React.FC = () => {
             <label className="text-sm font-semibold ml-1">Email</label>
             <div className="relative group">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-              <input
+              <Input
                 id="login-email"
                 type="email"
                 autoComplete="email"
                 {...register('email')}
-                className={`w-full pl-12 pr-4 py-4 rounded-2xl bg-secondary/50 border transition-all shadow-sm outline-none
+                className={`pl-12 pr-4 py-4 rounded-2xl bg-secondary/50 border transition-all shadow-sm outline-none
                   ${errors.email
                     ? 'border-destructive focus:border-destructive bg-destructive/5'
                     : 'border-transparent focus:border-primary focus:bg-background'
@@ -102,13 +100,14 @@ export const LoginPage: React.FC = () => {
               </Link>
             </div>
             <div className="relative group">
+              <PasswordValidation password={formValues.password} />
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-              <input
+              <Input
                 id="login-password"
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="current-password"
                 {...register('password')}
-                className={`w-full pl-12 pr-12 py-4 rounded-2xl bg-secondary/50 border transition-all shadow-sm outline-none
+                className={`pl-12 pr-12 py-4 rounded-2xl bg-secondary/50 border transition-all
                   ${errors.password
                     ? 'border-destructive focus:border-destructive bg-destructive/5'
                     : 'border-transparent focus:border-primary focus:bg-background'
@@ -124,15 +123,25 @@ export const LoginPage: React.FC = () => {
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
-            {errors.password && (
+            {errors.password ? (
               <motion.p
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-1.5 text-destructive text-xs font-medium ml-1 mt-1"
+                className="flex items-center gap-1.5 text-destructive text-sm font-medium ml-1 mt-1"
               >
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                {errors.password.message}
+                {!formValues.password || formValues.password.length === 0 ? "Password is required" : "Please fulfill all the requirements."}
               </motion.p>
+            ) : (
+                formValues.password && formValues.password.length > 0 && !(/[0-9]/.test(formValues.password) && /[a-z]/.test(formValues.password) && /[A-Z]/.test(formValues.password) && /[^A-Za-z0-9]/.test(formValues.password) && formValues.password.length >= 8) && (
+                <motion.p
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-destructive text-sm font-medium ml-1 mt-1"
+                >
+                  Please fulfill all the requirements.
+                </motion.p>
+              )
             )}
           </div>
 
@@ -151,7 +160,7 @@ export const LoginPage: React.FC = () => {
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-7 rounded-2xl cursor-pointer text-lg font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20 active:scale-95 transition-all group"
+            className="w-full py-5 rounded-2xl cursor-pointer text-lg font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20 active:scale-95 transition-all group"
           >
             {isSubmitting ? (
               <Loader2 className="w-6 h-6 animate-spin" />
