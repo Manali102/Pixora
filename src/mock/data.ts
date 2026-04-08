@@ -10,6 +10,15 @@ export interface User {
   storageLimit: number; // in MB
 }
 
+export interface Comment {
+  id: string;
+  userId: string;
+  userName: string;
+  userAvatar: string;
+  text: string;
+  createdAt: string;
+}
+
 export interface Pin {
   id: string;
   title: string;
@@ -24,6 +33,7 @@ export interface Pin {
   category: string;
   createdAt: string;
   type: 'image' | 'video';
+  comments?: Comment[];
 }
 
 export const MOCK_USERS: User[] = [

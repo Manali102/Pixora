@@ -15,6 +15,7 @@ interface PinState {
   deletePin: (id: string) => void;
   toggleLike: (id: string) => void;
   toggleSave: (id: string) => void;
+  addComment: (pinId: string, comment: string) => void;
 }
 
 export const usePinStore = create<PinState>()((set, get) => ({
@@ -38,6 +39,33 @@ export const usePinStore = create<PinState>()((set, get) => ({
 
   deletePin: (id: string) =>
     set((state) => ({ pins: state.pins.filter((p) => p.id !== id) })),
+
+  addComment: (pinId: string, text: string) =>
+    set((state) => {
+      const newComment = {
+        id: Math.random().toString(36).substr(2, 9),
+        userId: 'u1', // Defaulting to Admin for now
+        userName: 'Admin',
+        userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Admin',
+        text,
+        createdAt: new Date().toISOString(),
+      };
+
+      const updatedPins = state.pins.map((p) =>
+        p.id === pinId 
+          ? { ...p, comments: [...(p.comments || []), newComment] }
+          : p
+      );
+
+      const updatedSelectedPin = state.selectedPin?.id === pinId
+        ? updatedPins.find(p => p.id === pinId) || null
+        : state.selectedPin;
+
+      return {
+        pins: updatedPins,
+        selectedPin: updatedSelectedPin,
+      };
+    }),
 
   toggleLike: (id: string) =>
     set((state) => {
