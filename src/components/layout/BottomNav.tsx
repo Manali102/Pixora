@@ -12,9 +12,12 @@ export const BottomNav: React.FC = () => {
 
   const navItems = [
     { icon: Home, label: 'Home', path: '/' },
-    { icon: CreditCard, label: 'Pricing', path: '/pricing' },
+    ...(user?.role === 'admin' 
+      ? [{ icon: LayoutDashboard, label: 'Admin', path: '/admin' }]
+      : [{ icon: CreditCard, label: 'Pricing', path: '/pricing' }]
+    ),
     { icon: Plus, label: 'Create', path: '/create', protected: true },
-    { icon: LayoutDashboard, label: 'Profile', path: '/profile', protected: true },
+    { icon: User, label: 'Profile', path: '/profile', protected: true },
   ];
 
   if (!isAuthenticated) {

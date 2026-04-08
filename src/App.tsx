@@ -14,17 +14,21 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AnimatePresence } from 'framer-motion';
+import { useAuthStore } from './store/useAuthStore';
 import { usePinStore } from './store/usePinStore';
 import { PinModal } from './components/ui/PinModal';
 
 const App: React.FC = () => {
   const location = useLocation();
-  const showNavbar = !['/login', '/signup'].includes(location.pathname);
+  const isAuthenticated = useAuthStore(s => s.isAuthenticated);
+  const showNavbar = isAuthenticated && !['/login', '/signup'].includes(location.pathname);
   const fetchPins = usePinStore(s => s.fetchPins);
+  const checkStorageReset = useAuthStore(s => s.checkStorageReset);
 
   useEffect(() => {
     fetchPins();
-  }, [fetchPins]);
+    checkStorageReset();
+  }, [fetchPins, checkStorageReset]);
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
@@ -60,7 +64,7 @@ const App: React.FC = () => {
             } />
 
             <Route path="/pricing" element={
-              <ProtectedRoute>
+              <ProtectedRoute excludeAdmin>
                 <PricingPage />
               </ProtectedRoute>
             } />
@@ -71,8 +75,12 @@ const App: React.FC = () => {
               </ProtectedRoute>
             } />
 
-            {/* 404 catch-all */}
-            <Route path="*" element={<NotFoundPage />} />
+            {/* 404 catch-all protected to redirect unauth to login */}
+            <Route path="*" element={
+              <ProtectedRoute>
+                <NotFoundPage />
+              </ProtectedRoute>
+            } />
           </Routes>
         </AnimatePresence>
       </main>

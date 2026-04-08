@@ -15,6 +15,7 @@ interface AuthState {
   signup: (email: string, password: string, name: string) => Promise<boolean>;
   logout: () => void;
   updateUser: (fields: Partial<User>) => void;
+  checkStorageReset: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -70,11 +71,13 @@ export const useAuthStore = create<AuthState>()(
             password,
             avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`,
             role: 'user',
-            subscription: 'starter',
+            subscription: 'free',
+            billingCycle: 'monthly',
             storageUsed: 0,
-            storageLimit: 250,
+            storageLimit: 20,
             bio: '',
             followers: 0,
+            lastResetDate: new Date().toISOString(),
           };
           
           set((s) => ({ 
@@ -103,6 +106,33 @@ export const useAuthStore = create<AuthState>()(
           );
           return { user: updatedUser, registeredUsers: updatedRegistered };
         });
+      },
+
+      checkStorageReset: () => {
+        const { user } = get();
+        if (!user || user.billingCycle !== 'annual' || !user.lastResetDate) return;
+
+        const lastReset = new Date(user.lastResetDate);
+        const now = new Date();
+        
+        // Check if it's a new month since last reset
+        const isNewMonth = now.getMonth() !== lastReset.getMonth() || now.getFullYear() !== lastReset.getFullYear();
+
+        if (isNewMonth) {
+          const updatedUser = { 
+            ...user, 
+            storageUsed: 0, 
+            lastResetDate: now.toISOString() 
+          };
+          
+          set((state) => ({
+            user: updatedUser,
+            registeredUsers: state.registeredUsers.map(u => 
+              u.id === user.id ? { ...u, storageUsed: 0, lastResetDate: now.toISOString() } : u
+            )
+          }));
+          console.log('Storage quota reset for annual plan');
+        }
       },
     }),
     {
