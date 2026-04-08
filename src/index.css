@@ -206,3 +206,7 @@
 .mb-safe {
   margin-bottom: env(safe-area-inset-bottom);
 }
+
+.auth-page {
+  background-color: #f7faf6;
+}
