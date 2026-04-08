@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Link as LinkIcon, Share2, Heart, MoreHorizontal, MessageCircle, Copy } from 'lucide-react';
+import { X, Share2, Heart, MessageCircle } from 'lucide-react';
 import { usePinStore } from '../../store/usePinStore';
 import { Button } from './button';
 import { Badge } from './badge';
@@ -47,22 +47,51 @@ export const PinModal: React.FC = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-5xl bg-white dark:bg-zinc-900 rounded-[32px] overflow-hidden shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] flex flex-col md:flex-row max-h-[90vh]"
+            className="relative w-full max-w-5xl bg-white dark:bg-zinc-900 rounded-[32px] overflow-hidden shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] flex flex-col md:flex-row max-h-[90vh] h-fit"
           >
-            {/* Left side: Image */}
-            <div className="w-full md:w-[50%] bg-zinc-100 dark:bg-zinc-800 relative overflow-hidden group min-h-[300px] md:min-h-full">
-              <img
-                src={selectedPin.imageUrl}
-                alt={selectedPin.title}
-                className="w-full h-full object-cover"
+            {/* Close Button - Top Right Outside/Edge */}
+            <Button 
+                onClick={() => setSelectedPin(null)}
+                variant="ghost" 
+                size="icon" 
+                className="absolute top-6 right-6 z-30 rounded-full h-10 w-10 bg-white/10 hover:bg-white/20 md:bg-zinc-100 md:hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 backdrop-blur-md"
+            >
+                <X className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
+            </Button>
+
+            {/* Left side: Image or Video */}
+            <div className="w-full md:w-[60%] bg-zinc-50 dark:bg-zinc-950 relative overflow-hidden group min-h-[300px] md:min-h-full flex items-center justify-center">
+              {/* Blurred Background for Premium Look */}
+              <div 
+                className="absolute inset-0 blur-3xl opacity-20 scale-150 pointer-events-none"
+                style={{ 
+                  backgroundImage: `url(${selectedPin.imageUrl})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
               />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors pointer-events-none" />
+              
+              {selectedPin.type === 'video' ? (
+                <video
+                  src={selectedPin.imageUrl}
+                  controls
+                  autoPlay
+                  className="relative z-10 max-w-full max-h-full object-contain"
+                />
+              ) : (
+                <img
+                  src={selectedPin.imageUrl}
+                  alt={selectedPin.title}
+                  className="relative z-10 max-w-full max-h-full object-contain"
+                />
+              )}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors pointer-events-none z-20" />
             </div>
 
             {/* Right side: Details */}
-            <div className="w-full md:w-[50%] flex flex-col p-6 md:p-10 overflow-y-auto bg-white dark:bg-zinc-900">
+            <div className="w-full md:w-[40%] flex flex-col p-6 md:p-10 overflow-y-auto bg-white dark:bg-zinc-900 border-l border-zinc-100 dark:border-zinc-800 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               {/* Top Bar Actions */}
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center justify-between mb-8 pr-12">
                 <div className="flex items-center gap-2">
                    <Button 
                     variant="ghost" 
@@ -83,23 +112,12 @@ export const PinModal: React.FC = () => {
                   >
                     {selectedPin.isSaved ? 'Saved' : 'Save'}
                   </Button>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <Button onClick={handleShare} variant="ghost" className="rounded-full h-12 px-4 gap-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 font-semibold text-zinc-900 dark:text-zinc-100">
-                    <LinkIcon className="w-5 h-5" />
-                    Copy link
-                  </Button>
-                  <Button variant="ghost" size="icon" className="rounded-full h-12 w-12 hover:bg-zinc-100 dark:hover:bg-zinc-800">
-                    <Share2 className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
-                  </Button>
                   <Button 
-                    onClick={() => setSelectedPin(null)}
-                    variant="ghost" 
-                    size="icon" 
-                    className="rounded-full h-12 w-12 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    onClick={handleShare}
+                    variant="secondary"
+                    className="rounded-full px-8 h-12 font-bold transition-all text-base bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border-none"
                   >
-                    <X className="w-6 h-6 text-zinc-600 dark:text-zinc-400" />
+                    Share                  
                   </Button>
                 </div>
               </div>

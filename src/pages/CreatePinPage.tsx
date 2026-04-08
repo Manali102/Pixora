@@ -26,9 +26,8 @@ export const CreatePinPage: React.FC = () => {
     const droppedFile = acceptedFiles[0];
     if (droppedFile) {
       setFile(droppedFile);
-      const reader = new FileReader();
-      reader.onload = () => setPreview(reader.result as string);
-      reader.readAsDataURL(droppedFile);
+      const url = URL.createObjectURL(droppedFile);
+      setPreview(url);
     }
   }, []);
 
@@ -71,7 +70,7 @@ export const CreatePinPage: React.FC = () => {
         likes: 0,
         category,
         createdAt: new Date().toISOString(),
-        type: 'image' as any,
+        type: (file.type.startsWith('video') ? 'video' : 'image') as 'image' | 'video',
       };
 
       addPin(newPin);
@@ -133,8 +132,18 @@ export const CreatePinPage: React.FC = () => {
               <div className="mt-8 px-6 py-2 bg-foreground text-background rounded-full text-xs font-black uppercase tracking-widest group-hover:bg-primary transition-colors">Choose File</div>
             </div>
           ) : (
-            <div className="relative h-[500px] rounded-[3rem] overflow-hidden group shadow-2xl">
-              <img src={preview} alt="Preview" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+            <div className="relative h-[500px] rounded-[3rem] overflow-hidden group shadow-2xl bg-black">
+              {file?.type.startsWith('video') ? (
+                <video 
+                  src={preview} 
+                  autoPlay 
+                  muted 
+                  loop 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <img src={preview} alt="Preview" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+              )}
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                  <button 
                   type="button" 
@@ -213,6 +222,7 @@ export const CreatePinPage: React.FC = () => {
 
              <Button
                disabled={!file || !title || isUploading}
+               type="submit"
                className="w-full py-8 text-xl font-black rounded-3xl bg-red-600 hover:bg-red-700 shadow-2xl shadow-red-600/20 active:scale-95 transition-all group"
              >
                {isUploading ? (

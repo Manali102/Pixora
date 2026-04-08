@@ -36,12 +36,23 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
       onClick={handleOpenModal}
     >
       <div className="relative overflow-hidden rounded-2xl bg-muted transition-all duration-300">
-        <img
-          src={pin.imageUrl}
-          alt={pin.title}
-          className={`w-full h-auto object-cover transition-transform duration-700 ${isHovered ? 'scale-110 blur-[2px]' : 'scale-100'}`}
-          loading="lazy"
-        />
+        {pin.type === 'video' ? (
+          <video
+            src={pin.imageUrl}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className={`w-full h-auto object-cover transition-transform duration-700 ${isHovered ? 'scale-110 blur-[2px]' : 'scale-100'}`}
+          />
+        ) : (
+          <img
+            src={pin.imageUrl}
+            alt={pin.title}
+            className={`w-full h-auto object-cover transition-transform duration-700 ${isHovered ? 'scale-110 blur-[2px]' : 'scale-100'}`}
+            loading="lazy"
+          />
+        )}
         
         {/* Overlay */}
         <AnimatePresence>
