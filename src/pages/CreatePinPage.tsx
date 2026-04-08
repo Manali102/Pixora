@@ -71,6 +71,7 @@ export const CreatePinPage: React.FC = () => {
         category,
         createdAt: new Date().toISOString(),
         type: (file.type.startsWith('video') ? 'video' : 'image') as 'image' | 'video',
+        views: 0,
       };
 
       addPin(newPin);
