@@ -14,6 +14,7 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
+import { PublicRoute } from './components/layout/PublicRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AnimatePresence } from 'framer-motion';
 import { useAuthStore } from './store/useAuthStore';
@@ -44,22 +45,30 @@ const App: React.FC = () => {
             </ProtectedRoute>} />
             <Route path="/login" element={
               <ErrorBoundary>
-                <LoginPage />
+                <PublicRoute>
+                  <LoginPage />
+                </PublicRoute>
               </ErrorBoundary>
             } />
             <Route path="/signup" element={
               <ErrorBoundary>
-                <SignupPage />
+                <PublicRoute>
+                  <SignupPage />
+                </PublicRoute>
               </ErrorBoundary>
             } />
             <Route path="/forgot-password" element={
               <ErrorBoundary>
-                <ForgotPasswordPage />
+                <PublicRoute>
+                  <ForgotPasswordPage />
+                </PublicRoute>
               </ErrorBoundary>
             } />
             <Route path="/reset-password" element={
               <ErrorBoundary>
-                <ResetPasswordPage />
+                <PublicRoute>
+                  <ResetPasswordPage />
+                </PublicRoute>
               </ErrorBoundary>
             } />
 

@@ -25,6 +25,9 @@ export const ERROR_MESSAGES = {
   PASSWORDS_MUST_MATCH: "Passwords don't match",
   GENERIC_ERROR: 'Something went wrong',
   VALIDATION_REQUIREMENTS_NOT_MET: 'Please fulfill all the requirements.',
+
+  INTEREST_REQUIRED: 'Please select at least one interest.',
+  INTEREST_FAILED: 'Failed to save interests. Please try again.',
 } as const;
 
 export const UI_STRINGS = {

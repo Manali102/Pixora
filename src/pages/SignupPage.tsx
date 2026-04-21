@@ -11,11 +11,20 @@ import { PasswordValidation } from '../components/PasswordValidation';
 import { useSignupMutation } from '@/hooks/mutations/useSignupMutation';
 import { getErrorMessage } from '@/api/utils';
 import { ERROR_MESSAGES } from '../config/constants';
+import { useAuthStore } from '@/store/useAuthStore';
+import { InterestSelectionModal } from '../components/InterestSelectionModal';
+import { userMapper } from '@/api/mappers';
 
 export const SignupPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  // Custom states for the selection modal
+  const [showInterestModal, setShowInterestModal] = useState(false);
+  const [signedUpUser, setSignedUpUser] = useState<any>(null);
+
   const signupMutation = useSignupMutation();
+  const setAuth = useAuthStore((state) => state.setAuth);
 
   const {
     register,
@@ -48,7 +57,21 @@ export const SignupPage: React.FC = () => {
       email: data.email, 
       password: data.password, 
       name: data.name 
+    }, {
+      onSuccess: (response) => {
+        const { user: apiUser } = response.data;
+        const mappedUser = userMapper.toFrontend(apiUser);
+        setSignedUpUser(mappedUser);
+        setShowInterestModal(true);
+      }
     });
+  };
+
+  const handleInterestSelectionComplete = () => {
+    if (signedUpUser) {
+      sessionStorage.setItem('postAuthRedirect', '/pricing');
+      setAuth(signedUpUser);
+    }
   };
 
   // Get error message from the API
@@ -56,9 +79,14 @@ export const SignupPage: React.FC = () => {
     ? getErrorMessage(signupMutation.error, ERROR_MESSAGES.SIGNUP_FAILED)
     : null;
 
-
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 auth-page relative overflow-hidden">
+    <>
+      <InterestSelectionModal 
+        isOpen={showInterestModal} 
+        userId={signedUpUser?.id} 
+        onComplete={handleInterestSelectionComplete} 
+      />
+      <div className="min-h-screen flex items-center justify-center p-4 auth-page relative overflow-hidden">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -256,5 +284,6 @@ export const SignupPage: React.FC = () => {
         </p>
       </motion.div>
     </div>
+    </>
   );
 };

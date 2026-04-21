@@ -17,6 +17,7 @@ const AUTH = {
 // user endpoints
 const USER = {
   PROFILE: '/api/v1/users/profile',
+  ADD_INTEREST: '/api/v1/users/add-user-interest',
 } as const;
 
 export const ENDPOINTS = {
