@@ -8,6 +8,10 @@ import { cn } from '../../lib/utils';
 import { Tooltip } from './Tooltip';
 import { WhatsAppIcon, MessengerIcon, FacebookIcon, XIcon } from '../icons/SocialIcons';
 
+/**
+ * PinModal component to display pin in modal
+ * @returns JSX.Element
+ */
 export const PinModal: React.FC = () => {
   const { selectedPin, setSelectedPin, toggleLike, toggleSave, addComment } = usePinStore();
   const [comment, setComment] = useState('');
@@ -15,6 +19,7 @@ export const PinModal: React.FC = () => {
   const [isCopied, setIsCopied] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // use effect to handle body overflow when modal is open
   useEffect(() => {
     if (selectedPin) {
       document.body.style.overflow = 'hidden';
@@ -28,8 +33,12 @@ export const PinModal: React.FC = () => {
 
   if (!selectedPin) return null;
 
-  const handleDownload = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  /**
+   * Handles downloading of the pin
+   * @param event - event to stop propagation
+   */
+  const handleDownload = async (event: React.MouseEvent) => {
+    event.stopPropagation();
     try {
       const response = await fetch(selectedPin.imageUrl);
       const blob = await response.blob();
@@ -48,12 +57,16 @@ export const PinModal: React.FC = () => {
     }
   };
 
+  /**
+   * Handles copying of the pin link
+   */
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
 
+  // share options for the pin
   const shareOptions = [
     // { 
     //   name: 'Copy link', 
@@ -322,23 +335,23 @@ export const PinModal: React.FC = () => {
                   {/* Comments List */}
                   {selectedPin.comments && selectedPin.comments.length > 0 && (
                     <div className="flex flex-col gap-6 max-h-[400px] overflow-y-auto pr-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                      {selectedPin.comments.map((c) => (
-                        <div key={c.id} className="flex gap-3 group/comment">
+                      {selectedPin.comments.map((comment: any) => (
+                        <div key={comment.id} className="flex gap-3 group/comment">
                           <img 
-                            src={c.userAvatar} 
-                            alt={c.userName} 
+                            src={comment.userAvatar} 
+                            alt={comment.userName} 
                             className="w-10 h-10 rounded-full flex-shrink-0 object-cover"
                           />
                           <div className="flex-1">
                             <div className="flex flex-col">
                               <div className="flex items-center gap-2 mb-1">
-                                <span className="font-bold text-sm text-zinc-900 dark:text-zinc-100">{c.userName}</span>
+                                <span className="font-bold text-sm text-zinc-900 dark:text-zinc-100">{comment.userName}</span>
                                 <span className="text-[10px] text-zinc-400 font-medium">
-                                  {new Date(c.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                                  {new Date(comment.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                                 </span>
                               </div>
                               <p className="text-zinc-700 dark:text-zinc-300 text-sm leading-relaxed break-words">
-                                {c.text}
+                                {comment.text}
                               </p>
                             </div>
                           </div>
@@ -358,12 +371,12 @@ export const PinModal: React.FC = () => {
                       <textarea
                         ref={textareaRef}
                         value={comment}
-                        onChange={(e) => setComment(e.target.value)}
+                        onChange={(event) => setComment(event.target.value)}
                         placeholder="Add a comment"
                         className="w-full bg-zinc-100 dark:bg-zinc-800 border-2 border-transparent focus:border-zinc-200 dark:focus:border-zinc-700 rounded-[24px] py-3 px-5 pr-12 text-zinc-900 dark:text-zinc-100 focus:ring-0 outline-none resize-none min-h-[48px] transition-all placeholder:text-zinc-500 overflow-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                         rows={1}
-                        onInput={(e) => {
-                          const target = e.target as HTMLTextAreaElement;
+                        onInput={(event) => {
+                          const target = event.target as HTMLTextAreaElement;
                           target.style.height = 'auto';
                           target.style.height = `${target.scrollHeight}px`;
                         }}

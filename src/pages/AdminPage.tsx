@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { MOCK_USERS, MOCK_STATS } from '../mock/data';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { Users, Shield, TrendingUp, AlertCircle, Search, Filter, MoreVertical } from 'lucide-react';
 import Masonry from 'react-masonry-css';
@@ -12,13 +11,18 @@ const breakpointColumnsObj = {
   768: 1
 };
 
+/**
+ * Admin page to display admin dashboard
+ * @returns JSX.Element
+ */
 export const AdminPage: React.FC = () => {
   const [userSearchTerm, setUserSearchTerm] = React.useState('');
 
-  const filteredUsers = MOCK_USERS.filter(u => 
-    u.name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
-    u.email.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
-    u.subscription.toLowerCase().includes(userSearchTerm.toLowerCase())
+  // filter users based on search term
+  const filteredUsers = ([] as any).filter((user: any) => 
+    user.name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+    user.email.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+    user.subscription.toLowerCase().includes(userSearchTerm.toLowerCase())
   );
 
   return (
@@ -55,7 +59,7 @@ export const AdminPage: React.FC = () => {
           </div>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={MOCK_STATS}>
+              <AreaChart data={[] as any}>
                 <defs>
                   <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
@@ -85,7 +89,7 @@ export const AdminPage: React.FC = () => {
           </div>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={MOCK_STATS}>
+              <BarChart data={[] as any}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 600}} />
                 <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fontWeight: 600}} />
@@ -112,7 +116,7 @@ export const AdminPage: React.FC = () => {
               <input 
                 placeholder="Search users..." 
                 value={userSearchTerm}
-                onChange={(e) => setUserSearchTerm(e.target.value)}
+                onChange={(event) => setUserSearchTerm(event.target.value)}
                 className="pl-10 pr-4 py-2 bg-secondary rounded-xl text-sm outline-none w-full border border-transparent focus:border-primary transition-all"
               />
             </div>
@@ -139,22 +143,22 @@ export const AdminPage: React.FC = () => {
                   </td>
                 </tr>
               )}
-              {filteredUsers.map((u) => (
-                <tr key={u.id} className="hover:bg-secondary/20 transition-colors group">
+              {filteredUsers.map((user: any) => (
+                <tr key={user.id} className="hover:bg-secondary/20 transition-colors group">
                   <td className="p-6">
                     <div className="flex items-center gap-4">
-                      <img src={u.avatar} alt="" className="w-12 h-12 rounded-2xl bg-muted object-cover shadow-sm group-hover:scale-105 transition-transform" />
+                      <img src={user.avatar} alt="" className="w-12 h-12 rounded-2xl bg-muted object-cover shadow-sm group-hover:scale-105 transition-transform" />
                       <div>
-                        <p className="font-bold">{u.name}</p>
-                        <p className="text-xs text-muted-foreground">{u.email}</p>
+                        <p className="font-bold">{user.name}</p>
+                        <p className="text-xs text-muted-foreground">{user.email}</p>
                       </div>
                     </div>
                   </td>
                   <td className="p-6">
                     <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-tight ${
-                      u.subscription === 'pro' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'
+                      user.subscription === 'pro' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'
                     }`}>
-                      {u.subscription}
+                      {user.subscription}
                     </span>
                   </td>
                   <td className="p-6">

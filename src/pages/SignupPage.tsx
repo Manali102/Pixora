@@ -1,26 +1,25 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useAuthStore } from '../store/useAuthStore';
+import { AxiosError } from 'axios';
 import { Button } from '../components/ui/button';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { signupSchema, type SignupFormData } from '../lib/validationSchemas';
 import { Input } from '../components/ui/input';
 import { PasswordValidation } from '../components/PasswordValidation';
+import { useSignupMutation } from '@/hooks/mutations/useSignupMutation';
 
 export const SignupPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const signup = useAuthStore((store) => store.signup);
-  const navigate = useNavigate();
+  const signupMutation = useSignupMutation();
 
   const {
     register,
     handleSubmit,
     watch,
-    setError,
     clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<SignupFormData>({
@@ -32,25 +31,26 @@ export const SignupPage: React.FC = () => {
   const formValues = watch();
   const passwordValue = formValues.password || '';
 
-  // Clear errors when the user starts typing in a field
+  // Clear errors when the user starts typing
   React.useEffect(() => {
-    Object.keys(formValues).forEach((key) => {
-      if (errors[key as keyof SignupFormData]) {
-        clearErrors(key as keyof SignupFormData);
-      }
-    });
-  }, [formValues.name, formValues.email, formValues.password, formValues.confirmPassword, clearErrors]);
+    if (signupMutation.isError) {
+      signupMutation.reset();
+    }
+  }, [formValues.name, formValues.email, formValues.password, formValues.confirmPassword]);
 
   const onSubmit = async (data: SignupFormData) => {
-    const success = await signup(data.email, data.password, data.name);
-    if (success) {
-      navigate('/pricing');
-    } else {
-      setError('email', {
-        message: 'An account with this email already exists.',
-      });
-    }
+    signupMutation.mutate({ 
+      email: data.email, 
+      password: data.password, 
+      name: data.name 
+    });
   };
+
+  const apiErrorMessage = signupMutation.error
+    ? (signupMutation.error as AxiosError<{ message: string }>)?.response?.data?.message ||
+      'Registration failed. Please check your details.'
+    : null;
+
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 auth-page relative overflow-hidden">
@@ -216,12 +216,24 @@ export const SignupPage: React.FC = () => {
             </div>
           </div>
 
+          {/* API / server error */}
+          {apiErrorMessage && (
+            <motion.p
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex items-center gap-2 text-destructive text-sm font-bold bg-destructive/10 p-3 rounded-xl"
+            >
+              <AlertCircle className="w-5 h-5 shrink-0" />
+              {apiErrorMessage}
+            </motion.p>
+          )}
+
           <Button
             type="submit"
-            disabled={isSubmitting}
+            disabled={signupMutation.isPending || isSubmitting}
             className="w-full py-5 rounded-2xl cursor-pointer text-lg font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20 active:scale-95 transition-all group"
           >
-            {isSubmitting ? (
+            {signupMutation.isPending || isSubmitting ? (
               <Loader2 className="w-6 h-6 animate-spin" />
             ) : (
               <span className="flex items-center gap-2">

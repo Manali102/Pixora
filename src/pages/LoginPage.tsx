@@ -1,24 +1,23 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useAuthStore } from '../store/useAuthStore';
+import { AxiosError } from 'axios';
 import { Button } from '../components/ui/button';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { loginSchema, type LoginFormData } from '../lib/validationSchemas';
 import { Input } from '../components/ui/input';
 import { PasswordValidation } from '../components/PasswordValidation';
+import { useLoginMutation } from '@/hooks/mutations/useLoginMutation';
 
 export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const login = useAuthStore((store) => store.login);
-  const navigate = useNavigate();
+  const loginMutation = useLoginMutation();
 
   const {
     register,
     handleSubmit,
-    setError,
     formState: { errors, isSubmitting },
     watch,
     clearErrors,
@@ -29,21 +28,20 @@ export const LoginPage: React.FC = () => {
   // Clear root error when user starts typing again
   const formValues = watch();
   React.useEffect(() => {
-    if (errors.root) {
-      clearErrors('root');
+    if (loginMutation.isError) {
+      loginMutation.reset();
     }
-  }, [formValues.email, formValues.password, clearErrors]);
+  }, [formValues.email, formValues.password]);
 
   const onSubmit = async (data: LoginFormData) => {
-    const success = await login(data.email, data.password);
-    if (success) {
-      navigate('/', { replace: true });
-    } else {
-      setError('root', {
-        message: 'Invalid email or password',
-      });
-    }
+    loginMutation.mutate({ email: data.email, password: data.password });
   };
+
+  // Extract error message from mutation error
+  const apiErrorMessage = loginMutation.error
+    ? (loginMutation.error as AxiosError<{ message: string }>)?.response?.data?.message ||
+      'Something went wrong. Please try again.'
+    : null;
 
   return (
     <div className="auth-page min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
@@ -145,24 +143,24 @@ export const LoginPage: React.FC = () => {
             )}
           </div>
 
-          {/* Root / server error */}
-          {errors.root && (
+          {/* API / server error */}
+          {apiErrorMessage && (
             <motion.p
               initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
               className="flex items-center gap-2 text-destructive text-xs font-bold bg-destructive/10 p-3 rounded-xl"
             >
               <AlertCircle className="w-4 h-4 shrink-0" />
-              {errors.root.message}
+              {apiErrorMessage}
             </motion.p>
           )}
 
           <Button
             type="submit"
-            disabled={isSubmitting}
+            disabled={loginMutation.isPending || isSubmitting}
             className="w-full py-5 rounded-2xl cursor-pointer text-lg font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20 active:scale-95 transition-all group"
           >
-            {isSubmitting ? (
+            {loginMutation.isPending || isSubmitting ? (
               <Loader2 className="w-6 h-6 animate-spin" />
             ) : (
               <span className="flex items-center gap-2">

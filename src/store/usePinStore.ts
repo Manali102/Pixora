@@ -1,7 +1,6 @@
 import React from 'react';
 import { create } from 'zustand';
-import { Pin } from '../mock/data';
-import { mockFetchPins } from '../mock/api';
+import { Pin } from '@/types/type';
 
 interface PinState {
   pins: Pin[];
@@ -26,7 +25,7 @@ export const usePinStore = create<PinState>()((set, get) => ({
 
   fetchPins: async () => {
     set({ isLoading: true });
-    const data = await mockFetchPins();
+    const data = [] as any;
     set({ pins: data, isLoading: false });
   },
 

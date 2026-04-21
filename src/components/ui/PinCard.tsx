@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Download, Share2, Heart, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Pin } from '../../mock/data';
+import { Pin } from '@/types/type';
 import { usePinStore } from '../../store/usePinStore';
 import { Button } from './button';
 import { cn } from '../../lib/utils';
@@ -10,16 +10,28 @@ interface PinCardProps {
   pin: Pin;
 }
 
+/**
+ * PinCard component to display pin in grid
+ * @param pin - pin to display
+ * @returns JSX.Element
+ */
 export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
   const [isHovered, setIsHovered] = useState(false);
   const { toggleLike, toggleSave, setSelectedPin } = usePinStore();
 
-  const handleShare = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  /**
+   * Handles sharing of the pin
+   * @param event - event to stop propagation
+   */
+  const handleShare = (event: React.MouseEvent) => {
+    event.stopPropagation();
     navigator.clipboard.writeText(`https://pixora.app/pin/${pin.id}`);
     alert('Link copied to clipboard!');
   };
 
+  /**
+   * Handles opening of the pin modal
+   */
   const handleOpenModal = () => {
     setSelectedPin(pin);
   };
@@ -66,8 +78,8 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
               {/* Top Row: Save Button */}
               <div className="flex justify-end">
                 <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
+                  onClick={(event) => {
+                    event.stopPropagation();
                     toggleSave(pin.id);
                   }}
                   className={`rounded-full px-6 font-bold transition-all ${pin.isSaved ? 'bg-black text-white hover:bg-black' : 'bg-red-600 hover:bg-red-700'}`}
@@ -86,15 +98,15 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
                     <Share2 className="w-5 h-5" />
                   </button>
                   <button 
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(event) => event.stopPropagation()}
                     className="w-10 h-10 flex items-center justify-center bg-white/80 hover:bg-white rounded-full text-black transition-colors backdrop-blur-sm"
                   >
                     <Download className="w-5 h-5" />
                   </button>
                 </div>
                 <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
+                  onClick={(event) => {
+                    event.stopPropagation();
                     toggleLike(pin.id);
                   }}
                   className={`w-10 h-10 flex items-center justify-center rounded-full transition-all backdrop-blur-sm ${pin.isLiked ? 'bg-red-500 text-white' : 'bg-white/80 text-black hover:bg-white'}`}
@@ -108,7 +120,7 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
       </div>
 
       {/* Info Row */}
-      <div className="mt-2 flex items-center justify-between px-1" onClick={(e) => e.stopPropagation()}>
+      <div className="mt-2 flex items-center justify-between px-1" onClick={(event) => event.stopPropagation()}>
         <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
           <img src={pin.authorAvatar} alt={pin.authorName} className="w-7 h-7 rounded-full object-cover shadow-sm" />
           <span className="text-xs font-semibold truncate max-w-[120px]">{pin.authorName}</span>
