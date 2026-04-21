@@ -11,6 +11,7 @@ import { PasswordValidation } from '../components/PasswordValidation';
 import { authService } from '../services/authService';
 import { getErrorMessage } from '@/api/utils';
 import { buttonVariants } from '../components/ui/button';
+import { ERROR_MESSAGES } from '../config/constants';
 
 export const ResetPasswordPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -41,7 +42,7 @@ export const ResetPasswordPage: React.FC = () => {
    */
   const onSubmit = async (data: ResetPasswordFormData) => {
     if (!token) {
-      setError('Invalid or expired reset token.');
+      setError(ERROR_MESSAGES.INVALID_RESET_TOKEN);
       return;
     }
 
@@ -58,7 +59,7 @@ export const ResetPasswordPage: React.FC = () => {
         navigate('/login');
       }, 3000);
     } catch (err: any) {
-      setError(getErrorMessage(err, 'Failed to reset password. The link may be expired.'));
+      setError(getErrorMessage(err, ERROR_MESSAGES.RESET_PASSWORD_FAILED));
     } finally {
       setIsLoading(false);
     }

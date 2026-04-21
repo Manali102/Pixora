@@ -1,20 +1,21 @@
 import { z } from 'zod';
+import { ERROR_MESSAGES } from '../config/constants';
 
 // ─── Login ────────────────────────────────────────────────────────────────────
 
 export const loginSchema = z.object({
   email: z
     .string()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email address'),
+    .min(1, ERROR_MESSAGES.EMAIL_REQUIRED)
+    .email(ERROR_MESSAGES.INVALID_EMAIL),
   password: z
     .string()
-    .min(1, 'Password is required')
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number')
-    .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
+    .min(1, ERROR_MESSAGES.PASSWORD_REQUIRED)
+    .min(8, ERROR_MESSAGES.PASSWORD_MIN_LENGTH)
+    .regex(/[A-Z]/, ERROR_MESSAGES.PASSWORD_UPPERCASE)
+    .regex(/[a-z]/, ERROR_MESSAGES.PASSWORD_LOWERCASE)
+    .regex(/[0-9]/, ERROR_MESSAGES.PASSWORD_NUMBER)
+    .regex(/[^A-Za-z0-9]/, ERROR_MESSAGES.PASSWORD_SPECIAL),
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
@@ -25,29 +26,29 @@ export const signupSchema = z
   .object({
     name: z
       .string()
-      .min(1, 'Full name is required')
-      .min(2, 'Name must be at least 2 characters')
-      .max(50, 'Name must be under 50 characters')
+      .min(1, ERROR_MESSAGES.FULL_NAME_REQUIRED)
+      .min(2, ERROR_MESSAGES.NAME_MIN_LENGTH)
+      .max(50, ERROR_MESSAGES.NAME_MAX_LENGTH)
       .regex(
         /^[a-zA-Z\s'-]+$/,
-        "Name can only contain letters, spaces, hyphens, and apostrophes",
+        ERROR_MESSAGES.NAME_INVALID_CHARS,
       ),
     email: z
       .string()
-      .min(1, 'Email is required')
-      .email('Please enter a valid email address'),
+      .min(1, ERROR_MESSAGES.EMAIL_REQUIRED)
+      .email(ERROR_MESSAGES.INVALID_EMAIL),
     password: z
       .string()
-      .min(1, 'Password is required')
-      .min(8, 'Password must be at least 8 characters')
-      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-      .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-      .regex(/[0-9]/, 'Password must contain at least one number')
-      .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
+      .min(1, ERROR_MESSAGES.PASSWORD_REQUIRED)
+      .min(8, ERROR_MESSAGES.PASSWORD_MIN_LENGTH)
+      .regex(/[A-Z]/, ERROR_MESSAGES.PASSWORD_UPPERCASE)
+      .regex(/[a-z]/, ERROR_MESSAGES.PASSWORD_LOWERCASE)
+      .regex(/[0-9]/, ERROR_MESSAGES.PASSWORD_NUMBER)
+      .regex(/[^A-Za-z0-9]/, ERROR_MESSAGES.PASSWORD_SPECIAL),
+    confirmPassword: z.string().min(1, ERROR_MESSAGES.CONFIRM_PASSWORD_REQUIRED),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
+    message: ERROR_MESSAGES.PASSWORDS_MUST_MATCH,
     path: ['confirmPassword'],
   });
 
@@ -58,8 +59,8 @@ export type SignupFormData = z.infer<typeof signupSchema>;
 export const forgotPasswordSchema = z.object({
   email: z
     .string()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email address'),
+    .min(1, ERROR_MESSAGES.EMAIL_REQUIRED)
+    .email(ERROR_MESSAGES.INVALID_EMAIL),
 });
 
 export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
@@ -70,16 +71,16 @@ export const resetPasswordSchema = z
   .object({
     password: z
       .string()
-      .min(1, 'Password is required')
-      .min(8, 'Password must be at least 8 characters')
-      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-      .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-      .regex(/[0-9]/, 'Password must contain at least one number')
-      .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
+      .min(1, ERROR_MESSAGES.PASSWORD_REQUIRED)
+      .min(8, ERROR_MESSAGES.PASSWORD_MIN_LENGTH)
+      .regex(/[A-Z]/, ERROR_MESSAGES.PASSWORD_UPPERCASE)
+      .regex(/[a-z]/, ERROR_MESSAGES.PASSWORD_LOWERCASE)
+      .regex(/[0-9]/, ERROR_MESSAGES.PASSWORD_NUMBER)
+      .regex(/[^A-Za-z0-9]/, ERROR_MESSAGES.PASSWORD_SPECIAL),
+    confirmPassword: z.string().min(1, ERROR_MESSAGES.CONFIRM_PASSWORD_REQUIRED),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
+    message: ERROR_MESSAGES.PASSWORDS_MUST_MATCH,
     path: ['confirmPassword'],
   });
 

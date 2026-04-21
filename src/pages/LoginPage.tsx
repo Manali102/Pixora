@@ -11,6 +11,7 @@ import { Input } from '../components/ui/input';
 import { PasswordValidation } from '../components/PasswordValidation';
 import { useLoginMutation } from '@/hooks/mutations/useLoginMutation';
 import { getErrorMessage } from '@/api/utils';
+import { ERROR_MESSAGES } from '../config/constants';
 
 export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -40,7 +41,7 @@ export const LoginPage: React.FC = () => {
 
   // Extract error message from mutation error
   const apiErrorMessage = loginMutation.error
-    ? getErrorMessage(loginMutation.error, 'Something went wrong. Please try again.')
+    ? getErrorMessage(loginMutation.error, ERROR_MESSAGES.LOGIN_FAILED)
     : null;
 
   return (
@@ -128,7 +129,7 @@ export const LoginPage: React.FC = () => {
                 className="flex items-center gap-1.5 text-destructive text-sm font-medium ml-1 mt-1"
               >
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                {!formValues.password || formValues.password.length === 0 ? "Password is required" : "Please fulfill all the requirements."}
+                {!formValues.password || formValues.password.length === 0 ? ERROR_MESSAGES.PASSWORD_REQUIRED : ERROR_MESSAGES.VALIDATION_REQUIREMENTS_NOT_MET}
               </motion.p>
             ) : (
                 formValues.password && formValues.password.length > 0 && !(/[0-9]/.test(formValues.password) && /[a-z]/.test(formValues.password) && /[A-Z]/.test(formValues.password) && /[^A-Za-z0-9]/.test(formValues.password) && formValues.password.length >= 8) && (
@@ -137,7 +138,7 @@ export const LoginPage: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   className="text-destructive text-sm font-medium ml-1 mt-1"
                 >
-                  Please fulfill all the requirements.
+                  {ERROR_MESSAGES.VALIDATION_REQUIREMENTS_NOT_MET}
                 </motion.p>
               )
             )}

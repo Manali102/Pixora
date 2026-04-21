@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AxiosError } from 'axios';
 import { Button } from '../components/ui/button';
 import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
 import { signupSchema, type SignupFormData } from '../lib/validationSchemas';
@@ -11,6 +10,7 @@ import { Input } from '../components/ui/input';
 import { PasswordValidation } from '../components/PasswordValidation';
 import { useSignupMutation } from '@/hooks/mutations/useSignupMutation';
 import { getErrorMessage } from '@/api/utils';
+import { ERROR_MESSAGES } from '../config/constants';
 
 export const SignupPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -53,7 +53,7 @@ export const SignupPage: React.FC = () => {
 
   // Get error message from the API
   const apiErrorMessage = signupMutation.error
-    ? getErrorMessage(signupMutation.error, 'Registration failed. Please check your details.')
+    ? getErrorMessage(signupMutation.error, ERROR_MESSAGES.SIGNUP_FAILED)
     : null;
 
 
@@ -167,7 +167,7 @@ export const SignupPage: React.FC = () => {
                   className="flex items-center gap-1.5 text-destructive text-sm font-medium ml-1 mt-1"
                 >
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                  {passwordValue.length === 0 ? "Password is required" : "Please fulfill all the requirements."}
+                  {passwordValue.length === 0 ? ERROR_MESSAGES.PASSWORD_REQUIRED : ERROR_MESSAGES.VALIDATION_REQUIREMENTS_NOT_MET}
                 </motion.p>
               ) : (
                 passwordValue.length > 0 && !(/[0-9]/.test(passwordValue) && /[a-z]/.test(passwordValue) && /[A-Z]/.test(passwordValue) && /[^A-Za-z0-9]/.test(passwordValue) && passwordValue.length >= 8) && (
@@ -176,7 +176,7 @@ export const SignupPage: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     className="text-destructive text-sm font-medium ml-1 mt-1"
                   >
-                    Please fulfill all the requirements.
+                    {ERROR_MESSAGES.VALIDATION_REQUIREMENTS_NOT_MET}
                   </motion.p>
                 )
               )}

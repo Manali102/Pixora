@@ -10,6 +10,7 @@ import { Input } from '../components/ui/input';
 import { authService } from '../services/authService';
 import { getErrorMessage } from '@/api/utils';
 import { buttonVariants } from '../components/ui/button';
+import { ERROR_MESSAGES } from '../config/constants';
 
 export const ForgotPasswordPage: React.FC = () => {
   const [isSuccess, setIsSuccess] = useState(false);
@@ -35,7 +36,7 @@ export const ForgotPasswordPage: React.FC = () => {
       await authService.forgotPassword(data);
       setIsSuccess(true);
     } catch (err: any) {
-      setError(getErrorMessage(err, 'Could not send reset link. Please try again.'));
+      setError(getErrorMessage(err, ERROR_MESSAGES.FORGOT_PASSWORD_FAILED));
     } finally {
       setIsLoading(false);
     }

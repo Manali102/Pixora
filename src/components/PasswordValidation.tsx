@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle2, XCircle, ShieldCheck } from 'lucide-react';
+import { UI_STRINGS } from '../config/constants';
 
 interface PasswordValidationProps {
   password?: string;
@@ -10,11 +11,11 @@ export const PasswordValidation: React.FC<PasswordValidationProps> = ({ password
   if (!password) return null;
 
   const checks = [
-    { label: 'Must contain at least one number', pass: /[0-9]/.test(password) },
-    { label: 'Must contain at least one lowercase letter', pass: /[a-z]/.test(password) },
-    { label: 'Must contain at least one uppercase letter', pass: /[A-Z]/.test(password) },
-    { label: 'Must contain at least one special character', pass: /[^A-Za-z0-9]/.test(password) },
-    { label: 'Length must be at least 8 characters', pass: password.length >= 8 },
+    { label: UI_STRINGS.PASSWORD_CHECK_NUMBER, pass: /[0-9]/.test(password) },
+    { label: UI_STRINGS.PASSWORD_CHECK_LOWERCASE, pass: /[a-z]/.test(password) },
+    { label: UI_STRINGS.PASSWORD_CHECK_UPPERCASE, pass: /[A-Z]/.test(password) },
+    { label: UI_STRINGS.PASSWORD_CHECK_SPECIAL, pass: /[^A-Za-z0-9]/.test(password) },
+    { label: UI_STRINGS.PASSWORD_CHECK_LENGTH, pass: password.length >= 8 },
   ];
 
   const allPassed = checks.every(c => c.pass);

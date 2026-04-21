@@ -6,13 +6,9 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { AxiosError } from 'axios';
 import { authService, LoginPayload } from '@/services/authService';
 import { useAuthStore } from '@/store/useAuthStore';
 import { userMapper } from '@/api/mappers';
-import { getErrorMessage } from '@/api/utils';
-
-import { User, ApiErrorResponse } from '@/types/type';
 
 /**
  * Hook for login mutation
@@ -32,17 +28,8 @@ export const useLoginMutation = () => {
       const mappedUser = userMapper.toFrontend(apiUser);
 
       // Persist auth state in Zustand store
+      // GuestRoute will automatically catch this state change and redirect to Home (or prior route)
       setAuth(mappedUser); 
-      
-      // Navigate to home
-      navigate('/', { replace: true });
-    },
-
-    onError: (error: AxiosError<ApiErrorResponse>) => {
-      // Error is propagated to the component via mutation.error
-      if (import.meta.env.DEV) {
-        console.error('[Login Error]', getErrorMessage(error));
-      }
     },
   });
 };

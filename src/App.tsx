@@ -14,7 +14,6 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
-import { GuestRoute } from './components/layout/GuestRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AnimatePresence } from 'framer-motion';
 import { useAuthStore } from './store/useAuthStore';
@@ -44,32 +43,24 @@ const App: React.FC = () => {
               <HomePage />
             </ProtectedRoute>} />
             <Route path="/login" element={
-              <GuestRoute>
-                <ErrorBoundary>
-                  <LoginPage />
-                </ErrorBoundary>
-              </GuestRoute>
+              <ErrorBoundary>
+                <LoginPage />
+              </ErrorBoundary>
             } />
             <Route path="/signup" element={
-              <GuestRoute>
-                <ErrorBoundary>
-                  <SignupPage />
-                </ErrorBoundary>
-              </GuestRoute>
+              <ErrorBoundary>
+                <SignupPage />
+              </ErrorBoundary>
             } />
             <Route path="/forgot-password" element={
-              <GuestRoute>
-                <ErrorBoundary>
-                  <ForgotPasswordPage />
-                </ErrorBoundary>
-              </GuestRoute>
+              <ErrorBoundary>
+                <ForgotPasswordPage />
+              </ErrorBoundary>
             } />
             <Route path="/reset-password" element={
-              <GuestRoute>
-                <ErrorBoundary>
-                  <ResetPasswordPage />
-                </ErrorBoundary>
-              </GuestRoute>
+              <ErrorBoundary>
+                <ResetPasswordPage />
+              </ErrorBoundary>
             } />
 
             <Route path="/profile" element={
