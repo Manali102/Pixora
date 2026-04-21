@@ -10,11 +10,9 @@ import { AxiosError } from 'axios';
 import { authService, SignupPayload } from '@/services/authService';
 import { useAuthStore } from '@/store/useAuthStore';
 import { userMapper } from '@/api/mappers';
+import { getErrorMessage } from '@/api/utils';
 
-interface ApiErrorResponse {
-  message: string;
-  errors?: Record<string, string[]>;
-}
+import { User, ApiErrorResponse } from '@/types/type';
 
 /**
  * Hook for signup mutation
@@ -42,7 +40,7 @@ export const useSignupMutation = () => {
 
     onError: (error: AxiosError<ApiErrorResponse>) => {
       if (import.meta.env.DEV) {
-        console.error('[Signup Error]', error.response?.data?.message || error.message);
+        console.error('[Signup Error]', getErrorMessage(error));
       }
     },
   });

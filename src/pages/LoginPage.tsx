@@ -10,6 +10,7 @@ import { loginSchema, type LoginFormData } from '../lib/validationSchemas';
 import { Input } from '../components/ui/input';
 import { PasswordValidation } from '../components/PasswordValidation';
 import { useLoginMutation } from '@/hooks/mutations/useLoginMutation';
+import { getErrorMessage } from '@/api/utils';
 
 export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -39,8 +40,7 @@ export const LoginPage: React.FC = () => {
 
   // Extract error message from mutation error
   const apiErrorMessage = loginMutation.error
-    ? (loginMutation.error as AxiosError<{ message: string }>)?.response?.data?.message ||
-      'Something went wrong. Please try again.'
+    ? getErrorMessage(loginMutation.error, 'Something went wrong. Please try again.')
     : null;
 
   return (

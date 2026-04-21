@@ -40,3 +40,14 @@ export interface Pin {
   comments?: Comment[];
   views: number;
 }
+
+export interface ApiErrorResponse {
+  success: boolean;
+  error?: {
+    message: string;
+    code: string;
+    statusCode: number;
+    stack?: string;
+  };
+  message?: string;
+}

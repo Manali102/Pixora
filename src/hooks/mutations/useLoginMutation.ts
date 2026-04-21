@@ -10,11 +10,9 @@ import { AxiosError } from 'axios';
 import { authService, LoginPayload } from '@/services/authService';
 import { useAuthStore } from '@/store/useAuthStore';
 import { userMapper } from '@/api/mappers';
+import { getErrorMessage } from '@/api/utils';
 
-interface ApiErrorResponse {
-  message: string;
-  errors?: Record<string, string[]>;
-}
+import { User, ApiErrorResponse } from '@/types/type';
 
 /**
  * Hook for login mutation
@@ -42,9 +40,8 @@ export const useLoginMutation = () => {
 
     onError: (error: AxiosError<ApiErrorResponse>) => {
       // Error is propagated to the component via mutation.error
-      // Additional side effects (e.g., logging) can be handled here
       if (import.meta.env.DEV) {
-        console.error('[Login Error]', error.response?.data?.message || error.message);
+        console.error('[Login Error]', getErrorMessage(error));
       }
     },
   });

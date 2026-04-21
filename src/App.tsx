@@ -12,6 +12,7 @@ import { PricingPage } from './pages/PricingPage';
 import { CreatePinPage } from './pages/CreatePinPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
+import { GuestRoute } from './components/layout/GuestRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AnimatePresence } from 'framer-motion';
 import { useAuthStore } from './store/useAuthStore';
@@ -20,10 +21,10 @@ import { PinModal } from './components/ui/PinModal';
 
 const App: React.FC = () => {
   const location = useLocation();
-  const isAuthenticated = useAuthStore(s => s.isAuthenticated);
+  const isAuthenticated = useAuthStore(store => store.isAuthenticated);
   const showNavbar = isAuthenticated && !['/login', '/signup'].includes(location.pathname);
-  const fetchPins = usePinStore(s => s.fetchPins);
-  const checkStorageReset = useAuthStore(s => s.checkStorageReset);
+  const fetchPins = usePinStore(store => store.fetchPins);
+  const checkStorageReset = useAuthStore(store => store.checkStorageReset);
 
   useEffect(() => {
     fetchPins();
@@ -41,14 +42,18 @@ const App: React.FC = () => {
               <HomePage />
             </ProtectedRoute>} />
             <Route path="/login" element={
-              <ErrorBoundary>
-                <LoginPage />
-              </ErrorBoundary>
+              <GuestRoute>
+                <ErrorBoundary>
+                  <LoginPage />
+                </ErrorBoundary>
+              </GuestRoute>
             } />
             <Route path="/signup" element={
-              <ErrorBoundary>
-                <SignupPage />
-              </ErrorBoundary>
+              <GuestRoute>
+                <ErrorBoundary>
+                  <SignupPage />
+                </ErrorBoundary>
+              </GuestRoute>
             } />
 
             <Route path="/profile" element={

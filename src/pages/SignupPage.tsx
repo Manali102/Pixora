@@ -10,6 +10,7 @@ import { signupSchema, type SignupFormData } from '../lib/validationSchemas';
 import { Input } from '../components/ui/input';
 import { PasswordValidation } from '../components/PasswordValidation';
 import { useSignupMutation } from '@/hooks/mutations/useSignupMutation';
+import { getErrorMessage } from '@/api/utils';
 
 export const SignupPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -47,8 +48,7 @@ export const SignupPage: React.FC = () => {
   };
 
   const apiErrorMessage = signupMutation.error
-    ? (signupMutation.error as AxiosError<{ message: string }>)?.response?.data?.message ||
-      'Registration failed. Please check your details.'
+    ? getErrorMessage(signupMutation.error, 'Registration failed. Please check your details.')
     : null;
 
 
