@@ -13,6 +13,7 @@ import { getErrorMessage } from '@/api/utils';
 import { ERROR_MESSAGES } from '../config/constants';
 import { useAuthStore } from '@/store/useAuthStore';
 import { InterestSelectionModal } from '../components/InterestSelectionModal';
+import { PricingSelectionModal } from '../components/PricingSelectionModal';
 import { userMapper } from '@/api/mappers';
 
 export const SignupPage: React.FC = () => {
@@ -21,6 +22,7 @@ export const SignupPage: React.FC = () => {
   
   // Custom states for the selection modal
   const [showInterestModal, setShowInterestModal] = useState(false);
+  const [showPricingModal, setShowPricingModal] = useState(false);
   const [signedUpUser, setSignedUpUser] = useState<any>(null);
 
   const signupMutation = useSignupMutation();
@@ -68,9 +70,25 @@ export const SignupPage: React.FC = () => {
   };
 
   const handleInterestSelectionComplete = () => {
+    setShowInterestModal(false);
     if (signedUpUser) {
-      sessionStorage.setItem('postAuthRedirect', '/pricing');
-      setAuth(signedUpUser);
+      setShowPricingModal(true);
+    }
+  };
+
+  const handlePricingSelectionComplete = (planData?: any) => {
+    setShowPricingModal(false);
+    if (signedUpUser) {
+      let finalUser = { ...signedUpUser };
+      if (planData) {
+        finalUser = {
+          ...finalUser,
+          subscription: planData.subscription,
+          storageLimit: planData.storageLimit,
+          billingCycle: planData.billingCycle
+        };
+      }
+      setAuth(finalUser);
     }
   };
 
@@ -85,6 +103,11 @@ export const SignupPage: React.FC = () => {
         isOpen={showInterestModal} 
         userId={signedUpUser?.id} 
         onComplete={handleInterestSelectionComplete} 
+      />
+      <PricingSelectionModal
+        isOpen={showPricingModal}
+        onComplete={handlePricingSelectionComplete}
+        onSkip={() => handlePricingSelectionComplete()}
       />
       <div className="min-h-screen flex items-center justify-center p-4 auth-page relative overflow-hidden">
       <motion.div

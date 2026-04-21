@@ -67,13 +67,14 @@ export const InterestSelectionModal: React.FC<InterestSelectionModalProps> = ({ 
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-500/95 backdrop-blur-sm">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          className="bg-card w-full max-w-lg p-8 rounded-3xl shadow-2xl border"
-        >
+      <div className="fixed inset-0 z-50 bg-gray-500/95 backdrop-blur-sm overflow-y-auto">
+        <div className="flex min-h-full items-start justify-center p-4 sm:p-8">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-card w-full max-w-lg p-8 rounded-3xl shadow-2xl border relative my-auto"
+          >
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold mb-2">What are you into?</h2>
             <p className="text-muted-foreground">Select your interests to personalize your experience.</p>
@@ -123,6 +124,7 @@ export const InterestSelectionModal: React.FC<InterestSelectionModalProps> = ({ 
             </Button>
           </div>
         </motion.div>
+        </div>
       </div>
     </AnimatePresence>
   );

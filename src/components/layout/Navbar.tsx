@@ -5,6 +5,7 @@ import { Search, Bell, MessageCircle, User, Plus, LogOut, LayoutDashboard, Setti
 import { useAuthStore } from '../../store/useAuthStore';
 import { usePinStore } from '../../store/usePinStore';
 import { Button } from '../ui/button';
+import { cn } from '../../lib/utils';
 
 export const Navbar: React.FC = () => {
   const user = useAuthStore((store) => store.user);
@@ -30,16 +31,46 @@ export const Navbar: React.FC = () => {
 
         {/* Nav Links - Left */}
         <div className="hidden md:flex items-center gap-2">
-          <Link to="/" className="px-4 py-2 rounded-full font-semibold hover:bg-muted transition-colors">Home</Link>
+          <Link 
+            to="/" 
+            className={cn(
+              "px-4 py-2 rounded-full font-semibold transition-colors",
+              location.pathname === '/' ? "bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black" : "hover:bg-muted"
+            )}
+          >
+            Home
+          </Link>
           {user?.role === 'admin' ? (
-            <Link to="/admin" onClick={() => setIsProfileOpen(false)} className="px-4 py-2 rounded-full font-semibold hover:bg-muted transition-colors flex items-center gap-1.5">
+            <Link 
+              to="/admin" 
+              onClick={() => setIsProfileOpen(false)} 
+              className={cn(
+                "px-4 py-2 rounded-full font-semibold transition-colors flex items-center gap-1.5",
+                location.pathname === '/admin' ? "bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black" : "hover:bg-muted"
+              )}
+            >
               Admin Panel
             </Link>
           ) : (
-            <Link to="/pricing" onClick={() => setIsProfileOpen(false)} className="px-4 py-2 rounded-full font-semibold hover:bg-muted transition-colors border border-transparent">Pricing</Link>
+            <Link 
+              to="/pricing" 
+              onClick={() => setIsProfileOpen(false)} 
+              className={cn(
+                "px-4 py-2 rounded-full font-semibold transition-colors border border-transparent",
+                location.pathname === '/pricing' ? "bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black" : "hover:bg-muted"
+              )}
+            >
+              Pricing
+            </Link>
           )}
           {isAuthenticated && (
-            <Link to="/create" className="px-4 py-2 rounded-full font-semibold hover:bg-muted transition-colors flex items-center gap-1">
+            <Link 
+              to="/create" 
+              className={cn(
+                "px-4 py-2 rounded-full font-semibold transition-colors flex items-center gap-1",
+                location.pathname === '/create' ? "bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black" : "hover:bg-muted"
+              )}
+            >
               Create Pin
             </Link>
           )}
@@ -94,7 +125,14 @@ export const Navbar: React.FC = () => {
                       </div>
                     </div>
                     <div className="p-2">
-                      <Link to="/profile" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 p-2 rounded-xl hover:bg-secondary transition-colors">
+                      <Link 
+                        to="/profile" 
+                        onClick={() => setIsProfileOpen(false)} 
+                        className={cn(
+                          "flex items-center gap-3 p-2 rounded-xl transition-colors",
+                          location.pathname === '/profile' ? "bg-secondary font-semibold" : "hover:bg-secondary"
+                        )}
+                      >
                         <User className="w-5 h-5" /> Profile
                       </Link>
                     </div>

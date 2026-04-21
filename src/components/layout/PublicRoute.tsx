@@ -18,13 +18,7 @@ export const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      const postAuthRedirect = sessionStorage.getItem('postAuthRedirect');
-      if (postAuthRedirect) {
-        setRedirectPath(postAuthRedirect);
-        sessionStorage.removeItem('postAuthRedirect');
-      } else {
-        setRedirectPath(location.state?.from?.pathname || "/");
-      }
+      setRedirectPath(location.state?.from?.pathname || "/");
     }
   }, [isAuthenticated, location.state]);
   
