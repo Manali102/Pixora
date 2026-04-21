@@ -20,6 +20,17 @@ export interface SignupPayload {
   name: string;
 }
 
+// Forgot Password Payload
+export interface ForgotPasswordPayload {
+  email: string;
+}
+
+// Reset Password Payload
+export interface ResetPasswordPayload {
+  password: string;
+  token: string;
+}
+
 // User Profile
 export interface UserProfile {
   _id: string;
@@ -73,6 +84,32 @@ export const authService = {
     const { data } = await apiClient.post<LoginResponse>(
       ENDPOINTS.AUTH.SIGNUP,
       payload
+    );
+    return data;
+  },
+
+  /**
+   * Request a password reset link.
+   * @param payload - Email of the user.
+   * @returns Success response.
+   */
+  forgotPassword: async (payload: ForgotPasswordPayload): Promise<{ success: boolean; message: string }> => {
+    const { data } = await apiClient.post(
+      ENDPOINTS.AUTH.FORGOT_PASSWORD,
+      payload
+    );
+    return data;
+  },
+
+  /**
+   * Reset the password using a token.
+   * @param payload - New password and reset token.
+   * @returns Success response.
+   */
+  resetPassword: async (payload: ResetPasswordPayload): Promise<{ success: boolean; message: string }> => {
+    const { data } = await apiClient.post(
+      `${ENDPOINTS.AUTH.RESET_PASSWORD}?token=${payload.token}`,
+      { password: payload.password }
     );
     return data;
   },

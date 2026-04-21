@@ -39,6 +39,10 @@ export const SignupPage: React.FC = () => {
     }
   }, [formValues.name, formValues.email, formValues.password, formValues.confirmPassword]);
 
+  /**
+   * Handles the signup form submission.
+   * @param data - The signup form data.
+   */
   const onSubmit = async (data: SignupFormData) => {
     signupMutation.mutate({ 
       email: data.email, 
@@ -47,6 +51,7 @@ export const SignupPage: React.FC = () => {
     });
   };
 
+  // Get error message from the API
   const apiErrorMessage = signupMutation.error
     ? getErrorMessage(signupMutation.error, 'Registration failed. Please check your details.')
     : null;

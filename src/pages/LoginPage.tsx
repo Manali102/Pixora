@@ -93,7 +93,7 @@ export const LoginPage: React.FC = () => {
           <div className="space-y-1">
             <div className="flex justify-between items-center ml-1">
               <label className="text-sm font-semibold">Password</label>
-              <Link to="/forgot-password" title="Mocked flow" className="text-xs font-bold text-primary hover:underline">
+              <Link to="/forgot-password" className="text-xs font-bold text-primary hover:underline">
                 Forgot your password?
               </Link>
             </div>

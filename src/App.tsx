@@ -10,6 +10,8 @@ import ProfilePage from './pages/ProfilePage';
 import { AdminPage } from './pages/AdminPage';
 import { PricingPage } from './pages/PricingPage';
 import { CreatePinPage } from './pages/CreatePinPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { GuestRoute } from './components/layout/GuestRoute';
@@ -22,7 +24,7 @@ import { PinModal } from './components/ui/PinModal';
 const App: React.FC = () => {
   const location = useLocation();
   const isAuthenticated = useAuthStore(store => store.isAuthenticated);
-  const showNavbar = isAuthenticated && !['/login', '/signup'].includes(location.pathname);
+  const showNavbar = isAuthenticated && !['/login', '/signup', '/forgot-password', '/reset-password'].includes(location.pathname);
   const fetchPins = usePinStore(store => store.fetchPins);
   const checkStorageReset = useAuthStore(store => store.checkStorageReset);
 
@@ -52,6 +54,20 @@ const App: React.FC = () => {
               <GuestRoute>
                 <ErrorBoundary>
                   <SignupPage />
+                </ErrorBoundary>
+              </GuestRoute>
+            } />
+            <Route path="/forgot-password" element={
+              <GuestRoute>
+                <ErrorBoundary>
+                  <ForgotPasswordPage />
+                </ErrorBoundary>
+              </GuestRoute>
+            } />
+            <Route path="/reset-password" element={
+              <GuestRoute>
+                <ErrorBoundary>
+                  <ResetPasswordPage />
                 </ErrorBoundary>
               </GuestRoute>
             } />
