@@ -3,8 +3,11 @@ import { Download, Share2, Heart, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Pin } from '@/types/type';
 import { usePinStore } from '../../store/usePinStore';
+import { useBoardStore } from '../../store/useBoardStore';
+import { useModalStore } from '../../store/useModalStore';
 import { Button } from './button';
 import { cn } from '../../lib/utils';
+import { BoardSelector } from './BoardSelector';
 
 interface PinCardProps {
   pin: Pin;
@@ -17,7 +20,13 @@ interface PinCardProps {
  */
 export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [showBoardSelector, setShowBoardSelector] = useState(false);
   const { toggleLike, toggleSave, setSelectedPin } = usePinStore();
+  const { addPinToBoard, removePinFromBoard, boards } = useBoardStore();
+  const openModal = useModalStore((s) => s.openModal);
+
+  const isSavedToAnyBoard = boards.some(b => b.pinIds.includes(pin.id));
+
 
   /**
    * Handles sharing of the pin
@@ -44,7 +53,10 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
       exit={{ opacity: 0, scale: 0.9 }}
       className="masonry-item group relative cursor-zoom-in"
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setShowBoardSelector(false);
+      }}
       onClick={handleOpenModal}
     >
       <div className="relative overflow-hidden rounded-2xl bg-muted transition-all duration-300">
@@ -76,16 +88,39 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
               className="absolute inset-0 bg-black/40 flex flex-col justify-between p-4"
             >
               {/* Top Row: Save Button */}
-              <div className="flex justify-end">
+              <div className="flex justify-end relative">
                 <Button
                   onClick={(event) => {
                     event.stopPropagation();
-                    toggleSave(pin.id);
+                    setShowBoardSelector(!showBoardSelector);
                   }}
-                  className={`rounded-full px-6 font-bold transition-all ${pin.isSaved ? 'bg-black text-white hover:bg-black' : 'bg-red-600 hover:bg-red-700'}`}
+                  className={`rounded-full px-6 font-bold transition-all ${isSavedToAnyBoard || pin.isSaved ? 'bg-black text-white hover:bg-black' : 'bg-red-600 hover:bg-red-700'}`}
                 >
-                  {pin.isSaved ? <span className="flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span> : 'Save'}
+                  {(isSavedToAnyBoard || pin.isSaved) ? <span className="flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span> : 'Save'}
                 </Button>
+
+                <AnimatePresence>
+                  {showBoardSelector && (
+                    <BoardSelector
+                      pinId={pin.id}
+                      onClose={() => setShowBoardSelector(false)}
+                      onBoardSelect={(boardId) => {
+                        const board = boards.find(b => b.id === boardId);
+                        if (board?.pinIds.includes(pin.id)) {
+                          removePinFromBoard(boardId, pin.id);
+                        } else {
+                          addPinToBoard(boardId, pin.id);
+                        }
+                        setShowBoardSelector(false);
+                        if (!pin.isSaved) toggleSave(pin.id);
+                      }}
+                      onCreateBoard={() => {
+                        setShowBoardSelector(false);
+                        openModal('CREATE_BOARD');
+                      }}
+                    />
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* Bottom Row: Actions */}

@@ -51,3 +51,13 @@ export interface ApiErrorResponse {
   };
   message?: string;
 }
+export interface Board {
+  id: string;
+  name: string;
+  description?: string;
+  coverImageUrl?: string;
+  pinIds: string[];
+  userId: string;
+  isPrivate: boolean;
+  createdAt: string;
+}

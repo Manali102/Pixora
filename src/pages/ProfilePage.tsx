@@ -9,6 +9,9 @@ import { HardDrive, Share2, Plus, Edit3, Heart, Eye, X, Check, Camera, Crown } f
 import Masonry from 'react-masonry-css';
 import { Tooltip } from '../components/ui/Tooltip';
 import { Button } from '../components/ui/button';
+import { useBoardStore } from '../store/useBoardStore';
+import { useModalStore } from '../store/useModalStore';
+import { BoardCard } from '../components/ui/BoardCard';
 
 const breakpointColumnsObj = {
   default: 4,
@@ -44,6 +47,11 @@ const ProfilePage: React.FC = () => {
   const [editBio, setEditBio] = useState(user?.bio ?? '');
   const [saving, setSaving] = useState(false);
   const [avatarColorIdx, setAvatarColorIdx] = useState(0);
+  const [activeTab, setActiveTab] = useState<'created' | 'saved'>('created');
+
+  const boards = useBoardStore((s) => s.boards);
+  const openModal = useModalStore((s) => s.openModal);
+
 
   // ── Derived ───────────────────────────────────────────────
   const storageData = [
@@ -461,41 +469,105 @@ const ProfilePage: React.FC = () => {
           transition={{ delay: 0.45, duration: 0.5 }}
           className="mt-12 pb-16"
         >
-          <div className="flex items-center justify-between mb-8 border border-border/80 rounded-2xl px-5 py-4">
-            <div>
-              <h2 className="font-display text-xl font-bold text-foreground">Created Pins</h2>
-              <p className="text-muted-foreground text-sm mt-1">Your creative collection on Pixora</p>
+          <div className="flex flex-col gap-8">
+            {/* Tab Navigation */}
+            <div className="flex justify-center mb-4">
+              <div className="bg-secondary/40 backdrop-blur-md p-1.5 rounded-2xl border border-border/50 flex gap-1 relative overflow-hidden">
+                <button
+                  onClick={() => setActiveTab('created')}
+                  className={`relative px-8 py-2.5 text-sm font-black transition-all rounded-xl flex items-center gap-2.5 cursor-pointer ${activeTab === 'created' ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  {activeTab === 'created' && (
+                    <motion.div
+                      layoutId="tabIndicator"
+                      className="absolute inset-0 bg-primary rounded-xl shadow-[0_4px_12px_rgba(var(--primary),0.3)]"
+                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    />
+                  )}
+                  <Plus className={`relative z-10 w-4 h-4 transition-transform duration-300 ${activeTab === 'created' ? 'rotate-0' : 'rotate-45'}`} />
+                  <span className="relative z-10">Created</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('saved')}
+                  className={`relative px-8 py-2.5 text-sm font-black transition-all rounded-xl flex items-center gap-2.5 cursor-pointer ${activeTab === 'saved' ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  {activeTab === 'saved' && (
+                    <motion.div
+                      layoutId="tabIndicator"
+                      className="absolute inset-0 bg-primary rounded-xl shadow-[0_4px_12px_rgba(var(--primary),0.3)]"
+                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    />
+                  )}
+                  <Heart className={`relative z-10 w-4 h-4 transition-transform duration-300 ${activeTab === 'saved' ? 'scale-110' : 'scale-100'}`} />
+                  <span className="relative z-10">Saved</span>
+                </button>
+              </div>
             </div>
-            <button
-              onClick={() => navigate('/create')}
-              className="btn-primary-glow flex items-center gap-2 text-sm cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              Create Pin
-            </button>
+
+            <div className="flex items-center justify-between border border-border/80 rounded-2xl px-5 py-4">
+              <div>
+                <h2 className="font-display text-xl font-bold text-foreground">
+                  {activeTab === 'created' ? 'Created Pins' : 'Saved Boards'}
+                </h2>
+                <p className="text-muted-foreground text-sm mt-1">
+                  {activeTab === 'created' 
+                    ? 'Your creative collection on Pixora' 
+                    : 'Collections you have curated'}
+                </p>
+              </div>
+              <button
+                onClick={() => activeTab === 'created' ? navigate('/create') : openModal('CREATE_BOARD')}
+                className="btn-primary-glow flex items-center gap-2 text-sm cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                {activeTab === 'created' ? 'Create Pin' : 'Create Board'}
+              </button>
+            </div>
           </div>
 
-          {userPins.length > 0 ? (
-            <Masonry
-              breakpointCols={breakpointColumnsObj}
-              className="flex -ml-4 w-auto"
-              columnClassName="pl-4 bg-clip-padding"
-            >
-              {userPins.map((pin) => (
-                <PinCard key={pin.id} pin={pin} />
-              ))}
-            </Masonry>
-          ) : (
-            <div className="glass-card border border-border/90 rounded-2xl p-12 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <Plus className="w-7 h-7 text-primary" />
-              </div>
-              <h3 className="font-display font-semibold text-foreground text-lg">No pins yet</h3>
-              <p className="text-muted-foreground text-sm mt-2 max-w-sm mx-auto">
-                Time to share your first idea with the world! Start creating now.
-              </p>
-            </div>
-          )}
+          <div className="mt-8">
+            {activeTab === 'created' ? (
+              userPins.length > 0 ? (
+                <Masonry
+                  breakpointCols={breakpointColumnsObj}
+                  className="flex -ml-4 w-auto"
+                  columnClassName="pl-4 bg-clip-padding"
+                >
+                  {userPins.map((pin) => (
+                    <PinCard key={pin.id} pin={pin} />
+                  ))}
+                </Masonry>
+              ) : (
+                <div className="glass-card border border-border/90 rounded-2xl p-12 text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                    <Plus className="w-7 h-7 text-primary" />
+                  </div>
+                  <h3 className="font-display font-semibold text-foreground text-lg">No pins yet</h3>
+                  <p className="text-muted-foreground text-sm mt-2 max-w-sm mx-auto">
+                    Time to share your first idea with the world! Start creating now.
+                  </p>
+                </div>
+              )
+            ) : (
+              boards.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {boards.map((board) => (
+                    <BoardCard key={board.id} board={board} />
+                  ))}
+                </div>
+              ) : (
+                <div className="glass-card border border-border/90 rounded-2xl p-12 text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                    <Plus className="w-7 h-7 text-primary" />
+                  </div>
+                  <h3 className="font-display font-semibold text-foreground text-lg">No boards yet</h3>
+                  <p className="text-muted-foreground text-sm mt-2 max-w-sm mx-auto">
+                    Create boards to organize your favorite pins and ideas.
+                  </p>
+                </div>
+              )
+            )}
+          </div>
         </motion.div>
       </div>
     </div>

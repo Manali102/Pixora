@@ -12,6 +12,7 @@ import { PricingPage } from './pages/PricingPage';
 import { CreatePinPage } from './pages/CreatePinPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
+import { BoardDetailPage } from './pages/BoardDetailPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { PublicRoute } from './components/layout/PublicRoute';
@@ -20,6 +21,9 @@ import { AnimatePresence } from 'framer-motion';
 import { useAuthStore } from './store/useAuthStore';
 import { usePinStore } from './store/usePinStore';
 import { PinModal } from './components/ui/PinModal';
+import { CreateBoardModal } from './components/ui/CreateBoardModal';
+import { useModalStore } from './store/useModalStore';
+
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -27,8 +31,10 @@ const App: React.FC = () => {
   const showNavbar = isAuthenticated && !['/login', '/signup', '/forgot-password', '/reset-password'].includes(location.pathname);
   const fetchPins = usePinStore(store => store.fetchPins);
   const checkStorageReset = useAuthStore(store => store.checkStorageReset);
+  const { currentModal, closeModal } = useModalStore();
 
   useEffect(() => {
+
     fetchPins();
     checkStorageReset();
   }, [fetchPins, checkStorageReset]);
@@ -77,6 +83,11 @@ const App: React.FC = () => {
                 <ProfilePage />
               </ProtectedRoute>
             } />
+            <Route path="/board/:id" element={
+              <ProtectedRoute>
+                <BoardDetailPage />
+              </ProtectedRoute>
+            } />
 
             <Route path="/admin" element={
               <ProtectedRoute requireAdmin>
@@ -108,6 +119,10 @@ const App: React.FC = () => {
 
       {showNavbar && <BottomNav />}
       <PinModal />
+      <CreateBoardModal 
+        isOpen={currentModal === 'CREATE_BOARD'} 
+        onClose={closeModal} 
+      />
 
       {/* Background Decor */}
       <div className="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none opacity-20">
