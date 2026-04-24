@@ -81,7 +81,7 @@ export const BoardDetailPage: React.FC = () => {
             <div className="flex items-center justify-center gap-4 mb-12">
               <div className="flex -space-x-3">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="w-10 h-10 rounded-2xl border-2 border-background bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-xs font-bold shadow-sm">
+                  <div key={i} className="w-10 h-10 rounded-2xl border-2 border-background bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center test-sm font-bold shadow-sm">
                     {String.fromCharCode(64 + i)}
                   </div>
                 ))}

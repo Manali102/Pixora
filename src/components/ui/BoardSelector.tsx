@@ -27,7 +27,7 @@ export const BoardSelector: React.FC<BoardSelectorProps> = ({
       onClick={(e) => e.stopPropagation()}
     >
       <div className="px-4 py-2 border-b border-border/50">
-        <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Save to board</h4>
+        <h4 className="test-sm font-bold text-muted-foreground uppercase tracking-wider">Save to board</h4>
       </div>
       
       <div className="max-h-60 overflow-y-auto py-1 custom-scrollbar">
@@ -59,7 +59,7 @@ export const BoardSelector: React.FC<BoardSelectorProps> = ({
           })
         ) : (
           <div className="px-4 py-6 text-center">
-            <p className="text-xs text-muted-foreground">You don't have any boards yet.</p>
+            <p className="test-sm text-muted-foreground">You don't have any boards yet.</p>
           </div>
         )}
       </div>

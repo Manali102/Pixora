@@ -119,7 +119,7 @@ export const ForgotPasswordPage: React.FC = () => {
                 <motion.p
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-1.5 text-destructive text-xs font-medium ml-1 mt-1"
+                  className="flex items-center gap-1.5 text-destructive test-sm font-medium ml-1 mt-1"
                 >
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   {errors.email.message}
@@ -131,7 +131,7 @@ export const ForgotPasswordPage: React.FC = () => {
               <motion.p
                 initial={{ opacity: 0, scale: 0.97 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex items-center gap-2 text-destructive text-xs font-bold bg-destructive/10 p-4 rounded-2xl border border-destructive/20"
+                className="flex items-center gap-2 text-destructive test-sm font-bold bg-destructive/10 p-4 rounded-2xl border border-destructive/20"
               >
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 {error}

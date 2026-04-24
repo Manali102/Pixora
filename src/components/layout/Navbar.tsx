@@ -120,7 +120,7 @@ export const Navbar: React.FC = () => {
                     <div className="p-4 border-b">
                       <p className="font-bold">{user?.name}</p>
                       <p className="text-sm text-muted-foreground">{user?.email}</p>
-                      <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase transition-transform hover:scale-105 cursor-default">
+                      <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-primary/10 text-primary rounded-full test-sm font-bold uppercase transition-transform hover:scale-105 cursor-default">
                         <Crown className="w-3 h-3" /> {user?.subscription}
                       </div>
                     </div>

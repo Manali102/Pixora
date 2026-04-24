@@ -73,7 +73,7 @@ export const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
           </h3>
           {board.isPrivate && <Lock className="w-3 h-3 text-muted-foreground" />}
         </div>
-        <p className="text-muted-foreground text-xs font-medium">
+        <p className="text-muted-foreground test-sm font-medium">
           {board.pinIds.length} {board.pinIds.length === 1 ? 'Pin' : 'Pins'}
         </p>
       </div>

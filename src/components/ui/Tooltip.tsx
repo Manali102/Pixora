@@ -49,7 +49,7 @@ export const Tooltip: React.FC<TooltipProps> = ({ children, content, delay = 0.2
             exit={{ opacity: 0, scale: 0.95, y: side === 'top' ? 10 : -10 }}
             transition={{ duration: 0.15, delay: delay }}
             className={cn(
-              "absolute left-1/2 -translate-x-1/2 px-3 py-1.5 bg-zinc-900 dark:bg-zinc-100 text-zinc-100 dark:text-zinc-900 text-xs font-bold rounded-lg whitespace-nowrap z-[100] shadow-xl pointer-events-none",
+              "absolute left-1/2 -translate-x-1/2 px-3 py-1.5 bg-zinc-900 dark:bg-zinc-100 text-zinc-100 dark:text-zinc-900 test-sm font-bold rounded-lg whitespace-nowrap z-[100] shadow-xl pointer-events-none",
               positionClasses
             )}
           >

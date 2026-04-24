@@ -82,7 +82,7 @@ export const LoginPage: React.FC = () => {
               <motion.p
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-1.5 text-destructive text-xs font-medium ml-1 mt-1"
+                className="flex items-center gap-1.5 text-destructive test-sm font-medium ml-1 mt-1"
               >
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 {errors.email.message}
@@ -94,7 +94,7 @@ export const LoginPage: React.FC = () => {
           <div className="space-y-1">
             <div className="flex justify-between items-center ml-1">
               <label className="text-sm font-semibold">Password</label>
-              <Link to="/forgot-password" className="text-xs font-bold text-primary hover:underline">
+              <Link to="/forgot-password" className="test-sm font-bold text-primary hover:underline">
                 Forgot your password?
               </Link>
             </div>
@@ -106,7 +106,7 @@ export const LoginPage: React.FC = () => {
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="current-password"
                 {...register('password')}
-                className={`pl-12 pr-12 py-4 rounded-2xl bg-secondary/50 border transition-all
+                className={`pl-12 pr-4 py-4 rounded-2xl bg-secondary/50 border transition-all shadow-sm outline-none
                   ${errors.password
                     ? 'border-destructive focus:border-destructive bg-destructive/5'
                     : 'border-transparent focus:border-primary focus:bg-background'
@@ -126,7 +126,7 @@ export const LoginPage: React.FC = () => {
               <motion.p
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-1.5 text-destructive text-sm font-medium ml-1 mt-1"
+                className="flex items-center gap-1.5 text-destructive test-sm font-medium ml-1 mt-1"
               >
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 {!formValues.password || formValues.password.length === 0 ? ERROR_MESSAGES.PASSWORD_REQUIRED : ERROR_MESSAGES.VALIDATION_REQUIREMENTS_NOT_MET}
@@ -149,7 +149,7 @@ export const LoginPage: React.FC = () => {
             <motion.p
               initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex items-center gap-2 text-destructive text-xs font-bold bg-destructive/10 p-3 rounded-xl"
+              className="flex items-center gap-2 text-destructive text-sm font-bold bg-destructive/10 p-3 rounded-xl"
             >
               <AlertCircle className="w-4 h-4 shrink-0" />
               {apiErrorMessage}
@@ -171,7 +171,7 @@ export const LoginPage: React.FC = () => {
           </Button>
         </form>
 
-        <p className="text-center mt-8 text-sm text-muted-foreground font-medium">
+        <p className="text-center mt-8 text-md text-muted-foreground font-medium">
           Don't have an account?{' '}
           <Link to="/signup" className="text-primary font-bold hover:underline">
             Create one

@@ -158,7 +158,7 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
       <div className="mt-2 flex items-center justify-between px-1" onClick={(event) => event.stopPropagation()}>
         <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
           <img src={pin.authorAvatar} alt={pin.authorName} className="w-7 h-7 rounded-full object-cover shadow-sm" />
-          <span className="text-xs font-semibold truncate max-w-[120px]">{pin.authorName}</span>
+          <span className="test-sm font-semibold truncate max-w-[120px]">{pin.authorName}</span>
         </div>
         <div className="flex items-center gap-1 text-muted-foreground transition-colors hover:text-red-500 cursor-pointer" onClick={() => toggleLike(pin.id)}>
           <Heart className={cn("w-3.5 h-3.5", pin.isLiked && "fill-current text-red-500")} />

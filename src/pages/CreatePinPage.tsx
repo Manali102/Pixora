@@ -126,7 +126,7 @@ export const CreatePinPage: React.FC = () => {
     >
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-4xl font-black tracking-tight">Create a Pin</h1>
-        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-black uppercase ${
+        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full test-sm font-black uppercase ${
           user?.role === 'admin' 
             ? 'bg-blue-500/10 text-blue-600'
             : (user?.storageUsed || 0) > (user?.storageLimit || 0) * 0.9 
@@ -154,7 +154,7 @@ export const CreatePinPage: React.FC = () => {
               </div>
               <p className="font-bold text-lg mb-1">Select a file or drag and drop</p>
               <p className="text-sm text-muted-foreground">High-quality JPG, PNG, GIF or MP4 under 50MB</p>
-              <div className="mt-8 px-6 py-2 bg-foreground text-background rounded-full text-xs font-black uppercase tracking-widest group-hover:bg-primary transition-colors">Choose File</div>
+              <div className="mt-8 px-6 py-2 bg-foreground text-background rounded-full test-sm font-black uppercase tracking-widest group-hover:bg-primary transition-colors">Choose File</div>
             </div>
           ) : (
             <div className="relative h-[500px] rounded-[3rem] overflow-hidden group shadow-2xl bg-black">
@@ -216,7 +216,7 @@ export const CreatePinPage: React.FC = () => {
                    key={cat}
                    type="button"
                    onClick={() => setCategory(cat)}
-                   className={`px-6 py-2 rounded-full text-xs font-black uppercase tracking-tight transition-all ${
+                   className={`px-6 py-2 rounded-full test-sm font-black uppercase tracking-tight transition-all ${
                      category === cat ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-105' : 'bg-secondary hover:bg-muted font-bold'
                    }`}
                  >
@@ -231,7 +231,7 @@ export const CreatePinPage: React.FC = () => {
            <div className="space-y-4 pt-4">
              {isUploading && (
                <div className="space-y-2 mb-4 animate-in fade-in slide-in-from-bottom-2">
-                 <div className="flex justify-between items-center text-xs font-black uppercase tracking-widest">
+                 <div className="flex justify-between items-center test-sm font-black uppercase tracking-widest">
                    <span>Uploading...</span>
                    <span>{uploadProgress}%</span>
                  </div>

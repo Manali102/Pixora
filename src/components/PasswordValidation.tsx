@@ -18,7 +18,7 @@ export const PasswordValidation: React.FC<PasswordValidationProps> = ({ password
     { label: UI_STRINGS.PASSWORD_CHECK_LENGTH, pass: password.length >= 8 },
   ];
 
-  const allPassed = checks.every(c => c.pass);
+  const allPassed = checks.every(check => check.pass);
 
   if (allPassed) return null;
 
@@ -35,19 +35,19 @@ export const PasswordValidation: React.FC<PasswordValidationProps> = ({ password
         </div>
         
         <ul className="space-y-2.5">
-          {checks.map((c, i) => (
+          {checks.map((check, i) => (
             <motion.li 
               key={i} 
               initial={false}
-              animate={{ opacity: c.pass ? 1 : 0.6 }}
-              className={`flex items-center gap-3 text-xs font-medium transition-colors ${c.pass ? 'text-green-600' : 'text-muted-foreground'}`}
+              animate={{ opacity: check.pass ? 1 : 0.6 }}
+              className={`flex items-center gap-3 text-sm font-medium transition-colors ${check.pass ? 'text-green-600' : 'text-muted-foreground'}`}
             >
-              {c.pass ? (
+              {check.pass ? (
                 <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
               ) : (
                 <XCircle className="w-4 h-4 text-destructive shrink-0" />
               )}
-              {c.label}
+              {check.label}
             </motion.li>
           ))}
         </ul>

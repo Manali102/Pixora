@@ -55,7 +55,7 @@ export const AdminPage: React.FC = () => {
               <h3 className="text-xl font-bold">Platform Views</h3>
               <p className="text-sm text-muted-foreground font-medium">Simulated monthly traffic data</p>
             </div>
-            <div className="bg-green-500/10 text-green-600 px-3 py-1 rounded-full text-xs font-bold">+12.4%</div>
+            <div className="bg-green-500/10 text-green-600 px-3 py-1 rounded-full test-sm font-bold">+12.4%</div>
           </div>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -85,7 +85,7 @@ export const AdminPage: React.FC = () => {
               <h3 className="text-xl font-bold">Upload Quota Analytics</h3>
               <p className="text-sm text-muted-foreground font-medium">Distribution of content type uploads</p>
             </div>
-            <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold">Active</div>
+            <div className="bg-primary/10 text-primary px-3 py-1 rounded-full test-sm font-bold">Active</div>
           </div>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -150,12 +150,12 @@ export const AdminPage: React.FC = () => {
                       <img src={user.avatar} alt="" className="w-12 h-12 rounded-2xl bg-muted object-cover shadow-sm group-hover:scale-105 transition-transform" />
                       <div>
                         <p className="font-bold">{user.name}</p>
-                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                        <p className="test-sm text-muted-foreground">{user.email}</p>
                       </div>
                     </div>
                   </td>
                   <td className="p-6">
-                    <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-tight ${
+                    <span className={`px-4 py-1.5 rounded-full test-sm font-black uppercase tracking-tight ${
                       user.subscription === 'pro' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'
                     }`}>
                       {user.subscription}

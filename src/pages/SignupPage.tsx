@@ -146,7 +146,7 @@ export const SignupPage: React.FC = () => {
               <motion.p
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-1.5 text-destructive text-xs font-medium ml-1 mt-1"
+                className="flex items-center gap-1.5 text-destructive test-sm font-medium ml-1 mt-1"
               >
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 {errors.name.message}
@@ -176,7 +176,7 @@ export const SignupPage: React.FC = () => {
               <motion.p
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-1.5 text-destructive text-xs font-medium ml-1 mt-1"
+                className="flex items-center gap-1.5 text-destructive test-sm font-medium ml-1 mt-1"
               >
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 {errors.email.message}
@@ -215,7 +215,7 @@ export const SignupPage: React.FC = () => {
                 <motion.p
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-1.5 text-destructive text-sm font-medium ml-1 mt-1"
+                  className="flex items-center gap-1.5 text-destructive test-sm font-medium ml-1 mt-1"
                 >
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   {passwordValue.length === 0 ? ERROR_MESSAGES.PASSWORD_REQUIRED : ERROR_MESSAGES.VALIDATION_REQUIREMENTS_NOT_MET}
@@ -263,7 +263,7 @@ export const SignupPage: React.FC = () => {
                 <motion.p
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-1.5 text-destructive text-xs font-medium ml-1 mt-1"
+                  className="flex items-center gap-1.5 text-destructive test-sm font-medium ml-1 mt-1"
                 >
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   {errors.confirmPassword.message}
@@ -299,7 +299,7 @@ export const SignupPage: React.FC = () => {
           </Button>
         </form>
 
-        <p className="text-center mt-8 text-sm text-muted-foreground font-medium">
+        <p className="text-center mt-8 text-md text-muted-foreground font-medium">
           Already have an account?{' '}
           <Link to="/login" className="text-primary font-bold hover:underline">
             Log in

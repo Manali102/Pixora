@@ -78,7 +78,7 @@ export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onCl
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-foreground">Keep this board secret</h4>
-                    <p className="text-xs text-muted-foreground">Only you can see this board</p>
+                    <p className="test-sm text-muted-foreground">Only you can see this board</p>
                   </div>
                 </div>
                 <button
