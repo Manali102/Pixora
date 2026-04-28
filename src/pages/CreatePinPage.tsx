@@ -2,7 +2,10 @@
 import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, X, Shield, Plus, Loader2, ArrowRight, CheckCircle2 } from 'lucide-react';
+import {
+  Upload, X, Shield, Loader2, ArrowRight,
+  CheckCircle2, Image as ImageIcon, Video, Sparkles, CloudUpload
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { usePinStore } from '../store/usePinStore';
@@ -12,12 +15,9 @@ export const CreatePinPage: React.FC = () => {
   const user = useAuthStore((store) => store.user);
   const addPin = usePinStore((store) => store.addPin);
   const navigate = useNavigate();
-  
+
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('Art');
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [success, setSuccess] = useState(false);
@@ -26,74 +26,62 @@ export const CreatePinPage: React.FC = () => {
     const droppedFile = acceptedFiles[0];
     if (droppedFile) {
       setFile(droppedFile);
-      const url = URL.createObjectURL(droppedFile);
-      setPreview(url);
+      setPreview(URL.createObjectURL(droppedFile));
     }
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: { 'image/*': [], 'video/*': [] },
-    multiple: false
+    multiple: false,
   });
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || !title) return;
+    if (!file) return;
 
-    // Storage Check
     const fileSizeMB = file.size / (1024 * 1024);
     const currentUsed = user?.storageUsed || 0;
     const limit = user?.storageLimit || 0;
     const isAdmin = user?.role === 'admin';
 
-    if (!isAdmin && (currentUsed + fileSizeMB > limit)) {
-      alert(`Storage limit reached! You have used ${currentUsed.toFixed(2)}MB of ${limit}MB. This file is ${fileSizeMB.toFixed(2)}MB.`);
+    if (!isAdmin && currentUsed + fileSizeMB > limit) {
+      alert(`Storage limit reached! You have used ${currentUsed.toFixed(2)}MB of ${limit}MB.`);
       return;
     }
 
     setIsUploading(true);
-    
-    // Simulate upload progress
     const interval = setInterval(() => {
       setUploadProgress((prev) => {
-        if (prev >= 95) {
-          clearInterval(interval);
-          return 95;
-        }
-        return prev + 5;
+        if (prev >= 95) { clearInterval(interval); return 95; }
+        return prev + 4;
       });
-    }, 100);
+    }, 80);
 
-    // Mock API call
     setTimeout(() => {
       clearInterval(interval);
       setUploadProgress(100);
-      
+
       const newPin = {
         id: `p${Date.now()}`,
-        title,
-        description,
+        title: file.name.split('.')[0] || 'Untitled Pin',
+        description: '',
         imageUrl: preview || '',
         authorId: user?.id || 'u1',
         authorName: user?.name || 'Admin',
         authorAvatar: user?.avatar || '',
         likes: 0,
-        category,
+        category: 'General',
         createdAt: new Date().toISOString(),
         type: (file.type.startsWith('video') ? 'video' : 'image') as 'image' | 'video',
         views: 0,
       };
 
-      // Add Pin
       addPin(newPin);
-
-      // Update Storage Used
       const updateUser = useAuthStore.getState().updateUser;
       updateUser({ storageUsed: currentUsed + fileSizeMB });
-
       setSuccess(true);
-      setTimeout(() => navigate('/'), 2000);
+      setTimeout(() => navigate('/'), 2200);
     }, 2500);
   };
 
@@ -102,162 +90,248 @@ export const CreatePinPage: React.FC = () => {
     setPreview(null);
   };
 
+  /* ─── Success Screen ──────────────────────────────────────────── */
   if (success) {
     return (
-      <div className="flex flex-col items-center justify-center py-40">
+      <div className="min-h-[70vh] flex flex-col items-center justify-center gap-4">
         <motion.div
-           initial={{ scale: 0.8, opacity: 0 }}
-           animate={{ scale: 1, opacity: 1 }}
-           className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center text-white mb-6 shadow-2xl shadow-green-500/20"
+          initial={{ scale: 0, rotate: -20 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 18 }}
+          className="relative"
         >
-          <CheckCircle2 className="w-12 h-12" />
+          <div className="w-28 h-28 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-2xl shadow-green-500/30">
+            <CheckCircle2 className="w-14 h-14 text-white" strokeWidth={2} />
+          </div>
+          {/* Sparkle rings */}
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1.6, opacity: 0 }}
+            transition={{ duration: 1.2, repeat: Infinity }}
+            className="absolute inset-0 rounded-full border-2 border-green-400/40"
+          />
         </motion.div>
-        <h2 className="text-4xl font-black mb-2 animate-bounce">Published!</h2>
-        <p className="text-muted-foreground font-semibold">Your pin is live on Pixora dashboard</p>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="text-center"
+        >
+          <h2 className="text-4xl font-black tracking-tight mb-2">Pin Published!</h2>
+          <p className="text-muted-foreground font-medium">Your content is now live on Pixora ✨</p>
+        </motion.div>
       </div>
-    )
+    );
   }
+
+  /* ─── Storage Badge ───────────────────────────────────────────── */
+  const storagePct = ((user?.storageUsed || 0) / (user?.storageLimit || 1)) * 100;
+  const isNearLimit = storagePct > 90;
+  const isAdmin = user?.role === 'admin';
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="max-w-4xl mx-auto py-12 px-4"
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45 }}
+      className="max-w-xl mx-auto py-8 px-4 relative"
     >
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-4xl font-black tracking-tight">Create a Pin</h1>
-        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full test-sm font-black uppercase ${
-          user?.role === 'admin' 
-            ? 'bg-blue-500/10 text-blue-600'
-            : (user?.storageUsed || 0) > (user?.storageLimit || 0) * 0.9 
-              ? 'bg-red-500/10 text-red-600' 
-              : 'bg-green-500/10 text-green-600'
+      {/* ── Header ── */}
+      <div className="relative flex flex-col items-center text-center mb-6 gap-2.5">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1 }}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-[11px] font-black uppercase tracking-widest mb-1"
+        >
+          <Sparkles className="w-3 h-3" /> New Pin
+        </motion.div>
+
+        <h1 className="text-5xl font-black tracking-tight leading-none">
+          Create a Pin
+        </h1>
+        <p className="text-muted-foreground text-sm font-medium max-w-xs">
+          Drop an image or video — your content will be published instantly.
+        </p>
+
+        {/* Storage badge */}
+        <div className={`mt-1 inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-[11px] font-black uppercase tracking-wider border ${
+          isAdmin
+            ? 'bg-secondary/50 border-border text-foreground'
+            : isNearLimit
+              ? 'bg-red-500/10 border-red-500/20 text-red-500'
+              : 'bg-green-500/10 border-green-500/20 text-green-600'
         }`}>
-          <Shield className="w-3.5 h-3.5" /> 
-          {user?.role === 'admin' ? 'Admin: Unlimited Storage' : `Storage: ${((user?.storageUsed || 0) / (user?.storageLimit || 0) * 100).toFixed(1)}% Used`}
+          <Shield className="w-3.5 h-3.5" />
+          {isAdmin
+            ? 'Unlimited Admin Storage'
+            : `${storagePct.toFixed(1)}% of ${user?.storageLimit}MB used`}
         </div>
       </div>
 
-      <form onSubmit={handleUpload} className="grid grid-cols-1 md:grid-cols-2 gap-10">
-        {/* Left Side: Upload Zone */}
-        <div className="space-y-4">
-          {!preview ? (
-            <div
-              {...getRootProps()}
-              className={`h-[500px] rounded-[3rem] border-4 border-dashed flex flex-col items-center justify-center text-center p-8 transition-all cursor-pointer group relative overflow-hidden ${
-                isDragActive ? 'border-primary bg-primary/5' : 'border-secondary hover:border-muted-foreground/30 bg-secondary/30'
-              }`}
-            >
-              <input {...getInputProps()} />
-              <div className="w-16 h-16 bg-background rounded-2xl flex items-center justify-center mb-4 shadow-xl group-hover:scale-110 transition-transform">
-                <Upload className="w-8 h-8 text-primary" />
-              </div>
-              <p className="font-bold text-lg mb-1">Select a file or drag and drop</p>
-              <p className="text-sm text-muted-foreground">High-quality JPG, PNG, GIF or MP4 under 50MB</p>
-              <div className="mt-8 px-6 py-2 bg-foreground text-background rounded-full test-sm font-black uppercase tracking-widest group-hover:bg-primary transition-colors">Choose File</div>
-            </div>
-          ) : (
-            <div className="relative h-[500px] rounded-[3rem] overflow-hidden group shadow-2xl bg-black">
-              {file?.type.startsWith('video') ? (
-                <video 
-                  src={preview} 
-                  autoPlay 
-                  muted 
-                  loop 
-                  className="w-full h-full object-cover"
-                />
+      {/* ── Card ── */}
+      <form onSubmit={handleUpload}>
+        <div className="relative rounded-[2.5rem] border border-border bg-card/60 backdrop-blur-md p-3 shadow-xl shadow-black/5">
+
+          {/* Upload / Preview zone */}
+          <div className="relative group rounded-[2rem] overflow-hidden">
+            <AnimatePresence mode="wait">
+              {!preview ? (
+                /* ── Drop zone ── */
+                <motion.div
+                  key="dropzone"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  {...(getRootProps() as any)}
+                  className={`h-[360px] flex flex-col items-center justify-center text-center p-8 cursor-pointer select-none border-2 border-dashed rounded-[2rem] transition-all duration-300 ${
+                    isDragActive
+                      ? 'border-primary bg-primary/5 scale-[0.985]'
+                      : 'border-border hover:border-primary/40 bg-secondary/20 hover:bg-secondary/40'
+                  }`}
+                >
+                  <input {...getInputProps()} />
+
+                  {/* Icon */}
+                  <motion.div
+                    animate={isDragActive ? { scale: 1.15, rotate: -6 } : { scale: 1, rotate: 0 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                    className="w-20 h-20 rounded-[1.5rem] bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform duration-500"
+                  >
+                    <CloudUpload className="w-9 h-9 text-primary" strokeWidth={1.5} />
+                  </motion.div>
+
+                  <h3 className="text-2xl font-black mb-2 tracking-tight">
+                    {isDragActive ? 'Release to upload' : 'Drop your file here'}
+                  </h3>
+                  <p className="text-muted-foreground text-sm font-medium mb-5 max-w-[240px] leading-relaxed">
+                    High-quality JPG, PNG, GIF or MP4 — up to 50 MB
+                  </p>
+
+                  {/* Format chips */}
+                  <div className="flex gap-3 mb-6">
+                    {[
+                      { icon: <ImageIcon className="w-3.5 h-3.5" />, label: 'Image' },
+                      { icon: <Video className="w-3.5 h-3.5" />, label: 'Video' },
+                    ].map(({ icon, label }) => (
+                      <span
+                        key={label}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-secondary text-xs font-bold text-muted-foreground border border-border"
+                      >
+                        {icon} {label}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* CTA button */}
+                  <div className="px-9 py-3.5 bg-foreground text-background rounded-2xl text-sm font-black uppercase tracking-widest group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300 shadow-lg">
+                    Choose File
+                  </div>
+                </motion.div>
               ) : (
-                <img src={preview} alt="Preview" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                /* ── Preview ── */
+                <motion.div
+                  key="preview"
+                  initial={{ opacity: 0, scale: 1.04 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.35 }}
+                  className="relative h-[360px] rounded-[2rem] overflow-hidden bg-black"
+                >
+                  {file?.type.startsWith('video') ? (
+                    <video src={preview} autoPlay muted loop className="w-full h-full object-cover" />
+                  ) : (
+                    <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                  )}
+
+                  {/* Overlay on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center">
+                    <button
+                      type="button"
+                      onClick={removeFile}
+                      className="w-14 h-14 rounded-full bg-white/15 backdrop-blur-lg border border-white/25 text-white flex items-center justify-center hover:bg-red-500 hover:border-red-500 transition-all duration-200 shadow-xl"
+                    >
+                      <X className="w-6 h-6" />
+                    </button>
+                    <span className="mt-3 text-white/70 text-xs font-semibold">Remove & re-upload</span>
+                  </div>
+
+                  {/* File type badge */}
+                  <div className="absolute top-5 left-5 px-3.5 py-1.5 bg-black/60 backdrop-blur-xl rounded-full text-[10px] font-black uppercase tracking-[0.15em] text-white/90 border border-white/10 flex items-center gap-1.5">
+                    {file?.type.startsWith('video') ? <Video className="w-3 h-3" /> : <ImageIcon className="w-3 h-3" />}
+                    Preview
+                  </div>
+
+                  {/* File name badge */}
+                  <div className="absolute bottom-5 left-5 right-5 px-4 py-2.5 bg-black/60 backdrop-blur-xl rounded-2xl border border-white/10 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                    <span className="text-white/80 text-xs font-semibold truncate">{file?.name}</span>
+                    <span className="ml-auto text-white/50 text-xs shrink-0">{(file!.size / (1024 * 1024)).toFixed(1)} MB</span>
+                  </div>
+                </motion.div>
               )}
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                 <button 
-                  type="button" 
-                  onClick={removeFile}
-                  className="w-12 h-12 bg-red-600 text-white rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-xl"
-                 >
-                   <X className="w-6 h-6" />
-                 </button>
-              </div>
-              <div className="absolute top-6 left-6 p-2 glass rounded-2xl text-[10px] font-black uppercase tracking-widest border-none">Preview Mode</div>
-            </div>
-          )}
-        </div>
+            </AnimatePresence>
+          </div>
 
-        {/* Right Side: Metadata */}
-        <div className="space-y-6 flex flex-col h-full bg-background/50 glass p-10 rounded-[3.5rem] shadow-xl">
-           <div className="space-y-2">
-             <label className="text-sm font-bold ml-1 flex items-center gap-2">
-               <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span> Title
-             </label>
-             <input
-               placeholder="Add your title"
-               value={title}
-               onChange={(e) => setTitle(e.target.value)}
-               className="w-full bg-transparent border-b-2 border-border focus:border-primary outline-none py-2 text-2xl font-black placeholder:text-muted-foreground/30 transition-all"
-               required
-             />
-           </div>
+          {/* ── Bottom actions ── */}
+          <div className="px-3 pt-4 pb-3 space-y-4">
+            {/* Progress */}
+            <AnimatePresence>
+              {isUploading && (
+                <motion.div
+                  key="progress"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  className="space-y-2"
+                >
+                  <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-[0.18em] text-primary">
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="w-3 h-3 animate-spin" /> Publishing…
+                    </span>
+                    <span>{uploadProgress}%</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${uploadProgress}%` }}
+                      transition={{ ease: 'easeOut' }}
+                      className="h-full bg-gradient-to-r from-primary to-primary/70 rounded-full"
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-           <div className="space-y-2">
-             <label className="text-sm font-bold ml-1">About</label>
-             <textarea
-               placeholder="Show and tell people what this pin is about..."
-               value={description}
-               onChange={(e) => setDescription(e.target.value)}
-               className="w-full bg-secondary/50 rounded-2xl border-none outline-none p-6 text-sm font-medium min-h-[120px] focus:bg-background transition-all"
-             />
-           </div>
+            {/* Publish button */}
+            <Button
+              disabled={!file || isUploading}
+              type="submit"
+              className="w-full py-7 text-lg font-black rounded-[1.6rem] bg-gradient-to-r from-rose-600 to-red-500 hover:from-rose-700 hover:to-red-600 text-white transition-all duration-300 active:scale-[0.97] group relative overflow-hidden shadow-lg shadow-rose-600/25 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {/* Shine sweep */}
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
 
-           <div className="space-y-2">
-             <label className="text-sm font-bold ml-1">Category</label>
-             <div className="flex flex-wrap gap-2">
-               {['Art', 'Nature', 'Interior', 'Tech', 'Food'].map(cat => (
-                 <button
-                   key={cat}
-                   type="button"
-                   onClick={() => setCategory(cat)}
-                   className={`px-6 py-2 rounded-full test-sm font-black uppercase tracking-tight transition-all ${
-                     category === cat ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-105' : 'bg-secondary hover:bg-muted font-bold'
-                   }`}
-                 >
-                   {cat}
-                 </button>
-               ))}
-             </div>
-           </div>
+              <span className="relative flex items-center justify-center gap-2.5">
+                {isUploading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Processing…
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-5 h-5" />
+                    Publish Pin
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </>
+                )}
+              </span>
+            </Button>
 
-           <div className="flex-1"></div>
-
-           <div className="space-y-4 pt-4">
-             {isUploading && (
-               <div className="space-y-2 mb-4 animate-in fade-in slide-in-from-bottom-2">
-                 <div className="flex justify-between items-center test-sm font-black uppercase tracking-widest">
-                   <span>Uploading...</span>
-                   <span>{uploadProgress}%</span>
-                 </div>
-                 <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
-                   <motion.div 
-                     initial={{ width: 0 }}
-                     animate={{ width: `${uploadProgress}%` }}
-                     className="h-full bg-primary"
-                   />
-                 </div>
-               </div>
-             )}
-
-             <Button
-               disabled={!file || !title || isUploading}
-               type="submit"
-               className="w-full py-8 text-xl font-black rounded-3xl bg-red-600 hover:bg-red-700 shadow-2xl shadow-red-600/20 active:scale-95 transition-all group"
-             >
-               {isUploading ? (
-                 <Loader2 className="w-6 h-6 animate-spin" />
-               ) : (
-                 <span className="flex items-center gap-2">Publish Pin <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" /></span>
-               )}
-             </Button>
-             <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground text-center opacity-60">Your pin will be visibile to everyone by default</p>
-           </div>
+            <p className="text-center text-[10px] uppercase font-bold tracking-[0.18em] text-muted-foreground/50">
+              High-resolution assets recommended · Visible to everyone
+            </p>
+          </div>
         </div>
       </form>
     </motion.div>
