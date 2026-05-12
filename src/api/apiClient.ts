@@ -19,9 +19,6 @@ const apiClient = axios.create({
   baseURL: ENV.API_BASE_URL,
   timeout: 15000,
   withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 // response interceptor to handle 401 Unauthorized globally

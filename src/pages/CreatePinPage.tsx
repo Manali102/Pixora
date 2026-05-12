@@ -4,12 +4,14 @@ import { useDropzone } from 'react-dropzone';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Upload, X, Shield, Loader2, ArrowRight,
-  CheckCircle2, Image as ImageIcon, Video, Sparkles, CloudUpload
+  CheckCircle2, Image as ImageIcon, Video, Sparkles, CloudUpload,
+  BrainCircuit, UserCircle2, Type, AlignLeft, Tags
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { usePinStore } from '../store/usePinStore';
 import { Button } from '../components/ui/button';
+import { postService } from '../services/postService';
 
 export const CreatePinPage: React.FC = () => {
   const user = useAuthStore((store) => store.user);
@@ -21,6 +23,15 @@ export const CreatePinPage: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [success, setSuccess] = useState(false);
+  
+  // Metadata states
+  const [metadataMode, setMetadataMode] = useState<'manual' | 'ai' | null>(null);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('General');
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [createdPin, setCreatedPin] = useState<any | null>(null);
+  const setSelectedPin = usePinStore((store) => store.setSelectedPin);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const droppedFile = acceptedFiles[0];
@@ -29,6 +40,42 @@ export const CreatePinPage: React.FC = () => {
       setPreview(URL.createObjectURL(droppedFile));
     }
   }, []);
+
+  const handleAIGenerate = async () => {
+    if (!file) return;
+    setIsGeneratingAI(true);
+    setMetadataMode('ai');
+
+    try {
+      const response = await postService.suggestMetadata(file);
+      if (response.success && response.data?.taskId) {
+        // Start polling
+        const pollInterval = setInterval(async () => {
+          const statusResponse = await postService.getSuggestionStatus(response.data.taskId);
+          if (statusResponse.success && statusResponse.data?.status === 'completed') {
+            clearInterval(pollInterval);
+            const { title, description, category } = statusResponse.data.suggestion;
+            setTitle(title || '');
+            setDescription(description || '');
+            setCategory(category || 'General');
+            setIsGeneratingAI(false);
+          } else if (statusResponse.data?.status === 'failed') {
+            clearInterval(pollInterval);
+            alert('AI generation failed. Please try manual entry.');
+            setMetadataMode('manual');
+            setIsGeneratingAI(false);
+          }
+        }, 2000);
+      } else {
+        throw new Error(response.message || 'Failed to start AI generation');
+      }
+    } catch (error) {
+      console.error('AI Suggestion failed:', error);
+      alert('AI generation failed. Please try manual entry.');
+      setMetadataMode('manual');
+      setIsGeneratingAI(false);
+    }
+  };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -51,74 +98,136 @@ export const CreatePinPage: React.FC = () => {
     }
 
     setIsUploading(true);
-    const interval = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 95) { clearInterval(interval); return 95; }
-        return prev + 4;
+    setUploadProgress(0);
+
+    try {
+      const response = await postService.createPost(file, title, description, category, (progress) => {
+        setUploadProgress(progress);
       });
-    }, 80);
 
-    setTimeout(() => {
-      clearInterval(interval);
-      setUploadProgress(100);
+      if (response.success) {
+        const pinData = response.data || {
+          id: `p${Date.now()}`,
+          title: title || 'Untitled Pin',
+          description: description || '',
+          imageUrl: preview || '',
+          authorId: user?.id || 'u1',
+          authorName: user?.name || 'Admin',
+          authorAvatar: user?.avatar || '',
+          likes: 0,
+          category: category || 'General',
+          createdAt: new Date().toISOString(),
+          type: (file.type.startsWith('video') ? 'video' : 'image') as 'image' | 'video',
+          views: 0,
+        };
 
-      const newPin = {
-        id: `p${Date.now()}`,
-        title: file.name.split('.')[0] || 'Untitled Pin',
-        description: '',
-        imageUrl: preview || '',
-        authorId: user?.id || 'u1',
-        authorName: user?.name || 'Admin',
-        authorAvatar: user?.avatar || '',
-        likes: 0,
-        category: 'General',
-        createdAt: new Date().toISOString(),
-        type: (file.type.startsWith('video') ? 'video' : 'image') as 'image' | 'video',
-        views: 0,
-      };
+        addPin(pinData);
+        setCreatedPin(pinData);
 
-      addPin(newPin);
-      const updateUser = useAuthStore.getState().updateUser;
-      updateUser({ storageUsed: currentUsed + fileSizeMB });
-      setSuccess(true);
-      setTimeout(() => navigate('/'), 2200);
-    }, 2500);
+        // Update Storage Used locally for immediate feedback
+        const updateUser = useAuthStore.getState().updateUser;
+        updateUser({ storageUsed: currentUsed + fileSizeMB });
+
+        setSuccess(true);
+        // Remove the automatic navigation so they can see the success screen
+        // setTimeout(() => navigate('/'), 2200);
+      } else {
+        alert(response.message || 'Failed to create pin');
+      }
+    } catch (error: any) {
+      console.error('Upload failed:', error);
+      alert(error?.response?.data?.message || 'Something went wrong during upload');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const removeFile = () => {
     setFile(null);
     setPreview(null);
+    setMetadataMode(null);
+    setTitle('');
+    setDescription('');
+    setCategory('General');
   };
 
   /* ─── Success Screen ──────────────────────────────────────────── */
   if (success) {
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center gap-4">
-        <motion.div
-          initial={{ scale: 0, rotate: -20 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: 'spring', stiffness: 260, damping: 18 }}
-          className="relative"
-        >
-          <div className="w-28 h-28 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-2xl shadow-green-500/30">
-            <CheckCircle2 className="w-14 h-14 text-white" strokeWidth={2} />
-          </div>
-          {/* Sparkle rings */}
+      <div className="min-h-[80vh] flex flex-col items-center justify-center gap-8 py-10">
+        <div className="flex flex-col items-center gap-4">
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1.6, opacity: 0 }}
-            transition={{ duration: 1.2, repeat: Infinity }}
-            className="absolute inset-0 rounded-full border-2 border-green-400/40"
-          />
-        </motion.div>
+            initial={{ scale: 0, rotate: -20 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 18 }}
+            className="relative"
+          >
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center shadow-2xl shadow-green-500/30">
+              <CheckCircle2 className="w-10 h-10 text-white" strokeWidth={2} />
+            </div>
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1.6, opacity: 0 }}
+              transition={{ duration: 1.2, repeat: Infinity }}
+              className="absolute inset-0 rounded-full border-2 border-green-400/40"
+            />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="text-center"
+          >
+            <h2 className="text-4xl font-black tracking-tight mb-2">Pin Published!</h2>
+            <p className="text-muted-foreground font-medium">Your content is now live on Pixora ✨</p>
+          </motion.div>
+        </div>
+
+        {/* Created Pin Preview */}
+        {createdPin && (
+          <motion.div
+            initial={{ opacity: 0, y: 40, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: 0.5, type: 'spring', damping: 20 }}
+            className="group relative w-full max-w-sm rounded-[2.5rem] overflow-hidden border border-border bg-card shadow-2xl shadow-black/10"
+          >
+            <div className="aspect-[3/4] relative">
+              {createdPin.type === 'video' ? (
+                <video src={createdPin.imageUrl} autoPlay muted loop className="w-full h-full object-cover" />
+              ) : (
+                <img src={createdPin.imageUrl} alt={createdPin.title} className="w-full h-full object-cover" />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+              <div className="absolute bottom-6 left-6 right-6">
+                <h3 className="text-white text-xl font-bold truncate mb-1">{createdPin.title}</h3>
+                <p className="text-white/70 text-xs font-medium uppercase tracking-widest">{createdPin.category}</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="flex flex-col sm:flex-row gap-4 w-full max-w-sm"
         >
-          <h2 className="text-4xl font-black tracking-tight mb-2">Pin Published!</h2>
-          <p className="text-muted-foreground font-medium">Your content is now live on Pixora ✨</p>
+          <Button
+            onClick={() => {
+              setSelectedPin(createdPin);
+              navigate('/');
+            }}
+            className="flex-1 py-7 rounded-[1.6rem] bg-foreground text-background font-black uppercase tracking-widest hover:opacity-90 transition-opacity"
+          >
+            View Pin
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate('/')}
+            className="flex-1 py-7 rounded-[1.6rem] border-2 font-black uppercase tracking-widest hover:bg-secondary transition-colors"
+          >
+            Go Home
+          </Button>
         </motion.div>
       </div>
     );
@@ -273,8 +382,144 @@ export const CreatePinPage: React.FC = () => {
             </AnimatePresence>
           </div>
 
-          {/* ── Bottom actions ── */}
-          <div className="px-3 pt-4 pb-3 space-y-4">
+          {/* ── Bottom actions & Form ── */}
+          <div className="px-3 pt-6 pb-3 space-y-6">
+            <AnimatePresence mode="wait">
+              {file && !metadataMode && (
+                /* ── Mode Selection ── */
+                <motion.div
+                  key="mode-selection"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="space-y-4"
+                >
+                  <div className="text-center space-y-1">
+                    <h4 className="text-lg font-black tracking-tight">Add Pin Details</h4>
+                    <p className="text-muted-foreground text-xs font-medium">Choose how you want to describe your content</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setMetadataMode('manual')}
+                      className="flex flex-col items-center gap-3 p-5 rounded-[1.5rem] border border-border bg-secondary/30 hover:bg-secondary/50 hover:border-primary/30 transition-all duration-300 group"
+                    >
+                      <div className="w-12 h-12 rounded-2xl bg-background flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                        <UserCircle2 className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
+                      </div>
+                      <div className="text-center">
+                        <span className="block text-sm font-black uppercase tracking-wider">Manual</span>
+                        <span className="text-[10px] text-muted-foreground font-bold">Write it yourself</span>
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleAIGenerate}
+                      className="flex flex-col items-center gap-3 p-5 rounded-[1.5rem] border border-border bg-primary/5 hover:bg-primary/10 hover:border-primary/30 transition-all duration-300 group relative overflow-hidden"
+                    >
+                      <div className="absolute top-0 right-0 p-2 opacity-20">
+                        <Sparkles className="w-12 h-12 text-primary" />
+                      </div>
+                      <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                        <BrainCircuit className="w-6 h-6 text-primary" />
+                      </div>
+                      <div className="text-center relative z-10">
+                        <span className="block text-sm font-black uppercase tracking-wider text-primary">Magic AI</span>
+                        <span className="text-[10px] text-primary/70 font-bold">Auto-generate details</span>
+                      </div>
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {metadataMode && (
+                /* ── Metadata Form ── */
+                <motion.div
+                  key="metadata-form"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-5 px-1"
+                >
+                  {isGeneratingAI ? (
+                    <div className="py-12 flex flex-col items-center justify-center gap-4">
+                      <div className="relative">
+                        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                        <Sparkles className="w-6 h-6 text-primary absolute -top-1 -right-1 animate-pulse" />
+                      </div>
+                      <div className="text-center">
+                        <h4 className="text-lg font-black tracking-tight animate-pulse">AI is thinking...</h4>
+                        <p className="text-muted-foreground text-xs font-medium">Analyzing your {file?.type.startsWith('video') ? 'video' : 'image'} to craft the perfect metadata</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70 ml-1 flex items-center gap-1.5">
+                          <Type className="w-3 h-3" /> Title
+                        </label>
+                        <input
+                          type="text"
+                          value={title}
+                          onChange={(e) => setTitle(e.target.value)}
+                          placeholder="What is this pin about?"
+                          className="w-full px-5 py-4 rounded-2xl bg-secondary/40 border border-border focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all outline-none font-bold text-sm"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70 ml-1 flex items-center gap-1.5">
+                          <AlignLeft className="w-3 h-3" /> Description
+                        </label>
+                        <textarea
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                          placeholder="Tell us more about it..."
+                          rows={3}
+                          className="w-full px-5 py-4 rounded-2xl bg-secondary/40 border border-border focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all outline-none font-medium text-sm resize-none"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70 ml-1 flex items-center gap-1.5">
+                          <Tags className="w-3 h-3" /> Category
+                        </label>
+                        <select
+                          value={category}
+                          onChange={(e) => setCategory(e.target.value)}
+                          className="w-full px-5 py-4 rounded-2xl bg-secondary/40 border border-border focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all outline-none font-bold text-sm appearance-none cursor-pointer"
+                        >
+                          {['General', 'Art', 'Design', 'Photography', 'Nature', 'Technology', 'Fashion', 'Food', 'Travel'].map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setMetadataMode(null)}
+                          className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                        >
+                          <X className="w-3 h-3" /> Reset details
+                        </button>
+                        {metadataMode === 'manual' && (
+                          <button
+                            type="button"
+                            onClick={handleAIGenerate}
+                            className="text-[10px] font-black uppercase tracking-widest text-primary hover:opacity-80 transition-opacity flex items-center gap-1"
+                          >
+                            <BrainCircuit className="w-3 h-3" /> Try AI instead
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Progress */}
             <AnimatePresence>
               {isUploading && (
@@ -305,7 +550,7 @@ export const CreatePinPage: React.FC = () => {
 
             {/* Publish button */}
             <Button
-              disabled={!file || isUploading}
+              disabled={!file || !metadataMode || isGeneratingAI || isUploading || !title}
               type="submit"
               className="w-full py-7 text-lg font-black rounded-[1.6rem] bg-gradient-to-r from-rose-600 to-red-500 hover:from-rose-700 hover:to-red-600 text-white transition-all duration-300 active:scale-[0.97] group relative overflow-hidden shadow-lg shadow-rose-600/25 disabled:opacity-40 disabled:cursor-not-allowed"
             >
@@ -320,7 +565,7 @@ export const CreatePinPage: React.FC = () => {
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-5 h-5" />
+                    <CloudUpload className="w-5 h-5" />
                     Publish Pin
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </>

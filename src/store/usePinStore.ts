@@ -1,6 +1,7 @@
 import React from 'react';
 import { create } from 'zustand';
 import { Pin } from '@/types/type';
+import { postService } from '@/services/postService';
 
 interface PinState {
   pins: Pin[];
@@ -25,8 +26,36 @@ export const usePinStore = create<PinState>()((set, get) => ({
 
   fetchPins: async () => {
     set({ isLoading: true });
-    const data = [] as any;
-    set({ pins: data, isLoading: false });
+    try {
+      const response = await postService.getAllPosts();
+      
+      if (response.success && response.data?.posts) {
+        // Transform backend posts to frontend Pin interface
+        const transformedPins: Pin[] = response.data.posts.map((post: any) => ({
+          id: post._id,
+          title: post.title || 'Untitled',
+          description: post.description || '',
+          imageUrl: post.media_url,
+          authorId: post.user_id?._id || 'unknown',
+          authorName: post.user_id?.name || 'Anonymous',
+          authorAvatar: post.user_id?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post._id}`,
+          likes: post.totalLikes || 0,
+          category: post.category || 'General',
+          createdAt: post.created_at,
+          type: post.resource_type === 'video' ? 'video' : 'image',
+          isLiked: false, // Default for now
+          isSaved: false, // Default for now
+          comments: [] // Comments will be loaded on demand or if included in backend
+        }));
+        
+        set({ pins: transformedPins, isLoading: false });
+      } else {
+        set({ pins: [], isLoading: false });
+      }
+    } catch (error) {
+      console.error('Failed to fetch pins:', error);
+      set({ pins: [], isLoading: false });
+    }
   },
 
   setSearchQuery: (query: string) => set({ searchQuery: query }),

@@ -20,7 +20,16 @@ const USER = {
   ADD_INTEREST: '/api/v1/users/add-user-interest',
 } as const;
 
+// post endpoints
+const POSTS = {
+  GET_ALL: '/api/v1/posts',
+  CREATE: '/api/v1/posts/create',
+  SUGGEST_METADATA: '/api/v1/posts/suggest-metadata',
+  SUGGESTION_STATUS: (id: string) => `/api/v1/posts/suggestions/${id}`,
+} as const;
+
 export const ENDPOINTS = {
   AUTH,
   USER,
+  POSTS,
 } as const;
