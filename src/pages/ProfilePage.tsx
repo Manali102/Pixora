@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
@@ -35,8 +35,15 @@ const AVATAR_COLORS = [
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
+  const fetchProfile = useAuthStore((s) => s.fetchProfile);
   const updateUser = useAuthStore((s) => s.updateUser);
   const pins = usePinStore((s) => s.pins);
+  
+  // Call fetchProfile on mount to get fresh data
+  useEffect(() => {
+    fetchProfile();
+  }, []); // Empty array ensures this only runs once on mount
+
   const userPins = pins.filter((p) => p.authorId === user?.id);
 
   // ── UI state ──────────────────────────────────────────────

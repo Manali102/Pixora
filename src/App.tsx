@@ -37,7 +37,7 @@ const App: React.FC = () => {
 
     fetchPins();
     checkStorageReset();
-  }, [fetchPins, checkStorageReset]);
+  }, []); // Run once on mount to prevent loops
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">

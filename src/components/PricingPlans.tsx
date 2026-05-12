@@ -26,30 +26,33 @@ export const PricingPlans: React.FC<PricingPlansProps> = ({ isModal = false, onP
       monthlyPrice: 0,
       annualPrice: 0,
       description: 'The foundation for your journey.',
-      features: ['20 MB Total Storage', 'Core Features', 'Community Support'],
+      features: ['5 MB Total Storage', 'Core Features', 'Community Support'],
       icon: <Sparkles className="w-6 h-6 text-green-500" />,
       tier: 'free',
-      storage: 20
+      storageMonthly: 5,
+      storageAnnual: 5
     },
     {
       name: 'Starter',
       monthlyPrice: 10,
       annualPrice: 96,
       description: 'Ideal for casual creators.',
-      features: ['50 MB Total Storage', 'Monthly Reset', 'Basic Support'],
+      features: [`${isAnnual ? '25' : '10'} MB Total Storage`, 'Monthly Reset', 'Basic Support'],
       icon: <Zap className="w-6 h-6 text-blue-500" />,
       tier: 'starter',
-      storage: 50
+      storageMonthly: 10,
+      storageAnnual: 25
     },
     {
       name: 'Pro',
       monthlyPrice: 20,
       annualPrice: 192,
       description: 'For power users and pros.',
-      features: ['250 MB Total Storage', 'Monthly Reset', 'Priority Support'],
+      features: [`${isAnnual ? '30' : '15'} MB Total Storage`, 'Monthly Reset', 'Priority Support'],
       icon: <Rocket className="w-6 h-6 text-purple-500" />,
       tier: 'pro',
-      storage: 250,
+      storageMonthly: 15,
+      storageAnnual: 30,
       popular: true
     },
     {
@@ -57,10 +60,11 @@ export const PricingPlans: React.FC<PricingPlansProps> = ({ isModal = false, onP
       monthlyPrice: 50,
       annualPrice: 480,
       description: 'Massive storage for brands.',
-      features: ['1024 MB Total Storage', 'Monthly Reset', 'API Access'],
+      features: [`${isAnnual ? '40' : '20'} MB Total Storage`, 'Monthly Reset', 'API Access'],
       icon: <Crown className="w-6 h-6 text-amber-500" />,
       tier: 'enterprise',
-      storage: 1024
+      storageMonthly: 20,
+      storageAnnual: 40
     }
   ];
 
@@ -185,7 +189,7 @@ export const PricingPlans: React.FC<PricingPlansProps> = ({ isModal = false, onP
 
               <Button
                 disabled={processing !== null || isCurrentPlan}
-                onClick={() => handleUpgrade(plan.tier, plan.storage)}
+                onClick={() => handleUpgrade(plan.tier, isAnnual ? plan.storageAnnual : plan.storageMonthly)}
                 className={`w-full ${isModal ? 'py-6' : 'py-7'} rounded-2xl text-lg font-black transition-all cursor-pointer ${
                   isCurrentPlan 
                     ? 'bg-secondary text-foreground hover:bg-secondary cursor-not-allowed opacity-80'

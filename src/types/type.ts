@@ -11,6 +11,7 @@ export interface User {
   storageUsed: number; // in MB
   storageLimit: number; // in MB
   followers: number;
+  following: number;
   lastResetDate?: string; // For annual reset logic
 }
 
