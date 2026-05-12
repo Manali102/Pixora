@@ -32,13 +32,10 @@ const App: React.FC = () => {
   const location = useLocation();
   const isAuthenticated = useAuthStore(store => store.isAuthenticated);
   const showNavbar = isAuthenticated && !['/login', '/signup', '/forgot-password', '/reset-password'].includes(location.pathname);
-  const fetchPins = usePinStore(store => store.fetchPins);
   const checkStorageReset = useAuthStore(store => store.checkStorageReset);
   const { currentModal, closeModal } = useModalStore();
 
   useEffect(() => {
-
-    fetchPins();
     checkStorageReset();
   }, []); // Run once on mount to prevent loops
 
@@ -47,7 +44,7 @@ const App: React.FC = () => {
       {showNavbar && <Navbar />}
 
       <main className={`${showNavbar ? 'pt-24 pb-20 md:pb-12 px-4 sm:px-8' : ''}`}>
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<ProtectedRoute>
               <HomePage />
