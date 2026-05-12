@@ -18,6 +18,7 @@ const AUTH = {
 const USER = {
   PROFILE: '/api/v1/users/profile',
   ADD_INTEREST: '/api/v1/users/add-user-interest',
+  UPDATE: '/api/v1/users/me/update',
 } as const;
 
 // post endpoints

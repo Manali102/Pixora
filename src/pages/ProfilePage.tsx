@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { usePinStore } from '../store/usePinStore';
 import { PinCard } from '../components/ui/PinCard';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { HardDrive, Share2, Plus, Edit3, Heart, Eye, X, Check, Camera, Crown } from 'lucide-react';
+import { Check, Camera, Plus, MapPin, Globe, Calendar, Share2, Settings, LogOut, Grid, Heart, Layout, MoreHorizontal, Eye, X, Crown, Edit3, HardDrive } from 'lucide-react';
+import { toast } from 'sonner';
 import Masonry from 'react-masonry-css';
 import { Tooltip } from '../components/ui/Tooltip';
 import { Button } from '../components/ui/button';
@@ -36,8 +37,10 @@ const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const fetchProfile = useAuthStore((s) => s.fetchProfile);
+  const updateUserApi = useAuthStore((s) => s.updateProfileApi);
   const updateUser = useAuthStore((s) => s.updateUser);
   const pins = usePinStore((s) => s.pins);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Call fetchProfile on mount to get fresh data
   useEffect(() => {
@@ -47,12 +50,13 @@ const ProfilePage: React.FC = () => {
   const userPins = pins.filter((p) => p.authorId === user?.id);
 
   // ── UI state ──────────────────────────────────────────────
-  const [shareToast, setShareToast] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [editName, setEditName] = useState(user?.name ?? '');
   const [editBio, setEditBio] = useState(user?.bio ?? '');
   const [saving, setSaving] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(user?.avatar ?? '');
   const [avatarColorIdx, setAvatarColorIdx] = useState(0);
   const [activeTab, setActiveTab] = useState<'created' | 'saved'>('created');
 
@@ -77,17 +81,40 @@ const ProfilePage: React.FC = () => {
     } catch {
       // fallback for environments without clipboard API
     }
-    setShareToast(true);
-    setTimeout(() => setShareToast(false), 2500);
+    toast.success('Profile link copied!');
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    }
   };
 
   const handleSaveProfile = async () => {
     if (!editName.trim()) return;
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 600)); // simulate network
-    updateUser({ name: editName.trim(), bio: editBio.trim() });
-    setSaving(false);
-    setShowEditModal(false);
+    
+    const formData = new FormData();
+    formData.append('name', editName.trim());
+    formData.append('bio', editBio.trim());
+    if (selectedFile) {
+      formData.append('profileImage', selectedFile);
+    }
+
+    const result = await updateUserApi(formData);
+    
+    if (result.success) {
+      setSaving(false);
+      setShowEditModal(false);
+      setSelectedFile(null);
+      toast.success('Profile updated successfully!');
+    } else {
+      setSaving(false);
+      toast.error(result.message || 'Failed to update profile');
+    }
   };
 
   const handleSaveAvatar = () => {
@@ -109,21 +136,7 @@ const ProfilePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background mt-30">
 
-      {/* ── Share toast ─────────────────────────────── */}
-      <AnimatePresence>
-        {shareToast && (
-          <motion.div
-            key="toast"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-foreground text-background text-sm font-medium shadow-xl"
-          >
-            <Check className="w-4 h-4 text-green-400" />
-            Profile link copied!
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* ── Page Content ────────────────────────────── */}
 
       {/* ── Edit Profile modal ───────────────────────── */}
       <AnimatePresence>
@@ -155,6 +168,32 @@ const ProfilePage: React.FC = () => {
                     <X className="w-4 h-4" />
                   </button>
                 </Tooltip>
+              </div>
+
+              <div className="flex flex-col items-center mb-6">
+                <div className="relative group">
+                  <div className="w-24 h-24 rounded-2xl overflow-hidden border-2 border-primary/20 shadow-lg">
+                    <img 
+                      src={previewUrl || user?.avatar} 
+                      alt="Avatar Preview" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="absolute -bottom-2 -right-2 w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors cursor-pointer"
+                  >
+                    <Camera className="w-4 h-4" />
+                  </button>
+                </div>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <p className="text-[10px] text-muted-foreground mt-3 uppercase font-bold tracking-wider">Change Profile Picture</p>
               </div>
 
               <div className="space-y-4">
@@ -302,18 +341,12 @@ const ProfilePage: React.FC = () => {
         >
           {/* Avatar */}
           <div className="relative group">
-            <div
-              className="w-28 h-28 rounded-2xl p-[3px] shadow-[var(--shadow-glow)] ring-2 ring-primary/50"
-              style={{ background: avatarGradient }}
-            >
-              <div className="w-full h-full rounded-[13px] bg-card flex items-center justify-center overflow-hidden">
-                <span
-                  className="font-display text-3xl font-bold"
-                  style={{ background: avatarGradient, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-                >
-                  {user?.name?.charAt(0)}
-                </span>
-              </div>
+            <div className="w-28 h-28 rounded-2xl p-[3px] shadow-[var(--shadow-glow)] ring-2 ring-primary/50 overflow-hidden bg-muted">
+              <img 
+                src={user?.avatar} 
+                alt={user?.name} 
+                className="w-full h-full rounded-[13px] object-cover"
+              />
             </div>
             <Tooltip content="Change avatar color" side="bottom">
               <button

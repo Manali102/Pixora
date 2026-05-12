@@ -23,6 +23,7 @@ import { usePinStore } from './store/usePinStore';
 import { PinModal } from './components/ui/PinModal';
 import { CreateBoardModal } from './components/ui/CreateBoardModal';
 import { useModalStore } from './store/useModalStore';
+import { Toaster } from 'sonner';
 
 
 const App: React.FC = () => {
@@ -129,6 +130,7 @@ const App: React.FC = () => {
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-500 rounded-full blur-[120px]"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-500 rounded-full blur-[120px]"></div>
       </div>
+      <Toaster position="top-right" richColors />
     </div>
   );
 };
