@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Crown, Zap, Rocket, Loader2, Sparkles } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
@@ -7,7 +7,7 @@ import { Button } from './ui/button';
 export interface PlanDetails {
   subscription: string;
   storageLimit: number;
-  billingCycle: 'annual' | 'monthly';
+  billingCycle: 'yearly' | 'monthly';
 }
 
 interface PricingPlansProps {
@@ -17,8 +17,14 @@ interface PricingPlansProps {
 
 export const PricingPlans: React.FC<PricingPlansProps> = ({ isModal = false, onPlanSelect }) => {
   const user = useAuthStore((store) => store.user);
-  const [isAnnual, setIsAnnual] = useState(true);
+  const [isAnnual, setIsAnnual] = useState(user?.billingCycle === 'yearly');
   const [processing, setProcessing] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user?.billingCycle) {
+      setIsAnnual(user.billingCycle === 'yearly');
+    }
+  }, [user?.billingCycle]);
 
   const plans = [
     {
@@ -73,7 +79,7 @@ export const PricingPlans: React.FC<PricingPlansProps> = ({ isModal = false, onP
     await onPlanSelect({
       subscription: tier,
       storageLimit: storage,
-      billingCycle: isAnnual ? 'annual' : 'monthly',
+      billingCycle: isAnnual ? 'yearly' : 'monthly',
     });
     // If it's not a modal, maybe we clear it right away or parent redirects
     setProcessing(null);
@@ -109,7 +115,7 @@ export const PricingPlans: React.FC<PricingPlansProps> = ({ isModal = false, onP
               isAnnual ? 'text-white dark:text-black' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            Annual
+            Yearly
             <span className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold tracking-wide transition-colors ${
               isAnnual 
                 ? 'bg-green-500 text-white border border-green-400' 
@@ -128,7 +134,7 @@ export const PricingPlans: React.FC<PricingPlansProps> = ({ isModal = false, onP
           const isSameTier = !isModal && user?.subscription === plan.tier;
           const isCurrentPlan = isSameTier && (
             plan.tier === 'free' || 
-            (isAnnual ? user?.billingCycle === 'annual' : user?.billingCycle === 'monthly')
+            (isAnnual ? user?.billingCycle === 'yearly' : user?.billingCycle === 'monthly')
           );
           
           return (

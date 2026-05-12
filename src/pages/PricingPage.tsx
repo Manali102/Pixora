@@ -1,20 +1,46 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../store/useAuthStore';
-import { PricingPlans, PlanDetails } from '../components/PricingPlans';
+import { PricingPlans, type PlanDetails } from '../components/PricingPlans';
+import { paymentService } from '../services/paymentService';
+import { toast } from 'sonner';
 
 export const PricingPage: React.FC = () => {
+  const { user, fetchProfile } = useAuthStore();
 
-  const handleUpgrade = (planDetails: PlanDetails) => {
-    // Artificial delay is handled by PricingPlans visually, so we just do state update
-    const updateUser = useAuthStore.getState().updateUser;
-    updateUser({ 
-      subscription: planDetails.subscription as any, 
-      storageLimit: planDetails.storageLimit,
-      billingCycle: planDetails.billingCycle,
-      lastResetDate: new Date().toISOString()
-    });
-    alert(`Success! You have switched to the ${planDetails.subscription} plan on ${planDetails.billingCycle} cycle.`);
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const handleUpgrade = async (planDetails: PlanDetails) => {
+    if (!user) {
+      toast.error('Please login to upgrade your plan');
+      return;
+    }
+
+    try {
+      const response = await paymentService.createCheckoutSession({
+        email: user.email,
+        plan_type: planDetails.subscription,
+        period: planDetails.billingCycle,
+        userId: user.id
+      });
+
+      if (response.success) {
+        if (response.data.upgraded) {
+          // Immediate upgrade handled by backend
+          await useAuthStore.getState().fetchProfile();
+          toast.success('Subscription upgraded successfully!');
+        } else if (response.data.url) {
+          // Redirect to Stripe checkout
+          window.location.href = response.data.url;
+        }
+      }
+    } catch (error: any) {
+      console.error('Checkout error:', error);
+      const message = error.response?.data?.error?.message || 'Failed to initiate payment. Please try again.';
+      toast.error(message);
+    }
   };
 
   return (

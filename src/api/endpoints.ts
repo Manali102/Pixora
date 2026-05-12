@@ -29,8 +29,15 @@ const POSTS = {
   SUGGESTION_STATUS: (id: string) => `/api/v1/posts/suggestions/${id}`,
 } as const;
 
+// payment endpoints
+const PAYMENTS = {
+  CREATE_CHECKOUT: '/api/v1/payments/create-checkout-session',
+  MANAGE_SUBSCRIPTION: '/api/v1/payments/manage-subscription',
+} as const;
+
 export const ENDPOINTS = {
   AUTH,
   USER,
   POSTS,
+  PAYMENTS,
 } as const;

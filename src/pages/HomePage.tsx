@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useFilteredPins, usePinStore } from '../store/usePinStore';
 import { PinCard } from '../components/ui/PinCard';
 import { motion } from 'framer-motion';
@@ -16,7 +16,11 @@ const breakpointColumnsObj = {
 
 export const HomePage: React.FC = () => {
   const filteredPins = useFilteredPins();
-  const isLoading = usePinStore((store) => store.isLoading);
+  const { isLoading, fetchPins } = usePinStore();
+
+  useEffect(() => {
+    fetchPins();
+  }, []);
 
   if (isLoading) {
     return (

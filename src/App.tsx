@@ -9,6 +9,8 @@ import { SignupPage } from './pages/SignupPage';
 import ProfilePage from './pages/ProfilePage';
 import { AdminPage } from './pages/AdminPage';
 import { PricingPage } from './pages/PricingPage';
+import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
+import { PaymentCancelPage } from './pages/PaymentCancelPage';
 import { CreatePinPage } from './pages/CreatePinPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
@@ -99,6 +101,24 @@ const App: React.FC = () => {
             <Route path="/pricing" element={
               <ProtectedRoute excludeAdmin>
                 <PricingPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/payment/success" element={
+              <ProtectedRoute>
+                <PaymentSuccessPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/payment/cancel" element={
+              <ProtectedRoute>
+                <PaymentCancelPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/payment/error" element={
+              <ProtectedRoute>
+                <PaymentCancelPage />
               </ProtectedRoute>
             } />
 

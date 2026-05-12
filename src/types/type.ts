@@ -7,12 +7,12 @@ export interface User {
   bio: string;
   role: 'user' | 'admin';
   subscription: 'free' | 'starter' | 'pro' | 'enterprise';
-  billingCycle: 'monthly' | 'annual';
+  billingCycle: 'monthly' | 'yearly';
   storageUsed: number; // in MB
   storageLimit: number; // in MB
   followers: number;
   following: number;
-  lastResetDate?: string; // For annual reset logic
+  lastResetDate?: string; // For yearly reset logic
 }
 
 export interface Comment {

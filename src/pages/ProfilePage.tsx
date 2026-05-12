@@ -488,7 +488,7 @@ const ProfilePage: React.FC = () => {
                 </span>
               </div>
               <p className="text-muted-foreground text-sm mt-1">
-                {user?.billingCycle === 'annual' 
+                {user?.billingCycle === 'yearly' 
                   ? 'Your storage quota resets every month automatically.' 
                   : 'Unlock premium features & more storage by upgrading.'}
               </p>

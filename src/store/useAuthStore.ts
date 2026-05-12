@@ -17,13 +17,13 @@ interface AuthState {
 
 const transformBackendUser = (backendUser: any): User => {
   // Storage calculation logic
-  const plan = backendUser.subscription_plan?.toLowerCase() || 'free';
-  const cycle = backendUser.billing_cycle || 'monthly';
+  const plan = backendUser.plan_type?.toLowerCase() || 'free';
+  const cycle = backendUser.billing_period?.toLowerCase() || 'monthly';
   
   let storageLimit = 5; // Default for Free
-  if (plan === 'starter') storageLimit = cycle === 'annual' ? 25 : 10;
-  else if (plan === 'pro') storageLimit = cycle === 'annual' ? 30 : 15;
-  else if (plan === 'enterprise') storageLimit = cycle === 'annual' ? 40 : 20;
+  if (plan === 'starter') storageLimit = cycle === 'yearly' ? 25 : 10;
+  else if (plan === 'pro') storageLimit = cycle === 'yearly' ? 30 : 15;
+  else if (plan === 'enterprise') storageLimit = cycle === 'yearly' ? 40 : 20;
 
   return {
     id: backendUser._id || backendUser.id,
@@ -105,7 +105,7 @@ export const useAuthStore = create<AuthState>()(
 
       checkStorageReset: () => {
         const { user } = get();
-        if (!user || user.billingCycle !== 'annual' || !user.lastResetDate) return;
+        if (!user || user.billingCycle !== 'yearly' || !user.lastResetDate) return;
 
         const lastReset = new Date(user.lastResetDate);
         const now = new Date();
@@ -121,7 +121,7 @@ export const useAuthStore = create<AuthState>()(
           };
           
           set({ user: updatedUser });
-          console.log('Storage quota reset for annual plan');
+          console.log('Storage quota reset for yearly plan');
         }
       },
     }),
