@@ -13,6 +13,8 @@ interface AuthState {
   updateProfileApi: (formData: FormData) => Promise<{ success: boolean; message?: string }>;
   fetchProfile: () => Promise<void>;
   checkStorageReset: () => void;
+  followUser: (userId: string) => Promise<void>;
+  unfollowUser: (userId: string) => Promise<void>;
 }
 
 const transformBackendUser = (backendUser: any): User => {
@@ -36,9 +38,9 @@ const transformBackendUser = (backendUser: any): User => {
     storageLimit: storageLimit,
     subscription: plan as any,
     billingCycle: cycle as any,
-    lastResetDate: backendUser.last_quota_reset,
     followers: backendUser.followers_count || 0,
     following: backendUser.following_count || 0,
+    followingIds: backendUser.following_ids || [],
   };
 };
 
@@ -124,6 +126,46 @@ export const useAuthStore = create<AuthState>()(
           console.log('Storage quota reset for yearly plan');
         }
       },
+
+      followUser: async (userId: string) => {
+        try {
+          const response = await userService.followUser(userId);
+          if (response.success) {
+            set((state) => {
+              if (!state.user) return {};
+              return {
+                user: {
+                  ...state.user,
+                  following: state.user.following + 1,
+                  followingIds: [...state.user.followingIds, userId],
+                },
+              };
+            });
+          }
+        } catch (error) {
+          console.error('Failed to follow user:', error);
+        }
+      },
+
+      unfollowUser: async (userId: string) => {
+        try {
+          const response = await userService.unfollowUser(userId);
+          if (response.success) {
+            set((state) => {
+              if (!state.user) return {};
+              return {
+                user: {
+                  ...state.user,
+                  following: state.user.following - 1,
+                  followingIds: state.user.followingIds.filter((id) => id !== userId),
+                },
+              };
+            });
+          }
+        } catch (error) {
+          console.error('Failed to unfollow user:', error);
+        }
+      },
     }),
     {
       name: 'pixora_auth', // key in localStorage
@@ -131,6 +173,10 @@ export const useAuthStore = create<AuthState>()(
         if (state) {
           state.isAuthenticated = !!state.user;
           state.isLoading = false;
+          // Safety: Ensure followingIds is always an array
+          if (state.user && !state.user.followingIds) {
+            state.user.followingIds = [];
+          }
         }
       },
     }

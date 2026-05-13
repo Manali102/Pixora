@@ -8,7 +8,11 @@ interface PinState {
   isLoading: boolean;
   searchQuery: string;
   selectedPin: Pin | null;
+  feedType: 'all' | 'following';
+  userPins: Pin[];
   fetchPins: () => Promise<void>;
+  fetchUserPins: (userId: string) => Promise<void>;
+  setFeedType: (type: 'all' | 'following') => void;
   setSearchQuery: (query: string) => void;
   setSelectedPin: (pin: Pin | null) => void;
   addPin: (pin: Pin) => void;
@@ -23,11 +27,16 @@ export const usePinStore = create<PinState>()((set, get) => ({
   isLoading: false,
   searchQuery: '',
   selectedPin: null,
+  feedType: 'all',
+  userPins: [],
 
   fetchPins: async () => {
+    const { feedType } = get();
     set({ isLoading: true });
     try {
-      const response = await postService.getAllPosts();
+      const response = feedType === 'all' 
+        ? await postService.getAllPosts()
+        : await postService.getFollowingPosts();
       
       if (response.success && response.data?.posts) {
         // Transform backend posts to frontend Pin interface
@@ -45,7 +54,9 @@ export const usePinStore = create<PinState>()((set, get) => ({
           type: post.resource_type === 'video' ? 'video' : 'image',
           isLiked: false, // Default for now
           isSaved: false, // Default for now
-          comments: [] // Comments will be loaded on demand or if included in backend
+          comments: [], // Comments will be loaded on demand or if included in backend
+          authorFollowers: post.authorFollowers || 0,
+          views: post.views || 0,
         }));
         
         set({ pins: transformedPins, isLoading: false });
@@ -56,6 +67,44 @@ export const usePinStore = create<PinState>()((set, get) => ({
       console.error('Failed to fetch pins:', error);
       set({ pins: [], isLoading: false });
     }
+  },
+
+  fetchUserPins: async (userId: string) => {
+    set({ isLoading: true });
+    try {
+      const response = await postService.getUserPosts(userId);
+      if (response.success && response.data?.posts) {
+        const transformedPins: Pin[] = response.data.posts.map((post: any) => ({
+          id: post._id,
+          title: post.title || 'Untitled',
+          description: post.description || '',
+          imageUrl: post.media_url,
+          authorId: post.user_id?._id || 'unknown',
+          authorName: post.user_id?.name || 'Anonymous',
+          authorAvatar: post.user_id?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post._id}`,
+          likes: post.totalLikes || 0,
+          category: post.category || 'General',
+          createdAt: post.created_at,
+          type: post.resource_type === 'video' ? 'video' : 'image',
+          isLiked: false,
+          isSaved: false,
+          comments: [],
+          authorFollowers: post.authorFollowers || 0,
+          views: post.views || 0,
+        }));
+        set({ userPins: transformedPins, isLoading: false });
+      } else {
+        set({ userPins: [], isLoading: false });
+      }
+    } catch (error) {
+      console.error('Failed to fetch user pins:', error);
+      set({ userPins: [], isLoading: false });
+    }
+  },
+
+  setFeedType: (type: 'all' | 'following') => {
+    set({ feedType: type });
+    get().fetchPins();
   },
 
   setSearchQuery: (query: string) => set({ searchQuery: query }),

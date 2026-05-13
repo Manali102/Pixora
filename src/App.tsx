@@ -2,11 +2,13 @@
 import React, { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { Navbar } from './components/layout/Navbar';
+import { Sidebar } from './components/layout/Sidebar';
 import { BottomNav } from './components/layout/BottomNav';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
 import ProfilePage from './pages/ProfilePage';
+import CreatorProfilePage from './pages/CreatorProfilePage';
 import { AdminPage } from './pages/AdminPage';
 import { PricingPage } from './pages/PricingPage';
 import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
@@ -15,10 +17,14 @@ import { CreatePinPage } from './pages/CreatePinPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { BoardDetailPage } from './pages/BoardDetailPage';
+import MyPinsPage from './pages/MyPinsPage';
+import MyBoardsPage from './pages/MyBoardsPage';
+import FollowingPage from './pages/FollowingPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { PublicRoute } from './components/layout/PublicRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { cn } from './lib/utils';
 import { AnimatePresence } from 'framer-motion';
 import { useAuthStore } from './store/useAuthStore';
 import { usePinStore } from './store/usePinStore';
@@ -42,8 +48,12 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
       {showNavbar && <Navbar />}
+      {showNavbar && <Sidebar />}
 
-      <main className={`${showNavbar ? 'pt-24 pb-20 md:pb-12 px-4 sm:px-8' : ''}`}>
+      <main className={cn(
+        "transition-all duration-300",
+        showNavbar ? "pt-24 pb-20 md:pb-12 px-4 sm:px-8 md:pl-72" : ""
+      )}>
         <AnimatePresence>
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<ProtectedRoute>
@@ -83,9 +93,29 @@ const App: React.FC = () => {
                 <ProfilePage />
               </ProtectedRoute>
             } />
+            <Route path="/creator/:id" element={
+              <ProtectedRoute>
+                <CreatorProfilePage />
+              </ProtectedRoute>
+            } />
             <Route path="/board/:id" element={
               <ProtectedRoute>
                 <BoardDetailPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/my-pins" element={
+              <ProtectedRoute>
+                <MyPinsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/my-boards" element={
+              <ProtectedRoute>
+                <MyBoardsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/following" element={
+              <ProtectedRoute>
+                <FollowingPage />
               </ProtectedRoute>
             } />
 

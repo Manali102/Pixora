@@ -82,4 +82,31 @@ export const postService = {
     
     return data;
   },
+
+  /**
+   * Fetch posts from users being followed.
+   * @param page - Page number.
+   * @param limit - Number of items per page.
+   * @returns List of posts.
+   */
+  getFollowingPosts: async (page: number = 1, limit: number = 20): Promise<CreatePostResponse> => {
+    const { data } = await apiClient.get<CreatePostResponse>(
+      `${ENDPOINTS.POSTS.GET_FOLLOWING}?page=${page}&limit=${limit}`
+    );
+    return data;
+  },
+
+  /**
+   * Fetch posts created by a specific user.
+   * @param userId - The user ID.
+   * @param page - Page number.
+   * @param limit - Number of items per page.
+   * @returns List of posts.
+   */
+  getUserPosts: async (userId: string, page: number = 1, limit: number = 20): Promise<CreatePostResponse> => {
+    const { data } = await apiClient.get<CreatePostResponse>(
+      `${ENDPOINTS.POSTS.GET_USER_POSTS(userId)}?page=${page}&limit=${limit}`
+    );
+    return data;
+  },
 };

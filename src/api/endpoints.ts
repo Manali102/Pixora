@@ -19,6 +19,11 @@ const USER = {
   PROFILE: '/api/v1/users/profile',
   ADD_INTEREST: '/api/v1/users/add-user-interest',
   UPDATE: '/api/v1/users/me/update',
+  FOLLOW: (id: string) => `/api/v1/users/${id}/follow`,
+  UNFOLLOW: (id: string) => `/api/v1/users/${id}/unfollow`,
+  FOLLOWERS: (id: string) => `/api/v1/users/${id}/followers`,
+  FOLLOWING: (id: string) => `/api/v1/users/${id}/following`,
+  GET_PROFILE: (id: string) => `/api/v1/users/${id}/profile`,
 } as const;
 
 // post endpoints
@@ -27,6 +32,8 @@ const POSTS = {
   CREATE: '/api/v1/posts/create',
   SUGGEST_METADATA: '/api/v1/posts/suggest-metadata',
   SUGGESTION_STATUS: (id: string) => `/api/v1/posts/suggestions/${id}`,
+  GET_FOLLOWING: '/api/v1/posts/following',
+  GET_USER_POSTS: (id: string) => `/api/v1/posts/user/${id}`,
 } as const;
 
 // payment endpoints

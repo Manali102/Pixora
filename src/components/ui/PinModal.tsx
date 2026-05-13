@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { X, Share2, Heart, Send, Download, Link2, Check } from 'lucide-react';
 import { usePinStore } from '../../store/usePinStore';
+import { useAuthStore } from '../../store/useAuthStore';
 import { Button } from './button';
 import { Badge } from './badge';
 import { cn } from '../../lib/utils';
@@ -13,11 +15,16 @@ import { WhatsAppIcon, MessengerIcon, FacebookIcon, XIcon } from '../icons/Socia
  * @returns JSX.Element
  */
 export const PinModal: React.FC = () => {
+  const navigate = useNavigate();
   const { selectedPin, setSelectedPin, toggleLike, toggleSave, addComment } = usePinStore();
+  const { user, followUser, unfollowUser } = useAuthStore();
   const [comment, setComment] = useState('');
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const isFollowing = user?.followingIds?.includes(selectedPin?.authorId || '') || false;
+  const isOwnPin = user?.id === selectedPin?.authorId;
 
   // use effect to handle body overflow when modal is open
   useEffect(() => {
@@ -290,22 +297,39 @@ export const PinModal: React.FC = () => {
 
                 {/* Author Info */}
                 <div className="flex items-center justify-between mb-10">
-                  <div className="flex items-center gap-3">
+                  <div 
+                    className="flex items-center gap-3 cursor-pointer group"
+                    onClick={() => {
+                      setSelectedPin(null);
+                      navigate(isOwnPin ? '/profile' : `/creator/${selectedPin.authorId}`);
+                    }}
+                  >
                     <img 
                       src={selectedPin.authorAvatar} 
                       alt={selectedPin.authorName} 
-                      className="w-12 h-12 rounded-full border border-zinc-100 dark:border-zinc-800 hover:opacity-80 transition-opacity cursor-pointer"
+                      className="w-12 h-12 rounded-full border border-zinc-100 dark:border-zinc-800 group-hover:opacity-80 transition-opacity"
                     />
                     <div>
-                      <p className="font-bold text-zinc-900 dark:text-zinc-100 hover:underline cursor-pointer">
+                      <p className="font-bold text-zinc-900 dark:text-zinc-100 group-hover:underline">
                         {selectedPin.authorName}
                       </p>
-                      <p className="text-zinc-500 text-sm">1,890 saves</p>
+                      <p className="text-zinc-500 text-sm">{selectedPin.authorFollowers?.toLocaleString()} followers</p>
                     </div>
                   </div>
-                  <Button variant="secondary" className="rounded-full font-bold px-8 h-12 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border-none transition-colors">
-                    Follow
-                  </Button>
+                  {!isOwnPin && (
+                    <Button 
+                      onClick={() => isFollowing ? unfollowUser(selectedPin.authorId) : followUser(selectedPin.authorId)}
+                      variant={isFollowing ? "secondary" : "default"}
+                      className={cn(
+                        "rounded-full font-bold px-8 h-12 transition-all border-none",
+                        isFollowing 
+                          ? "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100" 
+                          : "bg-red-600 text-white hover:bg-red-700"
+                      )}
+                    >
+                      {isFollowing ? 'Following' : 'Follow'}
+                    </Button>
+                  )}
                 </div>
 
                 {/* Tags */}

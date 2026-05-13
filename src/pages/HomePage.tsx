@@ -16,7 +16,7 @@ const breakpointColumnsObj = {
 
 export const HomePage: React.FC = () => {
   const filteredPins = useFilteredPins();
-  const { pins, isLoading, fetchPins } = usePinStore();
+  const { pins, isLoading, fetchPins, feedType, setFeedType } = usePinStore();
 
   useEffect(() => {
     fetchPins();
@@ -39,6 +39,40 @@ export const HomePage: React.FC = () => {
       exit={{ opacity: 0 }}
       className="max-w-[2000px] mx-auto px-4"
     >
+      <div className="flex justify-center items-center gap-8 mb-8 mt-2">
+        <button
+          onClick={() => setFeedType('all')}
+          className={`text-lg font-semibold pb-1 transition-all duration-300 relative ${
+            feedType === 'all' 
+              ? 'text-foreground' 
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Explore
+          {feedType === 'all' && (
+            <motion.div 
+              layoutId="activeTab"
+              className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full"
+            />
+          )}
+        </button>
+        <button
+          onClick={() => setFeedType('following')}
+          className={`text-lg font-semibold pb-1 transition-all duration-300 relative ${
+            feedType === 'following' 
+              ? 'text-foreground' 
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Following
+          {feedType === 'following' && (
+            <motion.div 
+              layoutId="activeTab"
+              className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full"
+            />
+          )}
+        </button>
+      </div>
       <Masonry
         breakpointCols={breakpointColumnsObj}
         className="flex w-auto -ml-6"

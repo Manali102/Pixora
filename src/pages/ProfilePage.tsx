@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { usePinStore } from '../store/usePinStore';
 import { PinCard } from '../components/ui/PinCard';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { Check, Camera, Plus, MapPin, Globe, Calendar, Share2, Settings, LogOut, Grid, Heart, Layout, MoreHorizontal, Eye, X, Crown, Edit3, HardDrive } from 'lucide-react';
+import { Check, Camera, Plus, MapPin, Globe, Calendar, Share2, Settings, LogOut, Grid, Heart, Layout, MoreHorizontal, Eye, X, Crown, Edit3, HardDrive, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import Masonry from 'react-masonry-css';
 import { Tooltip } from '../components/ui/Tooltip';
@@ -39,15 +39,16 @@ const ProfilePage: React.FC = () => {
   const fetchProfile = useAuthStore((s) => s.fetchProfile);
   const updateUserApi = useAuthStore((s) => s.updateProfileApi);
   const updateUser = useAuthStore((s) => s.updateUser);
-  const pins = usePinStore((s) => s.pins);
+  const { userPins, fetchUserPins } = usePinStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Call fetchProfile on mount to get fresh data
+  // Call fetchProfile and fetchUserPins on mount
   useEffect(() => {
     fetchProfile();
-  }, []); // Empty array ensures this only runs once on mount
-
-  const userPins = pins.filter((p) => p.authorId === user?.id);
+    if (user?.id) {
+      fetchUserPins(user.id);
+    }
+  }, [user?.id]);
 
   // ── UI state ──────────────────────────────────────────────
   const [showEditModal, setShowEditModal] = useState(false);
@@ -58,9 +59,7 @@ const ProfilePage: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(user?.avatar ?? '');
   const [avatarColorIdx, setAvatarColorIdx] = useState(0);
-  const [activeTab, setActiveTab] = useState<'created' | 'saved'>('created');
 
-  const boards = useBoardStore((s) => s.boards);
   const openModal = useModalStore((s) => s.openModal);
 
 
@@ -463,7 +462,10 @@ const ProfilePage: React.FC = () => {
               <span className="label-dim">Engagement</span>
             </div>
             <span className="stat-number text-foreground">{totalLikes.toLocaleString()}</span>
-            <p className="text-muted-foreground test-sm mt-1">{user?.followers?.toLocaleString()} followers</p>
+            <div className="flex gap-4 mt-1">
+              <p className="text-muted-foreground text-sm">{user?.followers?.toLocaleString()} followers</p>
+              <p className="text-muted-foreground text-sm">{user?.following?.toLocaleString()} following</p>
+            </div>
           </div>
         </motion.div>
 
@@ -502,111 +504,35 @@ const ProfilePage: React.FC = () => {
           </motion.div>
         )}
 
-        {/* Pins Section */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.45, duration: 0.5 }}
-          className="mt-12 pb-16"
+          className="mt-12 pb-16 text-center"
         >
-          <div className="flex flex-col gap-8">
-            {/* Tab Navigation */}
-            <div className="flex justify-center mb-4">
-              <div className="bg-secondary/40 backdrop-blur-md p-1.5 rounded-2xl border border-border/50 flex gap-1 relative overflow-hidden">
-                <button
-                  onClick={() => setActiveTab('created')}
-                  className={`relative px-8 py-2.5 text-sm font-black transition-all rounded-xl flex items-center gap-2.5 cursor-pointer ${activeTab === 'created' ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                >
-                  {activeTab === 'created' && (
-                    <motion.div
-                      layoutId="tabIndicator"
-                      className="absolute inset-0 bg-primary rounded-xl shadow-[0_4px_12px_rgba(var(--primary),0.3)]"
-                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                    />
-                  )}
-                  <Plus className={`relative z-10 w-4 h-4 transition-transform duration-300 ${activeTab === 'created' ? 'rotate-0' : 'rotate-45'}`} />
-                  <span className="relative z-10">Created</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab('saved')}
-                  className={`relative px-8 py-2.5 text-sm font-black transition-all rounded-xl flex items-center gap-2.5 cursor-pointer ${activeTab === 'saved' ? 'text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-                >
-                  {activeTab === 'saved' && (
-                    <motion.div
-                      layoutId="tabIndicator"
-                      className="absolute inset-0 bg-primary rounded-xl shadow-[0_4px_12px_rgba(var(--primary),0.3)]"
-                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                    />
-                  )}
-                  <Heart className={`relative z-10 w-4 h-4 transition-transform duration-300 ${activeTab === 'saved' ? 'scale-110' : 'scale-100'}`} />
-                  <span className="relative z-10">Saved</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between border border-border/80 rounded-2xl px-5 py-4">
-              <div>
-                <h2 className="font-display text-xl font-bold text-foreground">
-                  {activeTab === 'created' ? 'Created Pins' : 'Saved Boards'}
-                </h2>
-                <p className="text-muted-foreground text-sm mt-1">
-                  {activeTab === 'created' 
-                    ? 'Your creative collection on Pixora' 
-                    : 'Collections you have curated'}
-                </p>
-              </div>
-              <button
-                onClick={() => activeTab === 'created' ? navigate('/create') : openModal('CREATE_BOARD')}
-                className="btn-primary-glow flex items-center gap-2 text-sm cursor-pointer"
+          <div className="glass-card border border-border/80 rounded-3xl p-12">
+            <h3 className="font-display text-xl font-bold mb-2">Account Settings</h3>
+            <p className="text-muted-foreground text-sm mb-8">Manage your public profile and account preferences</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+              <button 
+                onClick={() => setShowEditModal(true)}
+                className="flex items-center gap-4 p-4 rounded-2xl bg-secondary/50 hover:bg-secondary transition-all border border-border/50 group"
               >
-                <Plus className="w-4 h-4" />
-                {activeTab === 'created' ? 'Create Pin' : 'Create Board'}
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                  <Edit3 className="w-5 h-5" />
+                </div>
+                <span className="font-bold text-sm">Edit Profile</span>
+              </button>
+              <button 
+                onClick={() => setShowAvatarModal(true)}
+                className="flex items-center gap-4 p-4 rounded-2xl bg-secondary/50 hover:bg-secondary transition-all border border-border/50 group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                  <Camera className="w-5 h-5" />
+                </div>
+                <span className="font-bold text-sm">Update Avatar</span>
               </button>
             </div>
-          </div>
-
-          <div className="mt-8">
-            {activeTab === 'created' ? (
-              userPins.length > 0 ? (
-                <Masonry
-                  breakpointCols={breakpointColumnsObj}
-                  className="flex -ml-4 w-auto"
-                  columnClassName="pl-4 bg-clip-padding"
-                >
-                  {userPins.map((pin) => (
-                    <PinCard key={pin.id} pin={pin} />
-                  ))}
-                </Masonry>
-              ) : (
-                <div className="glass-card border border-border/90 rounded-2xl p-12 text-center">
-                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                    <Plus className="w-7 h-7 text-primary" />
-                  </div>
-                  <h3 className="font-display font-semibold text-foreground text-lg">No pins yet</h3>
-                  <p className="text-muted-foreground text-sm mt-2 max-w-sm mx-auto">
-                    Time to share your first idea with the world! Start creating now.
-                  </p>
-                </div>
-              )
-            ) : (
-              boards.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {boards.map((board) => (
-                    <BoardCard key={board.id} board={board} />
-                  ))}
-                </div>
-              ) : (
-                <div className="glass-card border border-border/90 rounded-2xl p-12 text-center">
-                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                    <Plus className="w-7 h-7 text-primary" />
-                  </div>
-                  <h3 className="font-display font-semibold text-foreground text-lg">No boards yet</h3>
-                  <p className="text-muted-foreground text-sm mt-2 max-w-sm mx-auto">
-                    Create boards to organize your favorite pins and ideas.
-                  </p>
-                </div>
-              )
-            )}
           </div>
         </motion.div>
       </div>

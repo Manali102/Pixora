@@ -5,6 +5,7 @@ import { Pin } from '@/types/type';
 import { usePinStore } from '../../store/usePinStore';
 import { useBoardStore } from '../../store/useBoardStore';
 import { useModalStore } from '../../store/useModalStore';
+import { useAuthStore } from '../../store/useAuthStore';
 import { Button } from './button';
 import { cn } from '../../lib/utils';
 import { BoardSelector } from './BoardSelector';
@@ -24,6 +25,10 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
   const { toggleLike, toggleSave, setSelectedPin } = usePinStore();
   const { addPinToBoard, removePinFromBoard, boards } = useBoardStore();
   const openModal = useModalStore((s) => s.openModal);
+  const { user, followUser, unfollowUser } = useAuthStore();
+
+  const isFollowing = user?.followingIds?.includes(pin.authorId) || false;
+  const isOwnPin = user?.id === pin.authorId;
 
   const isSavedToAnyBoard = boards.some(b => b.pinIds.includes(pin.id));
 
@@ -156,9 +161,28 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
 
       {/* Info Row */}
       <div className="mt-2 flex items-center justify-between px-1" onClick={(event) => event.stopPropagation()}>
-        <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
+        <div 
+          className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={() => navigate(isOwnPin ? '/profile' : `/creator/${pin.authorId}`)}
+        >
           <img src={pin.authorAvatar} alt={pin.authorName} className="w-7 h-7 rounded-full object-cover shadow-sm" />
-          <span className="test-sm font-semibold truncate max-w-[120px]">{pin.authorName}</span>
+          <span className="text-sm font-semibold truncate max-w-[120px]">{pin.authorName}</span>
+          {!isOwnPin && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                isFollowing ? unfollowUser(pin.authorId) : followUser(pin.authorId);
+              }}
+              className={cn(
+                "ml-1 text-[11px] font-bold px-3 py-1 rounded-full transition-all",
+                isFollowing 
+                  ? "bg-secondary text-secondary-foreground hover:bg-secondary/80" 
+                  : "bg-primary text-primary-foreground hover:bg-primary/90"
+              )}
+            >
+              {isFollowing ? 'Following' : 'Follow'}
+            </button>
+          )}
         </div>
         <div className="flex items-center gap-1 text-muted-foreground transition-colors hover:text-red-500 cursor-pointer" onClick={() => toggleLike(pin.id)}>
           <Heart className={cn("w-3.5 h-3.5", pin.isLiked && "fill-current text-red-500")} />

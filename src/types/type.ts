@@ -12,6 +12,7 @@ export interface User {
   storageLimit: number; // in MB
   followers: number;
   following: number;
+  followingIds: string[];
   lastResetDate?: string; // For yearly reset logic
 }
 
@@ -40,6 +41,7 @@ export interface Pin {
   type: 'image' | 'video';
   comments?: Comment[];
   views: number;
+  authorFollowers: number;
 }
 
 export interface ApiErrorResponse {

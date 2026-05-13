@@ -32,4 +32,34 @@ export const userService = {
     );
     return data;
   },
+
+  followUser: async (userId: string): Promise<{ success: boolean; message: string }> => {
+    const { data } = await apiClient.post(ENDPOINTS.USER.FOLLOW(userId));
+    return data;
+  },
+
+  unfollowUser: async (userId: string): Promise<{ success: boolean; message: string }> => {
+    const { data } = await apiClient.delete(ENDPOINTS.USER.UNFOLLOW(userId));
+    return data;
+  },
+
+  getFollowers: async (userId: string): Promise<{ success: boolean; data: any[] }> => {
+    const { data } = await apiClient.get(ENDPOINTS.USER.FOLLOWERS(userId));
+    return data;
+  },
+
+  getFollowing: async (userId: string): Promise<{ success: boolean; data: any[] }> => {
+    const { data } = await apiClient.get(ENDPOINTS.USER.FOLLOWING(userId));
+    return data;
+  },
+
+  /**
+   * Fetch any user's public profile.
+   * @param userId - The ID of the user whose profile to fetch.
+   * @returns User profile data.
+   */
+  getUserProfile: async (userId: string): Promise<any> => {
+    const { data } = await apiClient.get(ENDPOINTS.USER.GET_PROFILE(userId));
+    return data;
+  },
 };

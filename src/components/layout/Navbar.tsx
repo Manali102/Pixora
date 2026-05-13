@@ -1,83 +1,27 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Bell, MessageCircle, User, Plus, LogOut, LayoutDashboard, Settings, Crown } from 'lucide-react';
-import { useAuthStore } from '../../store/useAuthStore';
+import { Search } from 'lucide-react';
 import { usePinStore } from '../../store/usePinStore';
-import { Button } from '../ui/button';
-import { cn } from '../../lib/utils';
 
 export const Navbar: React.FC = () => {
-  const user = useAuthStore((store) => store.user);
-  const logout = useAuthStore((store) => store.logout);
-  const isAuthenticated = useAuthStore((store) => store.isAuthenticated);
   const searchQuery = usePinStore((store) => store.searchQuery);
   const setSearchQuery = usePinStore((store) => store.setSearchQuery);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b px-4 py-2">
-      <div className="flex items-center justify-between gap-4">
-
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b px-4 py-3 md:pl-20 transition-all duration-300">
+      <div className="flex items-center gap-4">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+        <Link to="/" className="flex items-center gap-2 group shrink-0">
+          <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-red-500/20">
             <span className="text-white font-bold text-xl">P</span>
           </div>
-          <span className="font-bold text-xl hidden sm:block">Pixora</span>
+          <span className="font-bold text-xl hidden sm:block tracking-tight">Pixora</span>
         </Link>
 
-        {/* Nav Links - Left */}
-        <div className="hidden md:flex items-center gap-2">
-          <Link 
-            to="/" 
-            className={cn(
-              "px-4 py-2 rounded-full font-semibold transition-colors",
-              location.pathname === '/' ? "bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black" : "hover:bg-muted"
-            )}
-          >
-            Home
-          </Link>
-          {user?.role === 'admin' ? (
-            <Link 
-              to="/admin" 
-              onClick={() => setIsProfileOpen(false)} 
-              className={cn(
-                "px-4 py-2 rounded-full font-semibold transition-colors flex items-center gap-1.5",
-                location.pathname === '/admin' ? "bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black" : "hover:bg-muted"
-              )}
-            >
-              Admin Panel
-            </Link>
-          ) : (
-            <Link 
-              to="/pricing" 
-              onClick={() => setIsProfileOpen(false)} 
-              className={cn(
-                "px-4 py-2 rounded-full font-semibold transition-colors border border-transparent",
-                location.pathname === '/pricing' ? "bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black" : "hover:bg-muted"
-              )}
-            >
-              Pricing
-            </Link>
-          )}
-          {isAuthenticated && (
-            <Link 
-              to="/create" 
-              className={cn(
-                "px-4 py-2 rounded-full font-semibold transition-colors flex items-center gap-1",
-                location.pathname === '/create' ? "bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black" : "hover:bg-muted"
-              )}
-            >
-              Create Pin
-            </Link>
-          )}
-        </div>
-
         {/* Search Bar */}
-        <div className="flex-1 relative group">
+        <div className="flex-1 relative group max-w-4xl mx-auto">
           <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors">
             <Search className="w-5 h-5" />
           </div>
@@ -91,77 +35,8 @@ export const Navbar: React.FC = () => {
                 navigate('/');
               }
             }}
-            className="w-full bg-secondary hover:bg-secondary/80 focus:bg-background outline-none rounded-full py-3 pl-12 pr-4 transition-all border-2 border-transparent focus:border-primary shadow-sm"
+            className="w-full bg-secondary/50 hover:bg-secondary focus:bg-background outline-none rounded-full py-2.5 pl-12 pr-4 transition-all border-2 border-transparent focus:border-primary shadow-sm"
           />
-        </div>
-
-        {/* Nav Links - Right */}
-        <div className="flex items-center gap-2 sm:gap-4">
-          {isAuthenticated ? (
-            <>
-              {/* <button className="p-2.5 rounded-full hover:bg-muted transition-colors relative">
-              <Bell className="w-6 h-6 text-muted-foreground" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-            </button>
-            <button className="p-2.5 rounded-full hover:bg-muted transition-colors">
-              <MessageCircle className="w-6 h-6 text-muted-foreground" />
-            </button> */}
-
-              <div className="relative">
-                <button
-                  onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="w-10 h-10 rounded-full overflow-hidden border-2 border-transparent hover:border-border transition-colors group"
-                >
-                  <img src={user?.avatar} alt="Profile" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                </button>
-
-                {isProfileOpen && (
-                  <div className="absolute right-0 mt-2 w-64 bg-background/95 backdrop-blur-2xl border shadow-2xl rounded-2xl overflow-hidden animate-in fade-in zoom-in duration-200 z-50">
-                    <div className="p-4 border-b">
-                      <p className="font-bold">{user?.name}</p>
-                      <p className="text-sm text-muted-foreground">{user?.email}</p>
-                      <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-primary/10 text-primary rounded-full test-sm font-bold uppercase transition-transform hover:scale-105 cursor-default">
-                        <Crown className="w-3 h-3" /> {user?.subscription}
-                      </div>
-                    </div>
-                    <div className="p-2">
-                      <Link 
-                        to="/profile" 
-                        onClick={() => setIsProfileOpen(false)} 
-                        className={cn(
-                          "flex items-center gap-3 p-2 rounded-xl transition-colors",
-                          location.pathname === '/profile' ? "bg-secondary font-semibold" : "hover:bg-secondary"
-                        )}
-                      >
-                        <User className="w-5 h-5" /> Profile
-                      </Link>
-                    </div>
-                    <div className="p-2 border-t">
-                      <button
-                        onClick={() => {
-                          logout();
-                          setIsProfileOpen(false);
-                          navigate('/login');
-                        }}
-                        className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-destructive/10 text-destructive transition-colors text-left"
-                      >
-                        <LogOut className="w-5 h-5" /> Log Out
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Link to="/login">
-                <Button variant="ghost" className="rounded-full">Log In</Button>
-              </Link>
-              <Link to="/signup">
-                <Button className="rounded-full bg-red-600 hover:bg-red-700">Sign Up</Button>
-              </Link>
-            </div>
-          )}
         </div>
       </div>
     </nav>
