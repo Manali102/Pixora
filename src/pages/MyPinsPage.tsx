@@ -6,6 +6,7 @@ import { PinCard } from '../components/ui/PinCard';
 import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Masonry from 'react-masonry-css';
+import { Loader } from '../components/ui/Loader';
 
 const breakpointColumnsObj = {
   default: 4,
@@ -28,7 +29,13 @@ const MyPinsPage: React.FC = () => {
   }, [user?.id]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+      className="w-full"
+    >
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between border-b border-border/80 pb-6 mb-8">
           <div>
@@ -45,9 +52,7 @@ const MyPinsPage: React.FC = () => {
         </div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-          </div>
+          <Loader text="Loading your pins..." className="py-20" size="lg" />
         ) : userPins.length > 0 ? (
           <Masonry
             breakpointCols={breakpointColumnsObj}
@@ -76,7 +81,7 @@ const MyPinsPage: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

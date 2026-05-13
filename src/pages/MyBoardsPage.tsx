@@ -6,6 +6,7 @@ import { useBoardStore } from '../store/useBoardStore';
 import { useModalStore } from '../store/useModalStore';
 import { BoardCard } from '../components/ui/BoardCard';
 import { Plus, Layout } from 'lucide-react';
+import { Loader } from '../components/ui/Loader';
 
 const MyBoardsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -20,7 +21,13 @@ const MyBoardsPage: React.FC = () => {
   // }, [user?.id, fetchBoards]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+      className="w-full"
+    >
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between border-b border-border/80 pb-6 mb-8">
           <div>
@@ -37,9 +44,7 @@ const MyBoardsPage: React.FC = () => {
         </div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-          </div>
+          <Loader text="Loading your boards..." className="py-20" size="lg" />
         ) : boards.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {boards.map((board) => (
@@ -64,7 +69,7 @@ const MyBoardsPage: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

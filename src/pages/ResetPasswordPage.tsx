@@ -12,6 +12,7 @@ import { authService } from '../services/authService';
 import { getErrorMessage } from '@/api/utils';
 import { buttonVariants } from '../components/ui/button';
 import { ERROR_MESSAGES } from '../config/constants';
+import { Loader } from '../components/ui/Loader';
 
 export const ResetPasswordPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -220,7 +221,7 @@ export const ResetPasswordPage: React.FC = () => {
               className="w-full py-6 rounded-2xl text-lg font-bold bg-primary hover:bg-primary/90 shadow-xl active:scale-95 transition-all group"
             >
               {isLoading ? (
-                <Loader2 className="w-6 h-6 animate-spin" />
+                <Loader size="sm" className="border-white" />
               ) : (
                 <span className="flex items-center gap-2">
                   Update Password <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

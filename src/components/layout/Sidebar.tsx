@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useAuthStore } from '../../store/useAuthStore';
+import { Avatar } from '../ui/Avatar';
 
 interface SidebarProps {
   className?: string;
@@ -65,7 +66,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
       <div className="mt-auto p-4 space-y-4">
         <div className="p-4 rounded-2xl bg-secondary/50 border border-border/50">
           <div className="flex items-center gap-3">
-            <img src={user?.avatar} alt={user?.name} className="w-10 h-10 rounded-full border border-border/50" />
+            <Avatar src={user?.avatar} name={user?.name} size="md" />
             <div className="min-w-0">
               <p className="font-bold text-sm truncate">{user?.name}</p>
               <div className="flex items-center gap-1 text-[10px] text-primary font-black uppercase">

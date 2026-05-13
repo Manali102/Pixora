@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Check, Crown, Zap, Rocket, Loader2, Sparkles } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { Button } from './ui/button';
+import { Loader } from './ui/Loader';
 
 export interface PlanDetails {
   subscription: string;
@@ -203,7 +204,7 @@ export const PricingPlans: React.FC<PricingPlansProps> = ({ isModal = false, onP
                 }`}
               >
                 {processing === plan.tier ? (
-                  <Loader2 className="w-6 h-6 animate-spin" />
+                  <Loader size="sm" className={isModal && plan.tier === 'free' ? 'border-primary' : 'border-white'} />
                 ) : isCurrentPlan ? (
                   'Current Plan'
                 ) : isSameTier ? (

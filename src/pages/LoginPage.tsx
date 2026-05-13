@@ -12,6 +12,7 @@ import { PasswordValidation } from '../components/PasswordValidation';
 import { useLoginMutation } from '@/hooks/mutations/useLoginMutation';
 import { getErrorMessage } from '@/api/utils';
 import { ERROR_MESSAGES } from '../config/constants';
+import { Loader } from '../components/ui/Loader';
 
 export const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -162,7 +163,7 @@ export const LoginPage: React.FC = () => {
             className="w-full py-5 rounded-2xl cursor-pointer text-lg font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20 active:scale-95 transition-all group"
           >
             {loginMutation.isPending || isSubmitting ? (
-              <Loader2 className="w-6 h-6 animate-spin" />
+              <Loader size="sm" className="border-white" />
             ) : (
               <span className="flex items-center gap-2">
                 Log In <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

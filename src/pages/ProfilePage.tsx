@@ -13,6 +13,8 @@ import { Button } from '../components/ui/button';
 import { useBoardStore } from '../store/useBoardStore';
 import { useModalStore } from '../store/useModalStore';
 import { BoardCard } from '../components/ui/BoardCard';
+import { Loader } from '../components/ui/Loader';
+import { Avatar } from '../components/ui/Avatar';
 
 const breakpointColumnsObj = {
   default: 4,
@@ -133,8 +135,7 @@ const ProfilePage: React.FC = () => {
   const avatarGradient = `linear-gradient(135deg, ${AVATAR_COLORS[avatarColorIdx].from}, ${AVATAR_COLORS[avatarColorIdx].to})`;
 
   return (
-    <div className="min-h-screen bg-background mt-30">
-
+    <div className="w-full pt-10">
       {/* ── Page Content ────────────────────────────── */}
 
       {/* ── Edit Profile modal ───────────────────────── */}
@@ -234,9 +235,7 @@ const ProfilePage: React.FC = () => {
                   className="px-6 py-2.5 rounded-xl font-bold bg-black hover:bg-black text-white shadow-lg active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {saving ? (
-                    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="30 60" />
-                    </svg>
+                    <Loader size="sm" className="border-white" />
                   ) : (
                     <Check className="w-4 h-4" />
                   )}
@@ -331,7 +330,7 @@ const ProfilePage: React.FC = () => {
       </AnimatePresence>
 
       {/* ── Page body ────────────────────────────────── */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 -mt-20 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -341,10 +340,11 @@ const ProfilePage: React.FC = () => {
           {/* Avatar */}
           <div className="relative group">
             <div className="w-28 h-28 rounded-2xl p-[3px] shadow-[var(--shadow-glow)] ring-2 ring-primary/50 overflow-hidden bg-muted">
-              <img 
+              <Avatar 
                 src={user?.avatar} 
-                alt={user?.name} 
-                className="w-full h-full rounded-[13px] object-cover"
+                name={user?.name} 
+                variant="square"
+                className="w-full h-full rounded-[13px] border-none"
               />
             </div>
             <Tooltip content="Change avatar color" side="bottom">

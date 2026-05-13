@@ -11,6 +11,8 @@ import { Tooltip } from '../components/ui/Tooltip';
 import { Button } from '../components/ui/button';
 import { userService } from '../services/userService';
 import { cn } from '../lib/utils';
+import { Loader } from '../components/ui/Loader';
+import { Avatar } from '../components/ui/Avatar';
 
 const breakpointColumnsObj = {
   default: 4,
@@ -82,11 +84,7 @@ const CreatorProfilePage: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <Loader fullPage size="xl" text="Loading creator profile..." />;
   }
 
   if (!creator) {
@@ -102,7 +100,12 @@ const CreatorProfilePage: React.FC = () => {
   const totalLikes = userPins.reduce((s, p) => s + (p.likes || 0), 0);
 
   return (
-    <div className="min-h-screen bg-background mt-30">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="w-full"
+    >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -113,10 +116,11 @@ const CreatorProfilePage: React.FC = () => {
           {/* Avatar */}
           <div className="relative group">
             <div className="w-28 h-28 rounded-2xl p-[3px] shadow-[var(--shadow-glow)] ring-2 ring-primary/50 overflow-hidden bg-muted">
-              <img 
-                src={creator.profile_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${creator.id}`} 
-                alt={creator.name} 
-                className="w-full h-full rounded-[13px] object-cover"
+              <Avatar 
+                src={creator.profile_url} 
+                name={creator.name} 
+                variant="square"
+                className="w-full h-full rounded-[13px] border-none"
               />
             </div>
           </div>
@@ -229,7 +233,7 @@ const CreatorProfilePage: React.FC = () => {
           )}
         </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

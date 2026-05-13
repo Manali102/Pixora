@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
+import { Loader } from '../ui/Loader';
 
 interface PublicRouteProps {
   children: React.ReactNode;
@@ -18,17 +19,13 @@ export const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      setRedirectPath(location.state?.from?.pathname || "/");
+      setRedirectPath("/");
     }
-  }, [isAuthenticated, location.state]);
+  }, [isAuthenticated]);
   
   // If we are still loading the auth state, don't redirect yet
   if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
+    return <Loader fullPage size="xl" />;
   }
 
   if (isAuthenticated) {

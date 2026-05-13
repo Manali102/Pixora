@@ -9,6 +9,8 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { Button } from './button';
 import { cn } from '../../lib/utils';
 import { BoardSelector } from './BoardSelector';
+import { Avatar } from './Avatar';
+import { useNavigate } from 'react-router-dom';
 
 interface PinCardProps {
   pin: Pin;
@@ -20,6 +22,7 @@ interface PinCardProps {
  * @returns JSX.Element
  */
 export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
+  const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
   const [showBoardSelector, setShowBoardSelector] = useState(false);
   const { toggleLike, toggleSave, setSelectedPin } = usePinStore();
@@ -165,7 +168,12 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
           className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
           onClick={() => navigate(isOwnPin ? '/profile' : `/creator/${pin.authorId}`)}
         >
-          <img src={pin.authorAvatar} alt={pin.authorName} className="w-7 h-7 rounded-full object-cover shadow-sm" />
+          <Avatar 
+            src={pin.authorAvatar} 
+            name={pin.authorName} 
+            size="sm" 
+            className="w-7 h-7 shadow-sm" 
+          />
           <span className="text-sm font-semibold truncate max-w-[120px]">{pin.authorName}</span>
           {!isOwnPin && (
             <button

@@ -52,9 +52,9 @@ const App: React.FC = () => {
 
       <main className={cn(
         "transition-all duration-300",
-        showNavbar ? "pt-24 pb-20 md:pb-12 px-4 sm:px-8 md:pl-72" : ""
+        showNavbar ? "pt-24 pb-20 md:pb-12 px-4 sm:px-8 md:pl-64" : ""
       )}>
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<ProtectedRoute>
               <HomePage />

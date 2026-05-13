@@ -12,6 +12,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { usePinStore } from '../store/usePinStore';
 import { Button } from '../components/ui/button';
 import { postService } from '../services/postService';
+import { Loader } from '../components/ui/Loader';
 
 export const CreatePinPage: React.FC = () => {
   const user = useAuthStore((store) => store.user);
@@ -445,7 +446,7 @@ export const CreatePinPage: React.FC = () => {
                   {isGeneratingAI ? (
                     <div className="py-12 flex flex-col items-center justify-center gap-4">
                       <div className="relative">
-                        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                        <Loader size="lg" className="border-primary" />
                         <Sparkles className="w-6 h-6 text-primary absolute -top-1 -right-1 animate-pulse" />
                       </div>
                       <div className="text-center">
@@ -532,7 +533,7 @@ export const CreatePinPage: React.FC = () => {
                 >
                   <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-[0.18em] text-primary">
                     <span className="flex items-center gap-2">
-                      <Loader2 className="w-3 h-3 animate-spin" /> Publishing…
+                      <Loader size="sm" /> Publishing…
                     </span>
                     <span>{uploadProgress}%</span>
                   </div>
@@ -560,7 +561,7 @@ export const CreatePinPage: React.FC = () => {
               <span className="relative flex items-center justify-center gap-2.5">
                 {isUploading ? (
                   <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <Loader size="sm" className="border-white" />
                     Processing…
                   </>
                 ) : (

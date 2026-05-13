@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import { PricingPlans, type PlanDetails } from '../components/PricingPlans';
 import { paymentService } from '../services/paymentService';
 import { toast } from 'sonner';
+import { Loader } from '../components/ui/Loader';
 
 export const PricingPage: React.FC = () => {
   const { user, fetchProfile } = useAuthStore();
@@ -19,12 +20,7 @@ export const PricingPage: React.FC = () => {
   }, [fetchProfile]);
 
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-muted-foreground animate-pulse font-medium">Fetching best deals for you...</p>
-      </div>
-    );
+    return <Loader fullPage text="Fetching best deals for you..." size="xl" />;
   }
 
   const handleUpgrade = async (planDetails: PlanDetails) => {

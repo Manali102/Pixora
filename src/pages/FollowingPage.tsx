@@ -6,6 +6,8 @@ import { userService } from '../services/userService';
 import { Users, Search, UserMinus } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
+import { Loader } from '../components/ui/Loader';
+import { Avatar } from '../components/ui/Avatar';
 
 const FollowingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -50,8 +52,14 @@ const FollowingPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+      className="w-full"
+    >
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/80 pb-6 mb-8">
           <div>
             <h1 className="font-display text-3xl font-bold text-foreground tracking-tight">Following</h1>
@@ -71,11 +79,9 @@ const FollowingPage: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-          </div>
+          <Loader text="Loading following list..." className="py-20" size="lg" />
         ) : filteredFollowing.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredFollowing.map((creator) => (
               <div 
                 key={creator.id} 
@@ -85,10 +91,11 @@ const FollowingPage: React.FC = () => {
                   className="flex-1 flex items-center gap-4 cursor-pointer min-w-0"
                   onClick={() => navigate(`/creator/${creator.id}`)}
                 >
-                  <img 
-                    src={creator.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${creator.id}`} 
-                    alt={creator.name} 
-                    className="w-14 h-14 rounded-full border-2 border-border/50 object-cover group-hover:border-primary/50 transition-colors" 
+                  <Avatar 
+                    src={creator.avatar} 
+                    name={creator.name} 
+                    size="lg"
+                    className="border-2 group-hover:border-primary/50 transition-colors" 
                   />
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-foreground truncate group-hover:text-primary transition-colors">{creator.name}</p>
@@ -128,7 +135,7 @@ const FollowingPage: React.FC = () => {
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
