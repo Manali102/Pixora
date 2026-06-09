@@ -16,6 +16,8 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { InterestSelectionModal } from '../components/InterestSelectionModal';
 import { PricingSelectionModal } from '../components/PricingSelectionModal';
 import { userMapper } from '@/api/mappers';
+import { paymentService } from '../services/paymentService';
+import { toast } from 'sonner';
 
 export const SignupPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -77,20 +79,50 @@ export const SignupPage: React.FC = () => {
     }
   };
 
-  const handlePricingSelectionComplete = (planData?: any) => {
-    setShowPricingModal(false);
-    if (signedUpUser) {
-      let finalUser = { ...signedUpUser };
-      if (planData) {
-        finalUser = {
-          ...finalUser,
-          subscription: planData.subscription,
-          storageLimit: planData.storageLimit,
-          billingCycle: planData.billingCycle
-        };
-      }
-      setAuth(finalUser);
+  const handlePricingSelectionComplete = async (planData?: any) => {
+    if (!signedUpUser) {
+      setShowPricingModal(false);
+      return;
     }
+
+    if (planData && planData.subscription !== 'free') {
+      try {
+        const response = await paymentService.createCheckoutSession({
+          email: signedUpUser.email,
+          plan_type: planData.subscription,
+          period: planData.billingCycle,
+          userId: signedUpUser.id
+        });
+
+        if (response.success) {
+          if (response.data.upgraded) {
+            toast.success('Subscription upgraded successfully!');
+            setAuth({
+              ...signedUpUser,
+              subscription: planData.subscription,
+              storageLimit: planData.storageLimit,
+              billingCycle: planData.billingCycle
+            });
+            setShowPricingModal(false);
+            return;
+          } else if (response.data.url) {
+            // Set user session locally before redirecting to ensure we stay logged in upon return
+            setAuth(signedUpUser);
+            // Redirect to Stripe checkout
+            window.location.href = response.data.url;
+            return;
+          }
+        }
+      } catch (error: any) {
+        console.error('Plan selection error:', error);
+        const message = error.response?.data?.error?.message || 'Failed to initiate payment. Proceeding with free plan.';
+        toast.error(message);
+      }
+    }
+    
+    // Default behavior or free plan
+    setShowPricingModal(false);
+    setAuth(signedUpUser);
   };
 
   // Get error message from the API

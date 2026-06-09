@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { LazyVideo } from './LazyVideo';
 import { Download, Share2, Heart, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Pin } from '@/types/type';
@@ -69,12 +70,8 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
     >
       <div className="relative overflow-hidden rounded-2xl bg-muted transition-all duration-300">
         {pin.type === 'video' ? (
-          <video
+          <LazyVideo
             src={pin.imageUrl}
-            autoPlay
-            muted
-            loop
-            playsInline
             className={`w-full h-auto object-cover transition-transform duration-700 ${isHovered ? 'scale-110 blur-[2px]' : 'scale-100'}`}
           />
         ) : (

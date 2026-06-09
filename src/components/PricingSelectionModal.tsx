@@ -4,7 +4,7 @@ import { PricingPlans, PlanDetails } from './PricingPlans';
 
 interface PricingSelectionModalProps {
   isOpen: boolean;
-  onComplete: (planData: PlanDetails) => void;
+  onComplete: (planData: PlanDetails) => Promise<void> | void;
   onSkip: () => void;
 }
 
@@ -18,11 +18,10 @@ export const PricingSelectionModal: React.FC<PricingSelectionModalProps> = ({
    * Handles the plan upgrade process.
    * @param planDetails - The details of the selected plan.
    */
-  const handleUpgrade = (planDetails: PlanDetails) => {
+  const handleUpgrade = async (planDetails: PlanDetails) => {
     // Optional delay to show processing spinner in PricingPlans before closing
-    setTimeout(() => {
-      onComplete(planDetails);
-    }, 1200);
+    await new Promise(resolve => setTimeout(resolve, 800));
+    await onComplete(planDetails);
   };
 
   if (!isOpen) return null;
