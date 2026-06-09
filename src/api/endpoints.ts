@@ -34,6 +34,8 @@ const POSTS = {
   SUGGESTION_STATUS: (id: string) => `/api/v1/posts/suggestions/${id}`,
   GET_FOLLOWING: '/api/v1/posts/following',
   GET_USER_POSTS: (id: string) => `/api/v1/posts/user/${id}`,
+  GET_POST: (id: string) => `/api/v1/posts/${id}`,
+  DELETE: (id: string) => `/api/v1/posts/${id}`,
 } as const;
 
 // payment endpoints

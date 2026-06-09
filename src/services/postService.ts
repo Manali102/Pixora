@@ -109,4 +109,28 @@ export const postService = {
     );
     return data;
   },
+
+  /**
+   * Fetch a single post by ID.
+   * @param id - The post ID.
+   * @returns The post data.
+   */
+  getPost: async (id: string): Promise<CreatePostResponse> => {
+    const { data } = await apiClient.get<CreatePostResponse>(
+      ENDPOINTS.POSTS.GET_POST(id)
+    );
+    return data;
+  },
+
+  /**
+   * Delete a post by ID.
+   * @param id - The post ID.
+   * @returns Success response.
+   */
+  deletePost: async (id: string): Promise<CreatePostResponse> => {
+    const { data } = await apiClient.delete<CreatePostResponse>(
+      ENDPOINTS.POSTS.DELETE(id)
+    );
+    return data;
+  },
 };

@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { X, Share2, Heart, Send, Download, Link2, Check } from 'lucide-react';
+import { X, Share2, Heart, Send, Download, Link2, Check, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { usePinStore } from '../../store/usePinStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { Button } from './button';
@@ -16,11 +17,12 @@ import { WhatsAppIcon, MessengerIcon, FacebookIcon, XIcon } from '../icons/Socia
  */
 export const PinModal: React.FC = () => {
   const navigate = useNavigate();
-  const { selectedPin, setSelectedPin, toggleLike, toggleSave, addComment } = usePinStore();
+  const { selectedPin, setSelectedPin, toggleLike, toggleSave, addComment, deletePin } = usePinStore();
   const { user, followUser, unfollowUser } = useAuthStore();
   const [comment, setComment] = useState('');
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const isFollowing = user?.followingIds?.includes(selectedPin?.authorId || '') || false;
@@ -67,10 +69,31 @@ export const PinModal: React.FC = () => {
   /**
    * Handles copying of the pin link
    */
+  const pinUrl = `${window.location.origin}/pin/${selectedPin.id}`;
+
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
+    navigator.clipboard.writeText(pinUrl);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  /**
+   * Handles deleting the pin
+   */
+  const handleDelete = async () => {
+    if (!selectedPin) return;
+    setIsDeleting(true);
+    try {
+      await deletePin(selectedPin.id);
+      toast.success("Pin deleted successfully!");
+      setSelectedPin(null);
+      navigate('/');
+    } catch (error: any) {
+      console.error("Failed to delete pin:", error);
+      toast.error(error?.message || "Failed to delete pin");
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   // share options for the pin
@@ -87,28 +110,28 @@ export const PinModal: React.FC = () => {
       icon: <WhatsAppIcon className="w-6 h-6" />, 
       bg: 'bg-[#25D366]', 
       color: 'text-white',
-      action: () => window.open(`https://wa.me/?text=${encodeURIComponent(selectedPin.title + ' ' + window.location.href)}`, '_blank')
+      action: () => window.open(`https://wa.me/?text=${encodeURIComponent(selectedPin.title + ' ' + pinUrl)}`, '_blank')
     },
     { 
       name: 'Messenger', 
       icon: <MessengerIcon className="w-6 h-6" />, 
       bg: 'bg-[#0084FF]', 
       color: 'text-white',
-      action: () => window.open(`https://www.facebook.com/dialog/send?link=${encodeURIComponent(window.location.href)}&app_id=614318355601247&redirect_uri=${encodeURIComponent(window.location.href)}`, '_blank')
+      action: () => window.open(`https://www.facebook.com/dialog/send?link=${encodeURIComponent(pinUrl)}&app_id=614318355601247&redirect_uri=${encodeURIComponent(pinUrl)}`, '_blank')
     },
     { 
       name: 'Facebook', 
       icon: <FacebookIcon className="w-6 h-6" />, 
       bg: 'bg-[#1877F2]', 
       color: 'text-white',
-      action: () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank')
+      action: () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pinUrl)}`, '_blank')
     },
     { 
       name: 'X', 
       icon: <XIcon className="w-6 h-6" />, 
       bg: 'bg-black', 
       color: 'text-white',
-      action: () => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(selectedPin.title)}`, '_blank')
+      action: () => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(pinUrl)}&text=${encodeURIComponent(selectedPin.title)}`, '_blank')
     },
   ];
 
@@ -134,12 +157,12 @@ export const PinModal: React.FC = () => {
             className="relative w-full max-w-5xl bg-white dark:bg-zinc-900 rounded-[32px] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] flex flex-col md:flex-row max-h-[90vh] h-fit overflow-visible"
           >
             {/* Close Button - Top Right Outside/Edge */}
-            <Tooltip content="Close" className="absolute top-6 right-6 z-30" side="bottom">
+            <Tooltip content="Close" className="absolute top-0 right-1 z-30" side="bottom">
               <Button 
                   onClick={() => setSelectedPin(null)}
                   variant="ghost" 
                   size="icon" 
-                  className="rounded-full h-10 w-10 bg-white/10 hover:bg-white/20 md:bg-zinc-100 md:hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 backdrop-blur-md"
+                  className="rounded-full h-10 w-10"
               >
                   <X className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
               </Button>
@@ -177,8 +200,8 @@ export const PinModal: React.FC = () => {
             {/* Right side: Details */}
             <div className="w-full md:w-[40%] flex flex-col p-6 md:p-10 overflow-y-auto bg-white dark:bg-zinc-900 border-l border-zinc-100 dark:border-zinc-800 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               {/* Top Bar Actions */}
-              <div className="flex items-center justify-between mb-8 pr-12">
-                <div className="flex items-center gap-2 relative">
+              <div className="flex items-center justify-between mb-8 pr-16 md:pr-20">
+                <div className="flex items-center gap-1 relative">
                   <Tooltip content={selectedPin.isLiked ? "Unlike" : "Like"}>
                     <Button 
                       variant="ghost" 
@@ -273,6 +296,16 @@ export const PinModal: React.FC = () => {
                     </Button>
                   </Tooltip>
                 </div>
+                {isOwnPin && (
+                  <Button
+                    disabled={isDeleting}
+                    onClick={handleDelete}
+                    variant="outline"
+                    className="rounded-full px-6 h-12 font-bold transition-all text-base border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-950/30 mr-2 disabled:opacity-70"
+                  >
+                    {isDeleting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Delete'}
+                  </Button>
+                )}
                 <Button
                   onClick={() => toggleSave(selectedPin.id)}
                   className={cn(

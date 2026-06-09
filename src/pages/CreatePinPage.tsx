@@ -107,19 +107,24 @@ export const CreatePinPage: React.FC = () => {
       });
 
       if (response.success) {
-        const pinData = response.data || {
-          id: `p${Date.now()}`,
-          title: title || 'Untitled Pin',
-          description: description || '',
-          imageUrl: preview || '',
-          authorId: user?.id || 'u1',
-          authorName: user?.name || 'Admin',
+        const rd = response.data?.post || response.data; // raw backend data
+        const pinData = {
+          id: rd?._id || rd?.id || `p${Date.now()}`,
+          title: rd?.title || title || 'Untitled Pin',
+          description: rd?.description || description || '',
+          imageUrl: preview || '', // Use local blob URL — backend media_url is 'processing' at this point
+          authorId: rd?.user_id?._id || rd?.user_id || user?.id || 'u1',
+          authorName: user?.name || 'Anonymous',
           authorAvatar: user?.avatar || '',
           likes: 0,
-          category: category || 'General',
-          createdAt: new Date().toISOString(),
+          category: rd?.category || category || 'General',
+          createdAt: rd?.created_at || new Date().toISOString(),
           type: (file.type.startsWith('video') ? 'video' : 'image') as 'image' | 'video',
           views: 0,
+          isLiked: false,
+          isSaved: false,
+          comments: [],
+          authorFollowers: 0,
         };
 
         addPin(pinData);
@@ -194,9 +199,9 @@ export const CreatePinPage: React.FC = () => {
           >
             <div className="aspect-[3/4] relative">
               {createdPin.type === 'video' ? (
-                <video src={createdPin.imageUrl} autoPlay muted loop className="w-full h-full object-cover" />
+                <video src={preview || createdPin.mediaUrl || createdPin.imageUrl} autoPlay muted loop className="w-full h-full object-cover" />
               ) : (
-                <img src={createdPin.imageUrl} alt={createdPin.title} className="w-full h-full object-cover" />
+                <img src={preview || createdPin.mediaUrl || createdPin.imageUrl} alt={createdPin.title} className="w-full h-full object-cover" />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6">
@@ -216,7 +221,6 @@ export const CreatePinPage: React.FC = () => {
           <Button
             onClick={() => {
               setSelectedPin(createdPin);
-              navigate('/');
             }}
             className="flex-1 py-7 rounded-[1.6rem] bg-foreground text-background font-black uppercase tracking-widest hover:opacity-90 transition-opacity"
           >
@@ -355,15 +359,15 @@ export const CreatePinPage: React.FC = () => {
                   )}
 
                   {/* Overlay on hover */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center">
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center">
                     <button
                       type="button"
                       onClick={removeFile}
-                      className="w-14 h-14 rounded-full bg-white/15 backdrop-blur-lg border border-white/25 text-white flex items-center justify-center hover:bg-red-500 hover:border-red-500 transition-all duration-200 shadow-xl"
+                      className="w-16 h-16 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white flex items-center justify-center hover:bg-red-600 hover:border-red-600 hover:scale-110 transition-all duration-200 shadow-2xl"
                     >
-                      <X className="w-6 h-6" />
+                      <X className="w-8 h-8" strokeWidth={2.5} />
                     </button>
-                    <span className="mt-3 text-white/70 text-xs font-semibold">Remove & re-upload</span>
+                    <span className="mt-4 text-white font-bold drop-shadow-md tracking-wide">Remove & re-upload</span>
                   </div>
 
                   {/* File type badge */}

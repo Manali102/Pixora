@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { LazyVideo } from './LazyVideo';
-import { Download, Share2, Heart, Check } from 'lucide-react';
+import { Download, Share2, Heart, Check, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Pin } from '@/types/type';
 import { usePinStore } from '../../store/usePinStore';
@@ -26,7 +26,7 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
   const [showBoardSelector, setShowBoardSelector] = useState(false);
-  const { toggleLike, toggleSave, setSelectedPin } = usePinStore();
+  const { toggleLike, toggleSave, setSelectedPin, deletePin } = usePinStore();
   const { addPinToBoard, removePinFromBoard, boards } = useBoardStore();
   const openModal = useModalStore((s) => s.openModal);
   const { user, followUser, unfollowUser } = useAuthStore();
@@ -43,7 +43,7 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
    */
   const handleShare = (event: React.MouseEvent) => {
     event.stopPropagation();
-    navigator.clipboard.writeText(`https://pixora.app/pin/${pin.id}`);
+    navigator.clipboard.writeText(`${window.location.origin}/pin/${pin.id}`);
     alert('Link copied to clipboard!');
   };
 
@@ -128,32 +128,6 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
                 </AnimatePresence>
               </div>
 
-              {/* Bottom Row: Actions */}
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex gap-2">
-                  <button 
-                    onClick={handleShare}
-                    className="w-10 h-10 flex items-center justify-center bg-white/80 hover:bg-white rounded-full text-black transition-colors backdrop-blur-sm"
-                  >
-                    <Share2 className="w-5 h-5" />
-                  </button>
-                  <button 
-                    onClick={(event) => event.stopPropagation()}
-                    className="w-10 h-10 flex items-center justify-center bg-white/80 hover:bg-white rounded-full text-black transition-colors backdrop-blur-sm"
-                  >
-                    <Download className="w-5 h-5" />
-                  </button>
-                </div>
-                <button 
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    toggleLike(pin.id);
-                  }}
-                  className={`w-10 h-10 flex items-center justify-center rounded-full transition-all backdrop-blur-sm ${pin.isLiked ? 'bg-red-500 text-white' : 'bg-white/80 text-black hover:bg-white'}`}
-                >
-                  <Heart className={`w-5 h-5 ${pin.isLiked ? 'fill-current' : ''}`} />
-                </button>
-              </div>
             </motion.div>
           )}
         </AnimatePresence>

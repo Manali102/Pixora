@@ -3,6 +3,25 @@ import { create } from 'zustand';
 import { Pin } from '@/types/type';
 import { postService } from '@/services/postService';
 
+export const transformBackendPin = (post: any): Pin => ({
+  id: post._id,
+  title: post.title || 'Untitled',
+  description: post.description || '',
+  imageUrl: post.media_url,
+  authorId: post.user_id?._id || 'unknown',
+  authorName: post.user_id?.name || 'Anonymous',
+  authorAvatar: post.user_id?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post._id}`,
+  likes: post.totalLikes || 0,
+  category: post.category || 'General',
+  createdAt: post.created_at,
+  type: post.resource_type === 'video' ? 'video' : 'image',
+  isLiked: false,
+  isSaved: false,
+  comments: [],
+  authorFollowers: post.authorFollowers || 0,
+  views: post.views || 0,
+});
+
 interface PinState {
   pins: Pin[];
   isLoading: boolean;
@@ -16,10 +35,11 @@ interface PinState {
   setSearchQuery: (query: string) => void;
   setSelectedPin: (pin: Pin | null) => void;
   addPin: (pin: Pin) => void;
-  deletePin: (id: string) => void;
+  deletePin: (id: string) => Promise<void>;
   toggleLike: (id: string) => void;
   toggleSave: (id: string) => void;
   addComment: (pinId: string, comment: string) => void;
+  fetchPinById: (id: string) => Promise<void>;
 }
 
 export const usePinStore = create<PinState>()((set, get) => ({
@@ -40,24 +60,7 @@ export const usePinStore = create<PinState>()((set, get) => ({
       
       if (response.success && response.data?.posts) {
         // Transform backend posts to frontend Pin interface
-        const transformedPins: Pin[] = response.data.posts.map((post: any) => ({
-          id: post._id,
-          title: post.title || 'Untitled',
-          description: post.description || '',
-          imageUrl: post.media_url,
-          authorId: post.user_id?._id || 'unknown',
-          authorName: post.user_id?.name || 'Anonymous',
-          authorAvatar: post.user_id?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post._id}`,
-          likes: post.totalLikes || 0,
-          category: post.category || 'General',
-          createdAt: post.created_at,
-          type: post.resource_type === 'video' ? 'video' : 'image',
-          isLiked: false, // Default for now
-          isSaved: false, // Default for now
-          comments: [], // Comments will be loaded on demand or if included in backend
-          authorFollowers: post.authorFollowers || 0,
-          views: post.views || 0,
-        }));
+        const transformedPins: Pin[] = response.data.posts.map(transformBackendPin);
         
         set({ pins: transformedPins, isLoading: false });
       } else {
@@ -74,24 +77,7 @@ export const usePinStore = create<PinState>()((set, get) => ({
     try {
       const response = await postService.getUserPosts(userId);
       if (response.success && response.data?.posts) {
-        const transformedPins: Pin[] = response.data.posts.map((post: any) => ({
-          id: post._id,
-          title: post.title || 'Untitled',
-          description: post.description || '',
-          imageUrl: post.media_url,
-          authorId: post.user_id?._id || 'unknown',
-          authorName: post.user_id?.name || 'Anonymous',
-          authorAvatar: post.user_id?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post._id}`,
-          likes: post.totalLikes || 0,
-          category: post.category || 'General',
-          createdAt: post.created_at,
-          type: post.resource_type === 'video' ? 'video' : 'image',
-          isLiked: false,
-          isSaved: false,
-          comments: [],
-          authorFollowers: post.authorFollowers || 0,
-          views: post.views || 0,
-        }));
+        const transformedPins: Pin[] = response.data.posts.map(transformBackendPin);
         set({ userPins: transformedPins, isLoading: false });
       } else {
         set({ userPins: [], isLoading: false });
@@ -111,11 +97,42 @@ export const usePinStore = create<PinState>()((set, get) => ({
 
   setSelectedPin: (pin: Pin | null) => set({ selectedPin: pin }),
 
+  fetchPinById: async (id: string) => {
+    set({ isLoading: true });
+    try {
+      const response = await postService.getPost(id);
+      if (response.success && response.data?.post) {
+        const post = response.data.post;
+        const transformedPin: Pin = transformBackendPin(post);
+        set({ selectedPin: transformedPin, isLoading: false });
+      } else {
+        set({ selectedPin: null, isLoading: false });
+      }
+    } catch (error) {
+      console.error('Failed to fetch pin:', error);
+      set({ selectedPin: null, isLoading: false });
+    }
+  },
+
   addPin: (pin: Pin) =>
     set((state) => ({ pins: [pin, ...state.pins] })),
 
-  deletePin: (id: string) =>
-    set((state) => ({ pins: state.pins.filter((p) => p.id !== id) })),
+  deletePin: async (id: string) => {
+    try {
+      const response = await postService.deletePost(id);
+      if (response.success) {
+        set((state) => ({ 
+          pins: state.pins.filter((pin) => pin.id !== id),
+          userPins: state.userPins.filter((pin) => pin.id !== id)
+        }));
+      } else {
+        throw new Error(response.message || 'Failed to delete pin');
+      }
+    } catch (error) {
+      console.error('Failed to delete pin:', error);
+      throw error;
+    }
+  },
 
   addComment: (pinId: string, text: string) =>
     set((state) => {
@@ -128,14 +145,14 @@ export const usePinStore = create<PinState>()((set, get) => ({
         createdAt: new Date().toISOString(),
       };
 
-      const updatedPins = state.pins.map((p) =>
-        p.id === pinId 
-          ? { ...p, comments: [...(p.comments || []), newComment] }
-          : p
+      const updatedPins = state.pins.map((pin) =>
+        pin.id === pinId 
+          ? { ...pin, comments: [...(pin.comments || []), newComment] }
+          : pin
       );
 
       const updatedSelectedPin = state.selectedPin?.id === pinId
-        ? updatedPins.find(p => p.id === pinId) || null
+        ? updatedPins.find(pin => pin.id === pinId) || null
         : state.selectedPin;
 
       return {
@@ -146,14 +163,14 @@ export const usePinStore = create<PinState>()((set, get) => ({
 
   toggleLike: (id: string) =>
     set((state) => {
-      const updatedPins = state.pins.map((p) =>
-        p.id === id
-          ? { ...p, isLiked: !p.isLiked, likes: p.isLiked ? p.likes - 1 : p.likes + 1 }
-          : p
+      const updatedPins = state.pins.map((pin) =>
+        pin.id === id
+          ? { ...pin, isLiked: !pin.isLiked, likes: pin.isLiked ? pin.likes - 1 : pin.likes + 1 }
+          : pin
       );
       
       const updatedSelectedPin = state.selectedPin?.id === id
-        ? updatedPins.find(p => p.id === id) || null
+        ? updatedPins.find(pin => pin.id === id) || null
         : state.selectedPin;
 
       return {
@@ -164,12 +181,12 @@ export const usePinStore = create<PinState>()((set, get) => ({
 
   toggleSave: (id: string) =>
     set((state) => {
-      const updatedPins = state.pins.map((p) =>
-        p.id === id ? { ...p, isSaved: !p.isSaved } : p
+      const updatedPins = state.pins.map((pin) =>
+        pin.id === id ? { ...pin, isSaved: !pin.isSaved } : pin
       );
 
       const updatedSelectedPin = state.selectedPin?.id === id
-        ? updatedPins.find(p => p.id === id) || null
+        ? updatedPins.find(pin => pin.id === id) || null
         : state.selectedPin;
 
       return {
@@ -185,14 +202,14 @@ export const useFilteredPins = () => {
   const searchQuery = usePinStore((state) => state.searchQuery);
 
   return React.useMemo(() => {
-    const q = searchQuery.toLowerCase().trim();
-    if (!q) return pins;
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return pins;
 
     return pins.filter(
       (pin) =>
-        pin.title.toLowerCase().includes(q) ||
-        pin.category.toLowerCase().includes(q) ||
-        pin.description.toLowerCase().includes(q)
+        pin.title.toLowerCase().includes(query) ||
+        pin.category.toLowerCase().includes(query) ||
+        pin.description.toLowerCase().includes(query)
     );
   }, [pins, searchQuery]);
 };

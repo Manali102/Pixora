@@ -23,7 +23,12 @@ const FollowingPage: React.FC = () => {
     try {
       const response = await userService.getFollowing(user.id);
       if (response.success) {
-        setFollowingList(response.data);
+        const mapped = response.data.map((user: any) => ({
+          ...user,
+          id: user._id || user.id,
+          avatar: user.profile_url || user.avatar,
+        }));
+        setFollowingList(mapped);
       }
     } catch (error) {
       console.error('Failed to fetch following:', error);

@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { usePinStore } from '../store/usePinStore';
 import { PinCard } from '../components/ui/PinCard';
-import { Heart, Share2, Eye, MapPin, Globe, Check } from 'lucide-react';
+import { Heart, Share2, MapPin, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import Masonry from 'react-masonry-css';
 import { Tooltip } from '../components/ui/Tooltip';
@@ -96,8 +96,7 @@ const CreatorProfilePage: React.FC = () => {
     );
   }
 
-  const totalViews = userPins.reduce((s, p) => s + (p.views || 0), 0);
-  const totalLikes = userPins.reduce((s, p) => s + (p.likes || 0), 0);
+
 
   return (
     <motion.div
@@ -160,46 +159,7 @@ const CreatorProfilePage: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* Stats Bento Grid */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8"
-        >
-          {/* Total Views */}
-          <div className="glass-card-hover border border-border/90 rounded-2xl p-5 text-center">
-            <div className="flex items-center justify-center gap-2.5 mb-3">
-              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Eye className="w-4.5 h-4.5 text-primary" />
-              </div>
-              <span className="label-dim">Public Views</span>
-            </div>
-            <span className="stat-number text-foreground">{totalViews.toLocaleString()}</span>
-          </div>
 
-          {/* Followers */}
-          <div className="glass-card-hover border border-border/90 rounded-2xl p-5 text-center">
-            <div className="flex items-center justify-center gap-2.5 mb-3">
-              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Heart className="w-4.5 h-4.5 text-primary" />
-              </div>
-              <span className="label-dim">Followers</span>
-            </div>
-            <span className="stat-number text-foreground">{creator.followers_count?.toLocaleString() || 0}</span>
-          </div>
-
-          {/* Following */}
-          <div className="glass-card-hover border border-border/90 rounded-2xl p-5 text-center">
-            <div className="flex items-center justify-center gap-2.5 mb-3">
-              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Globe className="w-4.5 h-4.5 text-primary" />
-              </div>
-              <span className="label-dim">Following</span>
-            </div>
-            <span className="stat-number text-foreground">{creator.following_count?.toLocaleString() || 0}</span>
-          </div>
-        </motion.div>
 
         {/* Pins Section */}
         <motion.div

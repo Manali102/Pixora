@@ -21,6 +21,7 @@ import MyPinsPage from './pages/MyPinsPage';
 import MyBoardsPage from './pages/MyBoardsPage';
 import FollowingPage from './pages/FollowingPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { PinDetailPage } from './pages/PinDetailPage';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { PublicRoute } from './components/layout/PublicRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -152,6 +153,12 @@ const App: React.FC = () => {
             <Route path="/create" element={
               <ProtectedRoute>
                 <CreatePinPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/pin/:id" element={
+              <ProtectedRoute>
+                <PinDetailPage />
               </ProtectedRoute>
             } />
 
