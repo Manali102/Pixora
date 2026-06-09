@@ -14,11 +14,11 @@ const MyBoardsPage: React.FC = () => {
   const { boards, isLoading } = useBoardStore();
   const openModal = useModalStore((s) => s.openModal);
 
-  // useEffect(() => {
-  //   if (user?.id) {
-  //     fetchBoards(user.id);
-  //   }
-  // }, [user?.id, fetchBoards]);
+  useEffect(() => {
+    if (user?.id) {
+      useBoardStore.getState().fetchBoards();
+    }
+  }, [user?.id]);
 
   return (
     <motion.div

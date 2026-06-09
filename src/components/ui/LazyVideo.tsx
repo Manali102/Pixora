@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { Video } from 'lucide-react';
 
 interface LazyVideoProps {
   src: string;
@@ -83,7 +84,10 @@ export const LazyVideo: React.FC<LazyVideoProps> = ({
     <div ref={containerRef} className={`relative ${className}`}>
       {/* Shimmer skeleton while video isn't ready */}
       {!isReady && (
-        <div className="absolute inset-0 bg-muted animate-pulse rounded-2xl" />
+        <div className="absolute inset-0 bg-secondary/50 animate-pulse flex items-center justify-center rounded-2xl overflow-hidden z-10 pointer-events-none">
+          <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 absolute inset-0" />
+          <Video className="w-8 h-8 text-primary/30 animate-pulse relative z-10" />
+        </div>
       )}
 
       {isNearViewport && (

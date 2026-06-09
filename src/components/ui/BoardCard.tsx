@@ -1,9 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Board, Pin } from '@/types/type';
-import { usePinStore } from '@/store/usePinStore';
+import { Board } from '@/types/type';
 import { Lock, MoreHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ProgressiveImage } from './ProgressiveImage';
 
 interface BoardCardProps {
   board: Board;
@@ -11,11 +11,9 @@ interface BoardCardProps {
 
 export const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
   const navigate = useNavigate();
-  const pins = usePinStore((state) => state.pins);
-  const boardPins = pins.filter((p) => board.pinIds.includes(p.id));
-  
+
   // Get up to 3 preview images
-  const previewPins = boardPins.slice(0, 3);
+  const previewPins = board.pins?.slice(0, 3) || [];
 
   return (
     <motion.div
@@ -27,33 +25,45 @@ export const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
         {previewPins.length > 0 ? (
           <>
             <div className="col-span-2 h-full">
-              <img
+              <ProgressiveImage
                 src={previewPins[0]?.imageUrl}
                 alt=""
                 className="w-full h-full object-cover"
+                containerClassName="w-full h-full"
               />
             </div>
             <div className="col-span-1 grid grid-rows-2 gap-0.5 h-full">
               {previewPins[1] ? (
-                <img
+                <ProgressiveImage
                   src={previewPins[1].imageUrl}
                   alt=""
                   className="w-full h-full object-cover"
+                  containerClassName="w-full h-full"
                 />
               ) : (
                 <div className="bg-secondary/50" />
               )}
               {previewPins[2] ? (
-                <img
+                <ProgressiveImage
                   src={previewPins[2].imageUrl}
                   alt=""
                   className="w-full h-full object-cover"
+                  containerClassName="w-full h-full"
                 />
               ) : (
                 <div className="bg-secondary/50" />
               )}
             </div>
           </>
+        ) : board.coverImageUrl ? (
+          <div className="col-span-3 h-full">
+            <ProgressiveImage
+              src={board.coverImageUrl}
+              alt={board.name}
+              className="w-full h-full object-cover"
+              containerClassName="w-full h-full"
+            />
+          </div>
         ) : (
           <div className="col-span-3 h-full flex items-center justify-center bg-secondary/30">
             <div className="w-12 h-12 rounded-full bg-border/50 flex items-center justify-center">
@@ -71,10 +81,9 @@ export const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
           <h3 className="font-display font-bold text-foreground text-base tracking-tight">
             {board.name}
           </h3>
-          {board.isPrivate && <Lock className="w-3 h-3 text-muted-foreground" />}
         </div>
         <p className="text-muted-foreground test-sm font-medium">
-          {board.pinIds.length} {board.pinIds.length === 1 ? 'Pin' : 'Pins'}
+          {board.totalPins ?? board.pinIds.length} {(board.totalPins ?? board.pinIds.length) === 1 ? 'Pin' : 'Pins'}
         </p>
       </div>
     </motion.div>

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Lock, Globe, Check } from 'lucide-react';
+import { X, Lock, Globe, Image as ImageIcon } from 'lucide-react';
 import { Tooltip } from './Tooltip';
 import { Button } from './button';
 import { useBoardStore } from '@/store/useBoardStore';
+import { usePinStore } from '@/store/usePinStore';
+import { Loader2 } from 'lucide-react';
 
 interface CreateBoardModalProps {
   isOpen: boolean;
@@ -13,17 +15,40 @@ interface CreateBoardModalProps {
 export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onClose }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [isPrivate, setIsPrivate] = useState(false);
+  const [coverImage, setCoverImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const createBoard = useBoardStore((s) => s.createBoard);
+  const addPinToBoard = useBoardStore((s) => s.addPinToBoard);
+  const selectedPin = usePinStore((s) => s.selectedPin);
+  const toggleSave = usePinStore((s) => s.toggleSave);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setCoverImage(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    createBoard(name, description, isPrivate);
-    setName('');
-    setDescription('');
-    setIsPrivate(false);
-    onClose();
+    setIsSubmitting(true);
+    try {
+      const newBoardId = await createBoard(name, description, false, coverImage || undefined);
+      if (newBoardId && selectedPin) {
+        await addPinToBoard(newBoardId, selectedPin.id);
+        if (!selectedPin.isSaved) toggleSave(selectedPin.id);
+      }
+      setName('');
+      setDescription('');
+      setCoverImage(null);
+      setImagePreview(null);
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -48,6 +73,28 @@ export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onCl
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="flex justify-center mb-6">
+                <div className="relative w-32 h-32 rounded-3xl overflow-hidden bg-secondary border-2 border-dashed border-border flex items-center justify-center group cursor-pointer">
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="flex flex-col items-center text-muted-foreground group-hover:text-primary transition-colors">
+                      <ImageIcon className="w-8 h-8 mb-2" />
+                      <span className="text-xs font-bold">Cover</span>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">Upload</span>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-semibold text-foreground/80 mb-2 ml-1">Name</label>
                 <input
@@ -71,28 +118,6 @@ export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onCl
                 />
               </div>
 
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-secondary/30 border border-border/50">
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isPrivate ? 'bg-primary/10 text-primary' : 'bg-muted/10 text-muted-foreground'}`}>
-                    {isPrivate ? <Lock className="w-5 h-5" /> : <Globe className="w-5 h-5" />}
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-foreground">Keep this board secret</h4>
-                    <p className="test-sm text-muted-foreground">Only you can see this board</p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsPrivate(!isPrivate)}
-                  className={`w-12 h-6 rounded-full relative transition-colors duration-200 focus:outline-none ${isPrivate ? 'bg-primary' : 'bg-border'}`}
-                >
-                  <motion.div
-                    animate={{ x: isPrivate ? 26 : 2 }}
-                    className="absolute top-1 left-0 w-4 h-4 rounded-full bg-white shadow-sm"
-                  />
-                </button>
-              </div>
-
               <div className="flex items-center justify-end gap-3 mt-8">
                 <button
                   type="button"
@@ -103,10 +128,10 @@ export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onCl
                 </button>
                 <Button
                   type="submit"
-                  disabled={!name.trim()}
+                  disabled={!name.trim() || isSubmitting}
                   className="px-8 py-3 rounded-2xl font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
-                  Create
+                  {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Create'}
                 </Button>
               </div>
             </form>

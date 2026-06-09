@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import { useFilteredPins, usePinStore } from '../store/usePinStore';
 import { PinCard } from '../components/ui/PinCard';
+import { PinSkeleton } from '../components/ui/PinSkeleton';
 import { motion } from 'framer-motion';
 import Masonry from 'react-masonry-css';
 import { Loader } from '../components/ui/Loader';
@@ -17,15 +18,42 @@ const breakpointColumnsObj = {
 
 export const HomePage: React.FC = () => {
   const filteredPins = useFilteredPins();
-  const { pins, isLoading, fetchPins, feedType, setFeedType } = usePinStore();
+  const { pins, isLoading, fetchPins, feedType, setFeedType, hasMorePins, isLoadingMorePins, loadMorePins } = usePinStore();
 
   useEffect(() => {
     fetchPins();
   }, [fetchPins]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 400
+      ) {
+        if (hasMorePins && !isLoadingMorePins) {
+          loadMorePins();
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [hasMorePins, isLoadingMorePins, loadMorePins]);
+
   // Only show the main loader if we have NO pins yet
   if (isLoading && pins.length === 0) {
-    return <Loader fullPage text="Brewing fresh ideas for you..." size="xl" />;
+    return (
+      <div className="max-w-[2000px] mx-auto px-4 pt-20">
+        <Masonry
+          breakpointCols={breakpointColumnsObj}
+          className="flex w-auto -ml-6"
+          columnClassName="pl-6 space-y-6 bg-clip-padding"
+        >
+          {[300, 250, 400, 350, 200, 380, 260, 420, 280, 320].map((h, i) => (
+            <PinSkeleton key={`skel-init-${i}`} height={`${h}px`} />
+          ))}
+        </Masonry>
+      </div>
+    );
   }
 
   return (
@@ -77,9 +105,12 @@ export const HomePage: React.FC = () => {
         {filteredPins.map((pin) => (
           <PinCard key={pin.id} pin={pin} />
         ))}
+        {isLoadingMorePins && [250, 350, 280, 400, 300].map((h, i) => (
+          <PinSkeleton key={`skel-more-${i}`} height={`${h}px`} />
+        ))}
       </Masonry>
       
-      {filteredPins.length === 0 && (
+      {filteredPins.length === 0 && !isLoading && (
         <div className="text-center py-20">
           <h2 className="text-2xl font-bold mb-2">No pins found</h2>
           <p className="text-muted-foreground">Start by creating something amazing!</p>

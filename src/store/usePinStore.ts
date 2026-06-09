@@ -17,7 +17,7 @@ export const transformBackendPin = (post: any): Pin => ({
   likes: post.totalLikes || 0,
   category: post.category || 'General',
   createdAt: post.created_at,
-  type: post.resource_type === 'video' ? 'video' : 'image',
+  type: post.resource_type === 'video' ? 'video' : post.media_url?.toLowerCase().includes('.gif') ? 'gif' : 'image',
   isLiked: false,
   isSaved: false,
   comments: [],
@@ -30,6 +30,7 @@ interface PinState {
   isLoading: boolean;
   searchQuery: string;
   selectedPin: Pin | null;
+  autoOpenBoardSelector: boolean;
   feedType: 'all' | 'following';
   userPins: Pin[];
   fetchPins: () => Promise<void>;
@@ -37,6 +38,7 @@ interface PinState {
   setFeedType: (type: 'all' | 'following') => void;
   setSearchQuery: (query: string) => void;
   setSelectedPin: (pin: Pin | null) => void;
+  setAutoOpenBoardSelector: (autoOpen: boolean) => void;
   addPin: (pin: Pin) => void;
   deletePin: (id: string) => Promise<void>;
   toggleLike: (id: string) => Promise<void>;
@@ -50,6 +52,10 @@ interface PinState {
   totalComments: number;
   isLoadingMoreComments: boolean;
   loadMoreComments: (id: string) => Promise<void>;
+  hasMorePins: boolean;
+  pinsPage: number;
+  isLoadingMorePins: boolean;
+  loadMorePins: () => Promise<void>;
 }
 
 export const usePinStore = create<PinState>()((set, get) => ({
@@ -57,32 +63,72 @@ export const usePinStore = create<PinState>()((set, get) => ({
   isLoading: false,
   searchQuery: '',
   selectedPin: null,
+  autoOpenBoardSelector: false,
   feedType: 'all',
   userPins: [],
   hasMoreComments: false,
   commentsPage: 1,
   totalComments: 0,
   isLoadingMoreComments: false,
+  hasMorePins: false,
+  pinsPage: 1,
+  isLoadingMorePins: false,
 
   fetchPins: async () => {
     const { feedType } = get();
-    set({ isLoading: true });
+    set({ isLoading: true, pinsPage: 1, hasMorePins: false });
     try {
       const response = feedType === 'all' 
-        ? await postService.getAllPosts()
-        : await postService.getFollowingPosts();
+        ? await postService.getAllPosts(1)
+        : await postService.getFollowingPosts(1);
       
       if (response.success && response.data?.posts) {
         // Transform backend posts to frontend Pin interface
         const transformedPins: Pin[] = response.data.posts.map(transformBackendPin);
         
-        set({ pins: transformedPins, isLoading: false });
+        set({ 
+          pins: transformedPins, 
+          isLoading: false,
+          hasMorePins: response.data.pagination?.page < response.data.pagination?.totalPages,
+          pinsPage: 1
+        });
       } else {
         set({ pins: [], isLoading: false });
       }
     } catch (error) {
       console.error('Failed to fetch pins:', error);
       set({ pins: [], isLoading: false });
+    }
+  },
+
+  loadMorePins: async () => {
+    const { hasMorePins, pinsPage, isLoadingMorePins, feedType } = get();
+    
+    if (!hasMorePins || isLoadingMorePins) return;
+
+    set({ isLoadingMorePins: true });
+
+    try {
+      const nextPage = pinsPage + 1;
+      const response = feedType === 'all' 
+        ? await postService.getAllPosts(nextPage)
+        : await postService.getFollowingPosts(nextPage);
+      
+      if (response.success && response.data?.posts) {
+        const transformedPins: Pin[] = response.data.posts.map(transformBackendPin);
+        
+        set((state) => ({
+          pins: [...state.pins, ...transformedPins],
+          hasMorePins: response.data.pagination?.page < response.data.pagination?.totalPages,
+          pinsPage: nextPage,
+          isLoadingMorePins: false
+        }));
+      } else {
+        set({ isLoadingMorePins: false });
+      }
+    } catch (error) {
+      console.error('Failed to load more pins:', error);
+      set({ isLoadingMorePins: false });
     }
   },
 
@@ -110,6 +156,7 @@ export const usePinStore = create<PinState>()((set, get) => ({
   setSearchQuery: (query: string) => set({ searchQuery: query }),
 
   setSelectedPin: (pin: Pin | null) => set({ selectedPin: pin }),
+  setAutoOpenBoardSelector: (autoOpen: boolean) => set({ autoOpenBoardSelector: autoOpen }),
 
   fetchPinById: async (id: string) => {
     set({ isLoading: true, commentsPage: 1, hasMoreComments: false, totalComments: 0 });

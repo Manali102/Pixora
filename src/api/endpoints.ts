@@ -57,6 +57,18 @@ const COMMENTS = {
   DELETE: (commentId: string) => `/api/v1/comments/${commentId}`,
 } as const;
 
+// boards endpoints
+const BOARDS = {
+  CREATE: '/api/v1/boards/create',
+  LIST: '/api/v1/boards/list',
+  GET_BOARD: (id: string) => `/api/v1/boards/${id}`,
+  GET_PINS: (id: string) => `/api/v1/boards/${id}/pins`,
+  UPDATE: (id: string) => `/api/v1/boards/${id}`,
+  SAVE_PIN: '/api/v1/boards/save-pin',
+  REMOVE_PIN: '/api/v1/boards/remove-pin',
+  DELETE: (id: string) => `/api/v1/boards/${id}`,
+} as const;
+
 export const ENDPOINTS = {
   AUTH,
   USER,
@@ -64,4 +76,5 @@ export const ENDPOINTS = {
   PAYMENTS,
   LIKES,
   COMMENTS,
+  BOARDS,
 } as const;

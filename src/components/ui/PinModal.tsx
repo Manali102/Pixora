@@ -5,11 +5,15 @@ import { X, Share2, Heart, Send, Download, Link2, Check, Loader2, Edit2, Trash2 
 import { toast } from 'sonner';
 import { usePinStore } from '../../store/usePinStore';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useBoardStore } from '../../store/useBoardStore';
 import { Button } from './button';
 import { Badge } from './badge';
 import { cn } from '../../lib/utils';
 import { Tooltip } from './Tooltip';
 import { WhatsAppIcon, MessengerIcon, FacebookIcon, XIcon } from '../icons/SocialIcons';
+import { BoardSelector } from './BoardSelector';
+import { useModalStore } from '../../store/useModalStore';
+import { ProgressiveImage } from './ProgressiveImage';
 
 /**
  * PinModal component to display pin in modal
@@ -17,26 +21,52 @@ import { WhatsAppIcon, MessengerIcon, FacebookIcon, XIcon } from '../icons/Socia
  */
 export const PinModal: React.FC = () => {
   const navigate = useNavigate();
-  const { selectedPin, setSelectedPin, toggleLike, toggleSave, addComment, editComment, deleteComment, deletePin, fetchPinById, hasMoreComments, isLoadingMoreComments, loadMoreComments, totalComments } = usePinStore();
+  const { selectedPin, setSelectedPin, toggleLike, toggleSave, addComment, editComment, deleteComment, deletePin, fetchPinById, hasMoreComments, isLoadingMoreComments, loadMoreComments, totalComments, autoOpenBoardSelector, setAutoOpenBoardSelector } = usePinStore();
+  const { boards, addPinToBoard, removePinFromBoard, fetchBoards } = useBoardStore();
   const { user, followUser, unfollowUser } = useAuthStore();
+  const openModal = useModalStore(s => s.openModal);
   const [comment, setComment] = useState('');
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{type: 'pin' | 'comment', id?: string} | null>(null);
+  const [showBoardSelect, setShowBoardSelect] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingCommentText, setEditingCommentText] = useState('');
+  const boardSelectRef = React.useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const isFollowing = user?.followingIds?.includes(selectedPin?.authorId || '') || false;
   const isOwnPin = user?.id === selectedPin?.authorId;
 
-  // Fetch the latest pin data when the modal opens
+  // Fetch the latest pin data and boards when the modal opens
   useEffect(() => {
     if (selectedPin?.id) {
       fetchPinById(selectedPin.id);
+      fetchBoards();
     }
   }, [selectedPin?.id]);
+
+  useEffect(() => {
+    if (selectedPin && autoOpenBoardSelector) {
+      setShowBoardSelect(true);
+      setAutoOpenBoardSelector(false);
+    }
+  }, [selectedPin, autoOpenBoardSelector, setAutoOpenBoardSelector]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (boardSelectRef.current && !boardSelectRef.current.contains(event.target as Node)) {
+        setShowBoardSelect(false);
+      }
+    };
+    if (showBoardSelect) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showBoardSelect]);
 
   const handleCommentsScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
@@ -58,6 +88,23 @@ export const PinModal: React.FC = () => {
       document.body.style.overflow = 'unset';
     };
   }, [selectedPin]);
+
+  const handleBoardSelect = async (boardId: string) => {
+    if (!selectedPin) return;
+    try {
+      const board = boards.find(b => b.id === boardId);
+      if (board?.pinIds.includes(selectedPin.id)) {
+        await removePinFromBoard(boardId, selectedPin.id);
+      } else {
+        await addPinToBoard(boardId, selectedPin.id);
+      }
+      if (!selectedPin.isSaved) toggleSave(selectedPin.id);
+    } catch (error) {
+      // Error handled by store
+    } finally {
+      setShowBoardSelect(false);
+    }
+  };
 
   if (!selectedPin) return null;
 
@@ -224,10 +271,11 @@ export const PinModal: React.FC = () => {
                   className="relative z-10 max-w-full max-h-full object-contain"
                 />
               ) : (
-                <img
+                <ProgressiveImage
                   src={selectedPin.imageUrl}
                   alt={selectedPin.title}
-                  className="relative z-10 max-w-full max-h-full object-contain"
+                  className="relative z-10 max-w-full max-h-[85vh] object-contain"
+                  containerClassName="w-full h-full !bg-transparent"
                 />
               )}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors pointer-events-none z-20" />
@@ -383,17 +431,36 @@ export const PinModal: React.FC = () => {
                     Delete
                   </Button>
                 )}
-                <Button
-                  onClick={() => toggleSave(selectedPin.id)}
-                  className={cn(
-                    "rounded-full px-8 h-12 font-bold transition-all text-base",
-                    selectedPin.isSaved
-                      ? "bg-zinc-900 text-white hover:bg-black dark:bg-white dark:text-black dark:hover:bg-zinc-200"
-                      : "bg-red-600 text-white hover:bg-red-700"
-                  )}
-                >
-                  {selectedPin.isSaved ? 'Saved' : 'Save'}
-                </Button>
+                
+                <div className="relative" ref={boardSelectRef}>
+                  <Button
+                    onClick={() => setShowBoardSelect(!showBoardSelect)}
+                    className={cn(
+                      "rounded-full px-8 h-12 font-bold transition-all text-base",
+                      selectedPin.isSaved
+                        ? "bg-zinc-900 text-white hover:bg-black dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+                        : "bg-red-600 text-white hover:bg-red-700"
+                    )}
+                  >
+                    {selectedPin.isSaved ? 'Saved' : 'Save'}
+                  </Button>
+
+                  <AnimatePresence>
+                    {showBoardSelect && (
+                      <div className="absolute top-full right-0 mt-2 z-50">
+                        <BoardSelector
+                          pinId={selectedPin.id}
+                          onClose={() => setShowBoardSelect(false)}
+                          onBoardSelect={handleBoardSelect}
+                          onCreateBoard={() => {
+                            setShowBoardSelect(false);
+                            openModal('CREATE_BOARD');
+                          }}
+                        />
+                      </div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
 
               {/* Content */}

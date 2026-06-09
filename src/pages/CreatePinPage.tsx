@@ -13,6 +13,7 @@ import { usePinStore } from '../store/usePinStore';
 import { Button } from '../components/ui/button';
 import { postService } from '../services/postService';
 import { Loader } from '../components/ui/Loader';
+import { toast } from 'sonner';
 
 export const CreatePinPage: React.FC = () => {
   const user = useAuthStore((store) => store.user);
@@ -93,11 +94,6 @@ export const CreatePinPage: React.FC = () => {
     const limit = user?.storageLimit || 0;
     const isAdmin = user?.role === 'admin';
 
-    if (!isAdmin && currentUsed + fileSizeMB > limit) {
-      alert(`Storage limit reached! You have used ${currentUsed.toFixed(2)}MB of ${limit}MB.`);
-      return;
-    }
-
     setIsUploading(true);
     setUploadProgress(0);
 
@@ -119,7 +115,7 @@ export const CreatePinPage: React.FC = () => {
           likes: 0,
           category: rd?.category || category || 'General',
           createdAt: rd?.created_at || new Date().toISOString(),
-          type: (file.type.startsWith('video') ? 'video' : 'image') as 'image' | 'video',
+          type: (file.type.startsWith('video') ? 'video' : file.type.includes('gif') ? 'gif' : 'image') as 'image' | 'video' | 'gif',
           views: 0,
           isLiked: false,
           isSaved: false,
@@ -138,11 +134,12 @@ export const CreatePinPage: React.FC = () => {
         // Remove the automatic navigation so they can see the success screen
         // setTimeout(() => navigate('/'), 2200);
       } else {
-        alert(response.message || 'Failed to create pin');
+        toast.error(response.message || 'Failed to create pin');
       }
     } catch (error: any) {
       console.error('Upload failed:', error);
-      alert(error?.response?.data?.message || 'Something went wrong during upload');
+      const errorMessage = error?.response?.data?.error?.message || error?.response?.data?.message || error?.message || 'Something went wrong during upload';
+      toast.error(errorMessage);
     } finally {
       setIsUploading(false);
     }

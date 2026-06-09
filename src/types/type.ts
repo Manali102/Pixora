@@ -38,7 +38,7 @@ export interface Pin {
   isSaved?: boolean;
   category: string;
   createdAt: string;
-  type: 'image' | 'video';
+  type: 'image' | 'video' | 'gif';
   comments?: Comment[];
   views: number;
   authorFollowers: number;
@@ -60,6 +60,8 @@ export interface Board {
   description?: string;
   coverImageUrl?: string;
   pinIds: string[];
+  pins?: any[];
+  totalPins?: number;
   userId: string;
   isPrivate: boolean;
   createdAt: string;

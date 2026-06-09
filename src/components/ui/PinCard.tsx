@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { LazyVideo } from './LazyVideo';
 import { Download, Share2, Heart, Check, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ProgressiveImage } from './ProgressiveImage';
 import { Pin } from '@/types/type';
 import { usePinStore } from '../../store/usePinStore';
 import { useBoardStore } from '../../store/useBoardStore';
@@ -9,7 +10,7 @@ import { useModalStore } from '../../store/useModalStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { Button } from './button';
 import { cn } from '../../lib/utils';
-import { BoardSelector } from './BoardSelector';
+import { Loader2 } from 'lucide-react';
 import { Avatar } from './Avatar';
 import { useNavigate } from 'react-router-dom';
 
@@ -25,8 +26,7 @@ interface PinCardProps {
 export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
-  const [showBoardSelector, setShowBoardSelector] = useState(false);
-  const { toggleLike, toggleSave, setSelectedPin, deletePin } = usePinStore();
+  const { toggleLike, toggleSave, setSelectedPin, deletePin, setAutoOpenBoardSelector } = usePinStore();
   const { addPinToBoard, removePinFromBoard, boards } = useBoardStore();
   const openModal = useModalStore((s) => s.openModal);
   const { user, followUser, unfollowUser } = useAuthStore();
@@ -36,6 +36,46 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
 
   const isSavedToAnyBoard = boards.some(b => b.pinIds.includes(pin.id));
 
+
+  /**
+   * Handles board selection for the pin
+   * @param boardId - board to add/remove pin from
+   */
+  const handleBoardSelect = async (boardId: string) => {
+    try {
+      const board = boards.find(board => board.id === boardId);
+      if (board?.pinIds.includes(pin.id)) {
+        await removePinFromBoard(boardId, pin.id);
+      } else {
+        await addPinToBoard(boardId, pin.id);
+      }
+      if (!pin.isSaved) toggleSave(pin.id);
+    } catch (error) {
+      // error is already toasted in the store
+    }
+  };
+
+  /**
+   * Handles downloading of the pin image
+   * @param event - event to stop propagation
+   */
+  const handleDownload = async (event: React.MouseEvent) => {
+    event.stopPropagation();
+    try {
+      const response = await fetch(pin.imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `pin-${pin.id}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading image:', error);
+    }
+  };
 
   /**
    * Handles sharing of the pin
@@ -64,7 +104,6 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
-        setShowBoardSelector(false);
       }}
       onClick={handleOpenModal}
     >
@@ -75,11 +114,11 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
             className={`w-full h-auto object-cover transition-transform duration-700 ${isHovered ? 'scale-110 blur-[2px]' : 'scale-100'}`}
           />
         ) : (
-          <img
+          <ProgressiveImage
             src={pin.imageUrl}
             alt={pin.title}
             className={`w-full h-auto object-cover transition-transform duration-700 ${isHovered ? 'scale-110 blur-[2px]' : 'scale-100'}`}
-            loading="lazy"
+            containerClassName="w-full h-full min-h-[250px]"
           />
         )}
         
@@ -95,39 +134,37 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
               {/* Top Row: Save Button */}
               <div className="flex justify-end relative">
                 <Button
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setShowBoardSelector(!showBoardSelector);
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setAutoOpenBoardSelector(true);
+                    handleOpenModal();
                   }}
-                  className={`rounded-full px-6 font-bold transition-all ${isSavedToAnyBoard || pin.isSaved ? 'bg-black text-white hover:bg-black' : 'bg-red-600 hover:bg-red-700'}`}
-                >
-                  {(isSavedToAnyBoard || pin.isSaved) ? <span className="flex items-center gap-1"><Check className="w-4 h-4" /> Saved</span> : 'Save'}
-                </Button>
-
-                <AnimatePresence>
-                  {showBoardSelector && (
-                    <BoardSelector
-                      pinId={pin.id}
-                      onClose={() => setShowBoardSelector(false)}
-                      onBoardSelect={(boardId) => {
-                        const board = boards.find(b => b.id === boardId);
-                        if (board?.pinIds.includes(pin.id)) {
-                          removePinFromBoard(boardId, pin.id);
-                        } else {
-                          addPinToBoard(boardId, pin.id);
-                        }
-                        setShowBoardSelector(false);
-                        if (!pin.isSaved) toggleSave(pin.id);
-                      }}
-                      onCreateBoard={() => {
-                        setShowBoardSelector(false);
-                        openModal('CREATE_BOARD');
-                      }}
-                    />
+                  className={cn(
+                    "rounded-full px-6 h-10 font-bold transition-all shadow-md",
+                    isSavedToAnyBoard
+                      ? "bg-zinc-900 text-white hover:bg-black dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+                      : "bg-red-600 text-white hover:bg-red-700"
                   )}
-                </AnimatePresence>
+                >
+                  {isSavedToAnyBoard ? 'Saved' : 'Save'}
+                </Button>
               </div>
 
+              {/* Bottom Row: Link & More Options */}
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={handleDownload}
+                  className="w-8 h-8 bg-background/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+                >
+                  <Download className="w-4 h-4 text-foreground" />
+                </button>
+                <button
+                  onClick={handleShare}
+                  className="w-8 h-8 bg-background/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-secondary transition-colors"
+                >
+                  <Share2 className="w-4 h-4 text-foreground" />
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
