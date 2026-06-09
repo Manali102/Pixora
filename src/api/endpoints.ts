@@ -44,9 +44,24 @@ const PAYMENTS = {
   MANAGE_SUBSCRIPTION: '/api/v1/payments/manage-subscription',
 } as const;
 
+// likes endpoints
+const LIKES = {
+  CREATE: '/api/v1/likes/create',
+} as const;
+
+// comments endpoints
+const COMMENTS = {
+  CREATE: '/api/v1/comments/create',
+  GET_BY_POST: (postId: string) => `/api/v1/comments/post/${postId}`,
+  UPDATE: (commentId: string) => `/api/v1/comments/${commentId}`,
+  DELETE: (commentId: string) => `/api/v1/comments/${commentId}`,
+} as const;
+
 export const ENDPOINTS = {
   AUTH,
   USER,
   POSTS,
   PAYMENTS,
+  LIKES,
+  COMMENTS,
 } as const;

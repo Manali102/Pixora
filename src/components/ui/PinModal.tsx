@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { X, Share2, Heart, Send, Download, Link2, Check, Loader2 } from 'lucide-react';
+import { X, Share2, Heart, Send, Download, Link2, Check, Loader2, Edit2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePinStore } from '../../store/usePinStore';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -17,16 +17,35 @@ import { WhatsAppIcon, MessengerIcon, FacebookIcon, XIcon } from '../icons/Socia
  */
 export const PinModal: React.FC = () => {
   const navigate = useNavigate();
-  const { selectedPin, setSelectedPin, toggleLike, toggleSave, addComment, deletePin } = usePinStore();
+  const { selectedPin, setSelectedPin, toggleLike, toggleSave, addComment, editComment, deleteComment, deletePin, fetchPinById, hasMoreComments, isLoadingMoreComments, loadMoreComments, totalComments } = usePinStore();
   const { user, followUser, unfollowUser } = useAuthStore();
   const [comment, setComment] = useState('');
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{type: 'pin' | 'comment', id?: string} | null>(null);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editingCommentText, setEditingCommentText] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const isFollowing = user?.followingIds?.includes(selectedPin?.authorId || '') || false;
   const isOwnPin = user?.id === selectedPin?.authorId;
+
+  // Fetch the latest pin data when the modal opens
+  useEffect(() => {
+    if (selectedPin?.id) {
+      fetchPinById(selectedPin.id);
+    }
+  }, [selectedPin?.id]);
+
+  const handleCommentsScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    if (scrollHeight - scrollTop - clientHeight < 50) {
+      if (selectedPin && hasMoreComments && !isLoadingMoreComments) {
+        loadMoreComments(selectedPin.id);
+      }
+    }
+  };
 
   // use effect to handle body overflow when modal is open
   useEffect(() => {
@@ -86,15 +105,32 @@ export const PinModal: React.FC = () => {
     try {
       await deletePin(selectedPin.id);
       toast.success("Pin deleted successfully!");
+      setDeleteTarget(null);
       setSelectedPin(null);
       navigate('/');
     } catch (error: any) {
       console.error("Failed to delete pin:", error);
       toast.error(error?.message || "Failed to delete pin");
+      setDeleteTarget(null);
     } finally {
       setIsDeleting(false);
     }
   };
+
+  const handleCommentDelete = async () => {
+    if (deleteTarget?.type !== 'comment' || !deleteTarget.id) return;
+    setIsDeleting(true);
+    try {
+      await deleteComment(deleteTarget.id);
+      setDeleteTarget(null);
+    } catch (error) {
+      toast.error('Failed to delete comment');
+      setDeleteTarget(null);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
 
   // share options for the pin
   const shareOptions = [
@@ -154,10 +190,10 @@ export const PinModal: React.FC = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-5xl bg-white dark:bg-zinc-900 rounded-[32px] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] flex flex-col md:flex-row max-h-[90vh] h-fit overflow-visible"
+            className="relative w-full max-w-5xl bg-white dark:bg-zinc-900 rounded-xl shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] flex flex-col md:flex-row h-[90vh] overflow-hidden"
           >
             {/* Close Button - Top Right Outside/Edge */}
-            <Tooltip content="Close" className="absolute top-0 right-1 z-30" side="bottom">
+            <div className="absolute top-0 right-0 z-30">
               <Button 
                   onClick={() => setSelectedPin(null)}
                   variant="ghost" 
@@ -166,7 +202,7 @@ export const PinModal: React.FC = () => {
               >
                   <X className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
               </Button>
-            </Tooltip>
+            </div>
 
             {/* Left side: Image or Video */}
             <div className="w-full md:w-[60%] bg-zinc-50 dark:bg-zinc-950 relative overflow-hidden group min-h-[300px] md:min-h-full flex items-center justify-center">
@@ -198,18 +234,19 @@ export const PinModal: React.FC = () => {
             </div>
 
             {/* Right side: Details */}
-            <div className="w-full md:w-[40%] flex flex-col p-6 md:p-10 overflow-y-auto bg-white dark:bg-zinc-900 border-l border-zinc-100 dark:border-zinc-800 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              {/* Top Bar Actions */}
-              <div className="flex items-center justify-between mb-8 pr-16 md:pr-20">
-                <div className="flex items-center gap-1 relative">
+            <div className="w-full md:w-[40%] flex flex-col p-6 md:p-10 bg-white dark:bg-zinc-900 border-l border-zinc-100 dark:border-zinc-800 h-[90vh] overflow-hidden">
+              
+              {/* Top Bar Actions - Fixed */}
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3 relative">
                   <Tooltip content={selectedPin.isLiked ? "Unlike" : "Like"}>
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="rounded-full h-12 w-12 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                      className="rounded-full"
                       onClick={() => toggleLike(selectedPin.id)}
                     >
-                      <Heart className={cn("w-6 h-6 transition-all", selectedPin.isLiked ? 'fill-red-500 text-red-500' : 'text-zinc-600 dark:text-zinc-400')} />
+                      <Heart className={cn("w-6 h-6 transition-all", selectedPin.isLiked ? 'fill-red-500 text-red-500' : '')} />
                     </Button>
                   </Tooltip>
                   
@@ -219,10 +256,7 @@ export const PinModal: React.FC = () => {
                         onClick={() => setShowShareMenu(!showShareMenu)}
                         variant="ghost" 
                         size="icon" 
-                        className={cn(
-                          "rounded-full h-12 w-12 transition-all",
-                          showShareMenu ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900" : "hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                        )}
+                        className="rounded-full"
                       >
                         <Share2 className="w-6 h-6" />                  
                       </Button>
@@ -283,6 +317,50 @@ export const PinModal: React.FC = () => {
                         </>
                       )}
                     </AnimatePresence>
+
+                    {/* Delete Confirmation Dialog */}
+                    <AnimatePresence>
+                      {deleteTarget && (
+                        <>
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setDeleteTarget(null)}
+                            className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm"
+                          />
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[110] bg-white dark:bg-zinc-900 rounded-[24px] shadow-2xl p-8 w-[90%] max-w-[400px] border border-zinc-100 dark:border-zinc-800"
+                          >
+                            <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mb-4 text-center">Are you sure?</h3>
+                            <p className="text-zinc-600 dark:text-zinc-400 text-center mb-8">
+                              {deleteTarget.type === 'pin' 
+                                ? "Once you delete a Pin, you can't undo it!"
+                                : "Once you delete a Comment, you can't undo it!"}
+                            </p>
+                            <div className="flex items-center justify-center gap-3">
+                              <Button
+                                onClick={() => setDeleteTarget(null)}
+                                variant="secondary"
+                                className="rounded-full font-bold px-6 h-12 flex-1"
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                disabled={isDeleting}
+                                onClick={deleteTarget.type === 'pin' ? handleDelete : handleCommentDelete}
+                                className="rounded-full font-bold px-6 h-12 bg-red-600 hover:bg-red-700 text-white flex-1"
+                              >
+                                {isDeleting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Delete'}
+                              </Button>
+                            </div>
+                          </motion.div>
+                        </>
+                      )}
+                    </AnimatePresence>
                   </div>
 
                   <Tooltip content="Download">
@@ -290,20 +368,19 @@ export const PinModal: React.FC = () => {
                       onClick={handleDownload}
                       variant="ghost" 
                       size="icon" 
-                      className="rounded-full h-12 w-12 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                      className="rounded-full"
                     >
-                      <Download className="w-6 h-6 text-zinc-600 dark:text-zinc-400" />                  
+                      <Download className="w-6 h-6" />                  
                     </Button>
                   </Tooltip>
                 </div>
                 {isOwnPin && (
                   <Button
-                    disabled={isDeleting}
-                    onClick={handleDelete}
+                    onClick={() => setDeleteTarget({ type: 'pin' })}
                     variant="outline"
-                    className="rounded-full px-6 h-12 font-bold transition-all text-base border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-950/30 mr-2 disabled:opacity-70"
+                    className="rounded-full px-6 h-12 font-bold transition-all text-base border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-950/30 mr-2"
                   >
-                    {isDeleting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Delete'}
+                    Delete
                   </Button>
                 )}
                 <Button
@@ -366,59 +443,133 @@ export const PinModal: React.FC = () => {
                 </div>
 
                 {/* Tags */}
-                <div className="flex flex-wrap gap-2 mb-8">
+                <div className="flex flex-wrap gap-2 mb-2">
                   <Badge variant="secondary" className="bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-none px-4 py-2 rounded-full text-sm font-medium hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer capitalize">
                     {selectedPin.category}
-                  </Badge>
-                  <Badge variant="secondary" className="bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-none px-4 py-2 rounded-full text-sm font-medium hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer">
-                    Portrait
-                  </Badge>
-                  <Badge variant="secondary" className="bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 border-none px-4 py-2 rounded-full text-sm font-medium hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer">
-                    Golden Hour
                   </Badge>
                 </div>
               </div>
 
               {/* Comments Section */}
-              <div className="pt-8 border-t border-zinc-100 dark:border-zinc-800 mt-auto">
-                <div className="flex flex-col gap-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
-                      <h3 className="text-xl font-bold">Comments</h3>
-                      <span className="text-zinc-500 font-normal ml-1">{selectedPin.comments?.length || 0}</span>
-                    </div>
+              <div className="flex flex-col flex-1 min-h-0 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+                <div className="flex items-center justify-between shrink-0 mb-4">
+                  <div className="flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
+                    <h3 className="text-xl font-bold">Comments</h3>
+                    <span className="text-zinc-500 font-normal ml-1">{totalComments}</span>
                   </div>
+                </div>
 
-                  {/* Comments List */}
-                  {selectedPin.comments && selectedPin.comments.length > 0 && (
-                    <div className="flex flex-col gap-6 max-h-[400px] overflow-y-auto pr-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                      {selectedPin.comments.map((comment: any) => (
-                        <div key={comment.id} className="flex gap-3 group/comment">
+                {/* Comments List - Scrollable */}
+                {selectedPin.comments && selectedPin.comments.length > 0 && (
+                  <div 
+                    className="flex flex-col gap-6 flex-1 overflow-y-auto pr-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                    onScroll={handleCommentsScroll}
+                  >
+                      {selectedPin.comments.map((c: any) => (
+                        <div key={c.id} className="flex gap-3 group/comment relative">
                           <img 
-                            src={comment.userAvatar} 
-                            alt={comment.userName} 
+                            src={c.userAvatar} 
+                            alt={c.userName} 
                             className="w-10 h-10 rounded-full flex-shrink-0 object-cover"
                           />
                           <div className="flex-1">
                             <div className="flex flex-col">
                               <div className="flex items-center gap-2 mb-1">
-                                <span className="font-bold text-sm text-zinc-900 dark:text-zinc-100">{comment.userName}</span>
+                                <span className="font-bold text-sm text-zinc-900 dark:text-zinc-100">{c.userName}</span>
                                 <span className="text-[10px] text-zinc-400 font-medium">
-                                  {new Date(comment.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                                  {new Date(c.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                                 </span>
                               </div>
-                              <p className="text-zinc-700 dark:text-zinc-300 text-sm leading-relaxed break-words">
-                                {comment.text}
-                              </p>
+                              
+                              {editingCommentId === c.id ? (
+                                <div className="flex flex-col gap-2 mt-1">
+                                  <textarea
+                                    value={editingCommentText}
+                                    onChange={(e) => setEditingCommentText(e.target.value)}
+                                    className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/50 resize-none"
+                                    rows={2}
+                                    autoFocus
+                                  />
+                                  <div className="flex items-center gap-2 self-end">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        setEditingCommentId(null);
+                                        setEditingCommentText('');
+                                      }}
+                                      className="h-7 text-xs"
+                                    >
+                                      Cancel
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      onClick={async () => {
+                                        if (editingCommentText.trim() && editingCommentText !== c.text) {
+                                          try {
+                                            await editComment(c.id, editingCommentText);
+                                            setEditingCommentId(null);
+                                            setEditingCommentText('');
+                                          } catch (error) {
+                                            toast.error('Failed to update comment');
+                                          }
+                                        } else {
+                                          setEditingCommentId(null);
+                                        }
+                                      }}
+                                      disabled={!editingCommentText.trim() || editingCommentText === c.text}
+                                      className="h-7 text-xs bg-red-600 hover:bg-red-700 text-white"
+                                    >
+                                      Save
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <p className="text-zinc-700 dark:text-zinc-300 text-sm leading-relaxed break-words">
+                                  {c.text}
+                                </p>
+                              )}
                             </div>
                           </div>
+                          
+                          {/* Edit / Delete Actions */}
+                          {user?.id === c.userId && editingCommentId !== c.id && (
+                            <div className="opacity-0 group-hover/comment:opacity-100 transition-opacity absolute top-0 right-0 flex items-center gap-1 bg-white dark:bg-zinc-900 pl-2 rounded-l-lg">
+                              <Tooltip content="Edit">
+                                <button 
+                                  onClick={() => {
+                                    setEditingCommentId(c.id);
+                                    setEditingCommentText(c.text);
+                                  }}
+                                  className="p-1.5 text-zinc-400 hover:text-blue-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors"
+                                >
+                                  <Edit2 className="w-3.5 h-3.5" />
+                                </button>
+                              </Tooltip>
+                              <Tooltip content="Delete">
+                                <button 
+                                  onClick={() => setDeleteTarget({ type: 'comment', id: c.id })}
+                                  className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </Tooltip>
+                            </div>
+                          )}
                         </div>
                       ))}
+                      
+                      {isLoadingMoreComments && (
+                        <div className="flex justify-center py-4">
+                          <Loader2 className="w-5 h-5 animate-spin text-zinc-400" />
+                        </div>
+                      )}
                     </div>
                   )}
+              </div>
 
-                  {/* Comment Input */}
-                  <div className="flex gap-3">
+              {/* Comment Input Pinned to Bottom */}
+              <div className="flex gap-3 shrink-0 pt-6 mt-auto bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800 relative z-10">
                     <img 
                       src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop" 
                       alt="User Avatar" 
@@ -446,12 +597,18 @@ export const PinModal: React.FC = () => {
                       >
                         <button
                           disabled={!comment.trim()}
-                          onClick={() => {
+                          onClick={async () => {
                             if (comment.trim()) {
-                              addComment(selectedPin.id, comment);
+                              const text = comment;
                               setComment('');
                               if (textareaRef.current) {
                                 textareaRef.current.style.height = 'auto';
+                              }
+                              try {
+                                await addComment(selectedPin.id, text);
+                              } catch (error) {
+                                setComment(text); // revert text
+                                toast.error('Failed to add comment');
                               }
                             }
                           }}
@@ -467,8 +624,6 @@ export const PinModal: React.FC = () => {
                       </Tooltip>
                     </div>
                   </div>
-                </div>
-              </div>
             </div>
           </motion.div>
         </div>

@@ -2,6 +2,9 @@ import React from 'react';
 import { create } from 'zustand';
 import { Pin } from '@/types/type';
 import { postService } from '@/services/postService';
+import { likeService } from '@/services/likeService';
+import { commentService } from '@/services/commentService';
+import { useAuthStore } from './useAuthStore';
 
 export const transformBackendPin = (post: any): Pin => ({
   id: post._id,
@@ -36,10 +39,17 @@ interface PinState {
   setSelectedPin: (pin: Pin | null) => void;
   addPin: (pin: Pin) => void;
   deletePin: (id: string) => Promise<void>;
-  toggleLike: (id: string) => void;
+  toggleLike: (id: string) => Promise<void>;
   toggleSave: (id: string) => void;
-  addComment: (pinId: string, comment: string) => void;
+  addComment: (pinId: string, comment: string) => Promise<void>;
+  editComment: (commentId: string, text: string) => Promise<void>;
+  deleteComment: (commentId: string) => Promise<void>;
   fetchPinById: (id: string) => Promise<void>;
+  hasMoreComments: boolean;
+  commentsPage: number;
+  totalComments: number;
+  isLoadingMoreComments: boolean;
+  loadMoreComments: (id: string) => Promise<void>;
 }
 
 export const usePinStore = create<PinState>()((set, get) => ({
@@ -49,6 +59,10 @@ export const usePinStore = create<PinState>()((set, get) => ({
   selectedPin: null,
   feedType: 'all',
   userPins: [],
+  hasMoreComments: false,
+  commentsPage: 1,
+  totalComments: 0,
+  isLoadingMoreComments: false,
 
   fetchPins: async () => {
     const { feedType } = get();
@@ -98,19 +112,84 @@ export const usePinStore = create<PinState>()((set, get) => ({
   setSelectedPin: (pin: Pin | null) => set({ selectedPin: pin }),
 
   fetchPinById: async (id: string) => {
-    set({ isLoading: true });
+    set({ isLoading: true, commentsPage: 1, hasMoreComments: false, totalComments: 0 });
     try {
-      const response = await postService.getPost(id);
-      if (response.success && response.data?.post) {
-        const post = response.data.post;
+      const [postResponse, commentsResponse] = await Promise.all([
+        postService.getPost(id),
+        commentService.getCommentsByPostId(id).catch(() => ({ success: false, data: { comments: [] } }))
+      ]);
+
+      if (postResponse.success && postResponse.data?.post) {
+        const post = postResponse.data.post;
         const transformedPin: Pin = transformBackendPin(post);
-        set({ selectedPin: transformedPin, isLoading: false });
+
+        let mappedComments: import('@/types/type').Comment[] = [];
+        const responseData = (commentsResponse as any).data;
+        if (commentsResponse.success && responseData?.comments) {
+          mappedComments = responseData.comments.map((c: any) => ({
+            id: c.id || c._id,
+            userId: c.user?.id || c.user_id?._id || 'unknown',
+            userName: c.user?.name || c.user_id?.name || 'Anonymous',
+            userAvatar: c.user?.avatar || c.user_id?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${c.id || c._id}`,
+            text: c.comment_text || c.comments_text,
+            createdAt: c.created_at || new Date().toISOString(),
+          }));
+        }
+
+        transformedPin.comments = mappedComments;
+        set({ 
+          selectedPin: transformedPin, 
+          isLoading: false,
+          hasMoreComments: responseData?.pagination?.hasNextPage || false,
+          commentsPage: 1,
+          totalComments: responseData?.pagination?.totalComments || mappedComments.length
+        });
       } else {
         set({ selectedPin: null, isLoading: false });
       }
     } catch (error) {
       console.error('Failed to fetch pin:', error);
       set({ selectedPin: null, isLoading: false });
+    }
+  },
+
+  loadMoreComments: async (id: string) => {
+    const { hasMoreComments, commentsPage, isLoadingMoreComments, selectedPin } = get();
+    
+    if (!hasMoreComments || isLoadingMoreComments || !selectedPin || selectedPin.id !== id) return;
+
+    set({ isLoadingMoreComments: true });
+
+    try {
+      const nextPage = commentsPage + 1;
+      const commentsResponse = await commentService.getCommentsByPostId(id, nextPage).catch(() => ({ success: false, data: { comments: [] } }));
+      
+      const responseData = (commentsResponse as any).data;
+      if (commentsResponse.success && responseData?.comments) {
+        const newComments = responseData.comments.map((c: any) => ({
+          id: c.id || c._id,
+          userId: c.user?.id || c.user_id?._id || 'unknown',
+          userName: c.user?.name || c.user_id?.name || 'Anonymous',
+          userAvatar: c.user?.avatar || c.user_id?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${c.id || c._id}`,
+          text: c.comment_text || c.comments_text,
+          createdAt: c.created_at || new Date().toISOString(),
+        }));
+
+        set((state) => ({
+          selectedPin: state.selectedPin ? {
+            ...state.selectedPin,
+            comments: [...(state.selectedPin.comments || []), ...newComments]
+          } : null,
+          hasMoreComments: responseData.pagination?.hasNextPage || false,
+          commentsPage: nextPage,
+          isLoadingMoreComments: false
+        }));
+      } else {
+        set({ isLoadingMoreComments: false });
+      }
+    } catch (error) {
+      console.error('Failed to load more comments:', error);
+      set({ isLoadingMoreComments: false });
     }
   },
 
@@ -134,17 +213,23 @@ export const usePinStore = create<PinState>()((set, get) => ({
     }
   },
 
-  addComment: (pinId: string, text: string) =>
-    set((state) => {
-      const newComment = {
-        id: Math.random().toString(36).substr(2, 9),
-        userId: 'u1', // Defaulting to Admin for now
-        userName: 'Admin',
-        userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Admin',
-        text,
-        createdAt: new Date().toISOString(),
-      };
+  addComment: async (pinId: string, text: string) => {
+    const user = useAuthStore.getState().user;
+    const userId = user?.id;
+    if (!userId) throw new Error('User not authenticated');
 
+    const tempId = `temp-${Math.random().toString(36).substr(2, 9)}`;
+    const newComment = {
+      id: tempId,
+      userId: userId,
+      userName: user?.name || 'Anonymous',
+      userAvatar: user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`,
+      text,
+      createdAt: new Date().toISOString(),
+    };
+
+    // Optimistic update
+    set((state) => {
       const updatedPins = state.pins.map((pin) =>
         pin.id === pinId 
           ? { ...pin, comments: [...(pin.comments || []), newComment] }
@@ -152,16 +237,109 @@ export const usePinStore = create<PinState>()((set, get) => ({
       );
 
       const updatedSelectedPin = state.selectedPin?.id === pinId
-        ? updatedPins.find(pin => pin.id === pinId) || null
+        ? { ...state.selectedPin, comments: [...(state.selectedPin.comments || []), newComment] }
         : state.selectedPin;
 
       return {
         pins: updatedPins,
         selectedPin: updatedSelectedPin,
+        totalComments: state.totalComments + 1,
       };
-    }),
+    });
 
-  toggleLike: (id: string) =>
+    try {
+      const response = await commentService.createComment({
+        post_id: pinId,
+        user_id: userId,
+        comment_text: text,
+      });
+
+      if (!response.success) throw new Error('API failed to create comment');
+
+      // Replace temp ID with real ID from backend
+      const realId = response.data?.id || response.data?.comment?.id || response.data?._id;
+      if (realId) {
+        set((state) => {
+          const updateCommentId = (comments: import('@/types/type').Comment[] = []) =>
+            comments.map(c => c.id === tempId ? { ...c, id: realId } : c);
+
+          return {
+            pins: state.pins.map(pin => pin.id === pinId ? { ...pin, comments: updateCommentId(pin.comments) } : pin),
+            selectedPin: state.selectedPin?.id === pinId ? { ...state.selectedPin, comments: updateCommentId(state.selectedPin.comments) } : state.selectedPin
+          };
+        });
+      }
+    } catch (error) {
+      console.error('Failed to add comment:', error);
+      // Revert optimistic update
+      set((state) => {
+        const removeComment = (comments: import('@/types/type').Comment[] = []) => comments.filter(c => c.id !== tempId);
+        return {
+          pins: state.pins.map(pin => pin.id === pinId ? { ...pin, comments: removeComment(pin.comments) } : pin),
+          selectedPin: state.selectedPin?.id === pinId ? { ...state.selectedPin, comments: removeComment(state.selectedPin.comments) } : state.selectedPin,
+          totalComments: state.totalComments - 1,
+        };
+      });
+      throw error;
+    }
+  },
+
+  editComment: async (commentId: string, text: string) => {
+    const userId = useAuthStore.getState().user?.id;
+    if (!userId) throw new Error('User not authenticated');
+
+    // Store previous state for rollback
+    const previousState = get();
+
+    // Optimistic update
+    set((state) => {
+      const updateCommentText = (comments: import('@/types/type').Comment[] = []) =>
+        comments.map(c => c.id === commentId ? { ...c, text } : c);
+
+      return {
+        pins: state.pins.map(pin => ({ ...pin, comments: updateCommentText(pin.comments) })),
+        selectedPin: state.selectedPin ? { ...state.selectedPin, comments: updateCommentText(state.selectedPin.comments) } : state.selectedPin
+      };
+    });
+
+    try {
+      const response = await commentService.updateComment(commentId, { comment_text: text, user_id: userId });
+      if (!response.success) throw new Error('API failed to update comment');
+    } catch (error) {
+      console.error('Failed to update comment:', error);
+      set({ pins: previousState.pins, selectedPin: previousState.selectedPin });
+      throw error;
+    }
+  },
+
+  deleteComment: async (commentId: string) => {
+    // Store previous state for rollback
+    const previousState = get();
+
+    // Optimistic update
+    set((state) => {
+      const removeComment = (comments: import('@/types/type').Comment[] = []) =>
+        comments.filter(c => c.id !== commentId);
+
+      return {
+        pins: state.pins.map(pin => ({ ...pin, comments: removeComment(pin.comments) })),
+        selectedPin: state.selectedPin ? { ...state.selectedPin, comments: removeComment(state.selectedPin.comments) } : state.selectedPin,
+        totalComments: Math.max(0, state.totalComments - 1),
+      };
+    });
+
+    try {
+      const response = await commentService.deleteComment(commentId);
+      if (!response.success) throw new Error('API failed to delete comment');
+    } catch (error) {
+      console.error('Failed to delete comment:', error);
+      set({ pins: previousState.pins, selectedPin: previousState.selectedPin });
+      throw error;
+    }
+  },
+
+  toggleLike: async (id: string) => {
+    // Optimistic update
     set((state) => {
       const updatedPins = state.pins.map((pin) =>
         pin.id === id
@@ -170,14 +348,44 @@ export const usePinStore = create<PinState>()((set, get) => ({
       );
       
       const updatedSelectedPin = state.selectedPin?.id === id
-        ? updatedPins.find(pin => pin.id === id) || null
+        ? { ...state.selectedPin, isLiked: !state.selectedPin.isLiked, likes: state.selectedPin.isLiked ? state.selectedPin.likes - 1 : state.selectedPin.likes + 1 }
         : state.selectedPin;
 
       return {
         pins: updatedPins,
         selectedPin: updatedSelectedPin
       };
-    }),
+    });
+
+    try {
+      const userId = useAuthStore.getState().user?.id;
+      if (!userId) throw new Error('User not authenticated');
+
+      const response = await likeService.toggleLike(id, userId);
+      if (!response.success) {
+        throw new Error('API reported failure');
+      }
+    } catch (error) {
+      console.error('Failed to toggle like on backend:', error);
+      // Revert optimistic update on failure
+      set((state) => {
+        const updatedPins = state.pins.map((pin) =>
+          pin.id === id
+            ? { ...pin, isLiked: !pin.isLiked, likes: pin.isLiked ? pin.likes - 1 : pin.likes + 1 }
+            : pin
+        );
+        
+        const updatedSelectedPin = state.selectedPin?.id === id
+          ? { ...state.selectedPin, isLiked: !state.selectedPin.isLiked, likes: state.selectedPin.isLiked ? state.selectedPin.likes - 1 : state.selectedPin.likes + 1 }
+          : state.selectedPin;
+
+        return {
+          pins: updatedPins,
+          selectedPin: updatedSelectedPin
+        };
+      });
+    }
+  },
 
   toggleSave: (id: string) =>
     set((state) => {
@@ -186,7 +394,7 @@ export const usePinStore = create<PinState>()((set, get) => ({
       );
 
       const updatedSelectedPin = state.selectedPin?.id === id
-        ? updatedPins.find(pin => pin.id === id) || null
+        ? { ...state.selectedPin, isSaved: !state.selectedPin.isSaved }
         : state.selectedPin;
 
       return {
