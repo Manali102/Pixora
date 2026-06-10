@@ -62,4 +62,9 @@ export const userService = {
     const { data } = await apiClient.get(ENDPOINTS.USER.GET_PROFILE(userId));
     return data;
   },
+
+  getAllUsers: async (params?: { page?: number; limit?: number; search?: string; sortField?: string; sortOrder?: string; status?: string; plan?: string }): Promise<{ success: boolean; data: { users: any[], pagination: any } }> => {
+    const { data } = await apiClient.get(ENDPOINTS.USER.GET_ALL, { params });
+    return data;
+  },
 };

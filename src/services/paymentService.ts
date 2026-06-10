@@ -18,4 +18,14 @@ export const paymentService = {
     const { data } = await apiClient.post(ENDPOINTS.PAYMENTS.MANAGE_SUBSCRIPTION, { email });
     return data;
   },
+
+  getBillingAnalytics: async (startDate: string, endDate: string): Promise<{ success: boolean; data: any }> => {
+    const { data } = await apiClient.get(ENDPOINTS.PAYMENTS.BILLING_ANALYTICS, { params: { startDate, endDate } });
+    return data;
+  },
+
+  getSubscribersPaymentsGraph: async (startDate: string, endDate: string): Promise<{ success: boolean; data: any }> => {
+    const { data } = await apiClient.get(ENDPOINTS.PAYMENTS.SUBSCRIBERS_PAYMENTS_GRAPH, { params: { startDate, endDate } });
+    return data;
+  },
 };

@@ -24,6 +24,7 @@ const USER = {
   FOLLOWERS: (id: string) => `/api/v1/users/${id}/followers`,
   FOLLOWING: (id: string) => `/api/v1/users/${id}/following`,
   GET_PROFILE: (id: string) => `/api/v1/users/${id}/profile`,
+  GET_ALL: '/api/v1/users/all',
 } as const;
 
 // post endpoints
@@ -42,6 +43,8 @@ const POSTS = {
 const PAYMENTS = {
   CREATE_CHECKOUT: '/api/v1/payments/create-checkout-session',
   MANAGE_SUBSCRIPTION: '/api/v1/payments/manage-subscription',
+  BILLING_ANALYTICS: '/api/v1/payments/billing-analytics',
+  SUBSCRIBERS_PAYMENTS_GRAPH: '/api/v1/payments/subscribers-payments-graph',
 } as const;
 
 // likes endpoints

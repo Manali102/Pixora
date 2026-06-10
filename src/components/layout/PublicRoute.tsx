@@ -16,12 +16,17 @@ export const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
   const isLoading = useAuthStore((store) => store.isLoading);
   const location = useLocation();
   const [redirectPath, setRedirectPath] = useState<string | null>(null);
+  const user = useAuthStore((store) => store.user);
 
   useEffect(() => {
     if (isAuthenticated) {
-      setRedirectPath("/");
+      if (user?.role === 'admin') {
+        setRedirectPath("/admin");
+      } else {
+        setRedirectPath("/");
+      }
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user]);
   
   // If we are still loading the auth state, don't redirect yet
   if (isLoading) {

@@ -26,13 +26,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   const logout = useAuthStore((state) => state.logout);
 
   const navItems = [
-    { label: 'Home', icon: Home, path: '/', active: location.pathname === '/' },
+    ...(user?.role === 'admin'
+      ? [{ label: 'Dashboard', icon: Crown, path: '/admin', active: location.pathname === '/admin' }]
+      : []),
+    { label: 'Feed', icon: Home, path: '/', active: location.pathname === '/' },
     { label: 'Create Pin', icon: PlusSquare, path: '/create', active: location.pathname === '/create' },
     { label: 'My Pins', icon: User, path: '/my-pins', active: location.pathname === '/my-pins' },
     { label: 'My Boards', icon: Layout, path: '/my-boards', active: location.pathname === '/my-boards' || location.pathname.startsWith('/board/') },
     { label: 'Following', icon: Users, path: '/following', active: location.pathname === '/following' || location.pathname.startsWith('/creator/') },
     { label: 'Profile', icon: Settings, path: '/profile', active: location.pathname === '/profile' },
-    { label: 'Pricing', icon: CreditCard, path: '/pricing', active: location.pathname === '/pricing' },
+    ...(user?.role !== 'admin'
+      ? [{ label: 'Pricing', icon: CreditCard, path: '/pricing', active: location.pathname === '/pricing' }]
+      : [])
   ];
 
   return (
