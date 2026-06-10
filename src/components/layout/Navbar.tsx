@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { usePinStore } from '../../store/usePinStore';
+import { Input } from '../ui/input';
 
 export const Navbar: React.FC = () => {
   const searchQuery = usePinStore((store) => store.searchQuery);
@@ -23,7 +24,7 @@ export const Navbar: React.FC = () => {
         {/* Search Bar */}
         <div className="flex-1 relative group max-w-3xl mx-auto">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-foreground transition-colors" />
-          <input
+          <Input
             type="text"
             placeholder="Search ideas, creators, boards…"
             value={searchQuery}

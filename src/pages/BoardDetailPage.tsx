@@ -1,11 +1,10 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronLeft, MoreHorizontal, Share2, Lock, Globe } from 'lucide-react';
+import { ChevronLeft, MoreHorizontal } from 'lucide-react';
 import Masonry from 'react-masonry-css';
 import { useBoardStore } from '@/store/useBoardStore';
 import { PinCard } from '@/components/ui/PinCard';
-import { Tooltip } from '@/components/ui/Tooltip';
 import { Button } from '@/components/ui/button';
 import { EditBoardModal } from '@/components/ui/EditBoardModal';
 import { ProgressiveImage } from '@/components/ui/ProgressiveImage';

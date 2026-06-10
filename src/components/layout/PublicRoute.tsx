@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import { Loader } from '../ui/Loader';
 
@@ -14,7 +14,6 @@ interface PublicRouteProps {
 export const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
   const isAuthenticated = useAuthStore((store) => store.isAuthenticated);
   const isLoading = useAuthStore((store) => store.isLoading);
-  const location = useLocation();
   const [redirectPath, setRedirectPath] = useState<string | null>(null);
   const user = useAuthStore((store) => store.user);
 

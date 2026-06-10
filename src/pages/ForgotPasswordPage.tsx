@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '../components/ui/button';
-import { Mail, ArrowRight, Loader2, AlertCircle, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Mail, ArrowRight, AlertCircle, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { forgotPasswordSchema, type ForgotPasswordFormData } from '../lib/validationSchemas';
 import { Input } from '../components/ui/input';
 import { authService } from '../services/authService';

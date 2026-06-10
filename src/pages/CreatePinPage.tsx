@@ -3,7 +3,7 @@ import React, { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Upload, X, Shield, Loader2, ArrowRight,
+  X, Shield, ArrowRight,
   CheckCircle2, Image as ImageIcon, Video, Sparkles, CloudUpload,
   BrainCircuit, UserCircle2, Type, AlignLeft, Tags
 } from 'lucide-react';
@@ -11,6 +11,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { usePinStore } from '../store/usePinStore';
 import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 import { postService } from '../services/postService';
 import { Loader } from '../components/ui/Loader';
 import { toast } from 'sonner';
@@ -91,8 +92,6 @@ export const CreatePinPage: React.FC = () => {
 
     const fileSizeMB = file.size / (1024 * 1024);
     const currentUsed = user?.storageUsed || 0;
-    const limit = user?.storageLimit || 0;
-    const isAdmin = user?.role === 'admin';
 
     setIsUploading(true);
     setUploadProgress(0);
@@ -301,7 +300,7 @@ export const CreatePinPage: React.FC = () => {
                       : 'border-border hover:border-primary/40 bg-secondary/20 hover:bg-secondary/40'
                   }`}
                 >
-                  <input {...getInputProps()} />
+                  <Input {...getInputProps() as any} />
 
                   {/* Icon */}
                   <motion.div
@@ -461,12 +460,11 @@ export const CreatePinPage: React.FC = () => {
                         <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/70 ml-1 flex items-center gap-1.5">
                           <Type className="w-3 h-3" /> Title
                         </label>
-                        <input
+                        <Input
                           type="text"
                           value={title}
                           onChange={(e) => setTitle(e.target.value)}
                           placeholder="What is this pin about?"
-                          className="w-full px-5 py-4 rounded-2xl bg-secondary/40 border border-border focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all outline-none font-bold text-sm"
                         />
                       </div>
 
@@ -479,7 +477,7 @@ export const CreatePinPage: React.FC = () => {
                           onChange={(e) => setDescription(e.target.value)}
                           placeholder="Tell us more about it..."
                           rows={3}
-                          className="w-full px-5 py-4 rounded-2xl bg-secondary/40 border border-border focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all outline-none font-medium text-sm resize-none"
+                          className="w-full px-5 py-4 rounded-2xl bg-secondary/40 border border-border focus:border-primary/50 transition-all outline-none font-medium text-sm resize-none"
                         />
                       </div>
 

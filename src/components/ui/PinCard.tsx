@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { LazyVideo } from './LazyVideo';
-import { X, Download, Share2, Heart, Check, Trash2 } from 'lucide-react';
+import { X, Download, Share2, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ProgressiveImage } from './ProgressiveImage';
 import { Pin } from '@/types/type';

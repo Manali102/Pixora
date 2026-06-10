@@ -3,9 +3,8 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AxiosError } from 'axios';
 import { Button } from '../components/ui/button';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react';
 import { loginSchema, type LoginFormData } from '../lib/validationSchemas';
 import { Input } from '../components/ui/input';
 import { PasswordValidation } from '../components/PasswordValidation';
@@ -23,7 +22,6 @@ export const LoginPage: React.FC = () => {
     handleSubmit,
     formState: { errors, isSubmitting },
     watch,
-    clearErrors,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });

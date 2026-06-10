@@ -28,7 +28,6 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { cn } from './lib/utils';
 import { AnimatePresence } from 'framer-motion';
 import { useAuthStore } from './store/useAuthStore';
-import { usePinStore } from './store/usePinStore';
 import { PinModal } from './components/ui/PinModal';
 import { CreateBoardModal } from './components/ui/CreateBoardModal';
 import { useModalStore } from './store/useModalStore';

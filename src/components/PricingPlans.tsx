@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Crown, Zap, Rocket, Loader2, Sparkles } from 'lucide-react';
+import { Check, Crown, Zap, Rocket, Sparkles } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { Button } from './ui/button';
 import { Loader } from './ui/Loader';

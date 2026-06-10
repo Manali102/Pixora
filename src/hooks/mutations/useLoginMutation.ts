@@ -5,7 +5,6 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
 import { authService, LoginPayload } from '@/services/authService';
 import { useAuthStore } from '@/store/useAuthStore';
 import { userMapper } from '@/api/mappers';
@@ -15,7 +14,6 @@ import { userMapper } from '@/api/mappers';
  * @returns useMutation
  */
 export const useLoginMutation = () => {
-  const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
 
   return useMutation({

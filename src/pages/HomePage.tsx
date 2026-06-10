@@ -18,7 +18,7 @@ const breakpointColumnsObj = {
 
 export const HomePage: React.FC = () => {
   const filteredPins = useFilteredPins();
-  const { pins, isLoading, fetchPins, feedType, setFeedType, hasMorePins, isLoadingMorePins, loadMorePins } = usePinStore();
+  const { isLoading, fetchPins, feedType, setFeedType, hasMorePins, isLoadingMorePins, loadMorePins } = usePinStore();
 
   useEffect(() => {
     fetchPins();

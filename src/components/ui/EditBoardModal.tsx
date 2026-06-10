@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { Button } from './button';
+import { Input } from './input';
 import { useBoardStore } from '@/store/useBoardStore';
 import { Board } from '@/types/type';
 
@@ -79,12 +80,11 @@ export const EditBoardModal: React.FC<EditBoardModalProps> = ({ isOpen, onClose,
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-bold text-foreground mb-2">Name</label>
-                  <input
+                  <Input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Like 'Places to Go' or 'Recipes to Make'"
-                    className="w-full px-4 py-3 rounded-xl bg-secondary/50 border-2 border-transparent focus:border-primary focus:bg-background outline-none transition-all text-foreground font-medium placeholder:text-muted-foreground/70"
                     autoFocus
                   />
                 </div>
@@ -116,7 +116,7 @@ export const EditBoardModal: React.FC<EditBoardModalProps> = ({ isOpen, onClose,
                           <span className="text-xs text-muted-foreground font-medium">Upload image</span>
                         </div>
                       )}
-                      <input
+                      <Input
                         type="file"
                         accept="image/*"
                         onChange={handleImageChange}

@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { userService } from '../services/userService';
 import { Users, Search, UserMinus } from 'lucide-react';
-import { Button } from '../components/ui/button';
 import { toast } from 'sonner';
 import { Loader } from '../components/ui/Loader';
 import { Avatar } from '../components/ui/Avatar';
+import { Input } from '../components/ui/input';
 
 const FollowingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -73,7 +73,7 @@ const FollowingPage: React.FC = () => {
           
           <div className="relative group w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors" />
-            <input 
+            <Input 
               type="text" 
               placeholder="Search following..." 
               value={searchQuery}

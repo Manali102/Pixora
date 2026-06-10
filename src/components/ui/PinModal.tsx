@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { X, Share2, Heart, Send, Download, Link2, Check, Loader2, Edit2, Trash2 } from 'lucide-react';
+import { X, Share2, Heart, Send, Download, Loader2, Edit2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePinStore } from '../../store/usePinStore';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -27,7 +27,6 @@ export const PinModal: React.FC = () => {
   const openModal = useModalStore(s => s.openModal);
   const [comment, setComment] = useState('');
   const [showShareMenu, setShowShareMenu] = useState(false);
-  const [isCopied, setIsCopied] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{type: 'pin' | 'comment', id?: string} | null>(null);
   const [showBoardSelect, setShowBoardSelect] = useState(false);
@@ -136,12 +135,6 @@ export const PinModal: React.FC = () => {
    * Handles copying of the pin link
    */
   const pinUrl = `${window.location.origin}/pin/${selectedPin.id}`;
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(pinUrl);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
-  };
 
   /**
    * Handles deleting the pin
@@ -553,7 +546,7 @@ export const PinModal: React.FC = () => {
                                   <textarea
                                     value={editingCommentText}
                                     onChange={(e) => setEditingCommentText(e.target.value)}
-                                    className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/50 resize-none"
+                                    className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-xl p-3 text-sm focus:outline-none resize-none"
                                     rows={2}
                                     autoFocus
                                   />

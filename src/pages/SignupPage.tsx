@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '../components/ui/button';
-import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react';
 import { signupSchema, type SignupFormData } from '../lib/validationSchemas';
 import { Input } from '../components/ui/input';
 import { PasswordValidation } from '../components/PasswordValidation';
@@ -35,7 +35,6 @@ export const SignupPage: React.FC = () => {
     register,
     handleSubmit,
     watch,
-    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),

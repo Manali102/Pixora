@@ -1,29 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { usePinStore } from '../store/usePinStore';
-import { PinCard } from '../components/ui/PinCard';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { Check, Camera, Plus, MapPin, Globe, Calendar, Share2, Settings, LogOut, Grid, Heart, Layout, MoreHorizontal, Eye, X, Crown, Edit3, HardDrive, Users } from 'lucide-react';
+import { Check, Camera, Heart, Eye, X, Crown, Edit3, HardDrive } from 'lucide-react';
 import { toast } from 'sonner';
-import Masonry from 'react-masonry-css';
 import { Tooltip } from '../components/ui/Tooltip';
 import { Button } from '../components/ui/button';
-import { useBoardStore } from '../store/useBoardStore';
-import { useModalStore } from '../store/useModalStore';
-import { BoardCard } from '../components/ui/BoardCard';
+import { Input } from '@/components/ui/input';
 import { Loader } from '../components/ui/Loader';
 import { Avatar } from '../components/ui/Avatar';
-
-const breakpointColumnsObj = {
-  default: 4,
-  1536: 4,
-  1280: 3,
-  1024: 3,
-  768: 2,
-  640: 1,
-};
 
 // Avatar colour options
 const AVATAR_COLORS = [
@@ -62,9 +49,6 @@ const ProfilePage: React.FC = () => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(user?.avatar ?? '');
   const [avatarColorIdx, setAvatarColorIdx] = useState(0);
 
-  const openModal = useModalStore((s) => s.openModal);
-
-
   // ── Derived ───────────────────────────────────────────────
   const storageData = [
     { name: 'Used', value: user?.storageUsed || 0 },
@@ -73,17 +57,6 @@ const ProfilePage: React.FC = () => {
   const COLORS = ['hsl(0, 84%, 60%)', 'hsl(240, 4%, 20%)'];
   const totalViews = userPins.reduce((s, p) => s + p.views, 0);
   const totalLikes = userPins.reduce((s, p) => s + p.likes, 0);
-
-  // ── Handlers ──────────────────────────────────────────────
-  const handleShare = async () => {
-    const url = `${window.location.origin}/profile`;
-    try {
-      await navigator.clipboard.writeText(url);
-    } catch {
-      // fallback for environments without clipboard API
-    }
-    toast.success('Profile link copied!');
-  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -186,7 +159,7 @@ const ProfilePage: React.FC = () => {
                     <Camera className="w-4 h-4" />
                   </button>
                 </div>
-                <input
+                <Input
                   type="file"
                   ref={fileInputRef}
                   onChange={handleFileChange}
@@ -199,13 +172,12 @@ const ProfilePage: React.FC = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1.5">Display Name</label>
-                  <input
+                  <Input
                     type="text"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
                     maxLength={50}
                     placeholder="Your name"
-                    className="w-full px-3 py-2.5 rounded-xl border border-border/80 bg-background text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
                   />
                 </div>
                 <div>
@@ -216,7 +188,7 @@ const ProfilePage: React.FC = () => {
                     maxLength={160}
                     rows={3}
                     placeholder="Tell the world about yourself…"
-                    className="w-full px-3 py-2.5 rounded-xl border border-border/80 bg-background text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition resize-none"
+                    className="w-full px-3 py-2.5 rounded-xl border border-border/80 bg-background text-foreground text-sm placeholder:text-muted-foreground focus:outline-none transition resize-none"
                   />
                   <p className="text-sm text-muted-foreground mt-1 text-right">{editBio.length}/160</p>
                 </div>
@@ -368,15 +340,6 @@ const ProfilePage: React.FC = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-2.5 pb-1">
-            <Tooltip content="Copy profile link">
-              <button
-                onClick={handleShare}
-                className="btn-ghost-glass flex items-center gap-2 text-sm cursor-pointer"
-              >
-                <Share2 className="w-4 h-4" />
-                Share
-              </button>
-            </Tooltip>
             <Tooltip content="Edit profile">
               <button
                 onClick={openEditModal}

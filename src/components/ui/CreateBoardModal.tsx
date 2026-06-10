@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Lock, Globe, Image as ImageIcon } from 'lucide-react';
-import { Tooltip } from './Tooltip';
+import { X, Image as ImageIcon } from 'lucide-react';
 import { Button } from './button';
+import { Input } from './input';
 import { useBoardStore } from '@/store/useBoardStore';
 import { usePinStore } from '@/store/usePinStore';
 import { Loader2 } from 'lucide-react';
@@ -86,7 +86,7 @@ export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onCl
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <span className="text-white text-xs font-bold">Upload</span>
                   </div>
-                  <input
+                  <Input
                     type="file"
                     accept="image/*"
                     onChange={handleImageChange}
@@ -97,12 +97,11 @@ export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onCl
 
               <div>
                 <label className="block text-sm font-semibold text-foreground/80 mb-2 ml-1">Name</label>
-                <input
+                <Input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder='Like "Places to Go" or "Recipes"'
-                  className="w-full px-4 py-3 rounded-2xl border border-border/80 bg-background text-foreground text-base placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
                   required
                 />
               </div>
@@ -114,7 +113,7 @@ export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onCl
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="What is this board about?"
                   rows={3}
-                  className="w-full px-4 py-3 rounded-2xl border border-border/80 bg-background text-foreground text-base placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition resize-none"
+                  className="w-full px-4 py-3 rounded-2xl border border-border/80 bg-background text-foreground text-base placeholder:text-muted-foreground focus:outline-none transition resize-none"
                 />
               </div>
 

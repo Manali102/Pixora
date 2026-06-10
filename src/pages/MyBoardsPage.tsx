@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { useBoardStore } from '../store/useBoardStore';
 import { useModalStore } from '../store/useModalStore';
@@ -9,7 +8,6 @@ import { Plus, Layout } from 'lucide-react';
 import { Loader } from '../components/ui/Loader';
 
 const MyBoardsPage: React.FC = () => {
-  const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const { boards, isLoading } = useBoardStore();
   const openModal = useModalStore((s) => s.openModal);

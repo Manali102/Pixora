@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { usePinStore } from '../store/usePinStore';
 import { PinCard } from '../components/ui/PinCard';
-import { Heart, Share2, MapPin, Check } from 'lucide-react';
+import { Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import Masonry from 'react-masonry-css';
 import { Tooltip } from '../components/ui/Tooltip';

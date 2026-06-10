@@ -4,10 +4,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
 import {
-  Users, Shield, Search, MoreVertical,
-  Download, Plus, Activity, Zap, ShieldCheck, Globe, ArrowUpRight,
-  Eye, Edit2, Trash2, ArrowDownUp, Mail, User
-} from 'lucide-react';
+  Users, Shield, Search, Download, Activity, Zap, ShieldCheck, ArrowDownUp, Mail, User } from 'lucide-react';
 import { Loader } from '@/components/ui/Loader';
 
 // Shadcn UI Components
@@ -36,8 +33,8 @@ export const AdminPage: React.FC = () => {
   const [sortOrder, setSortOrder] = React.useState('desc');
 
   const [userSearchTerm, setUserSearchTerm] = React.useState('');
-  const [statusFilter, setStatusFilter] = React.useState('All');
-  const [planFilter, setPlanFilter] = React.useState('All');
+  const statusFilter = 'All';
+  const planFilter = 'All';
   const [dateRangeFilter, setDateRangeFilter] = React.useState('MTD');
 
   React.useEffect(() => {

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '../components/ui/button';
-import { Lock, Eye, EyeOff, ArrowRight, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Lock, Eye, EyeOff, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { resetPasswordSchema, type ResetPasswordFormData } from '../lib/validationSchemas';
 import { Input } from '../components/ui/input';
 import { PasswordValidation } from '../components/PasswordValidation';
