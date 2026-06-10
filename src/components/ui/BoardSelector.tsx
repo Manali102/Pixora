@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useBoardStore } from '@/store/useBoardStore';
 import { Plus, Check, Lock, X } from 'lucide-react';
+import { ProgressiveImage } from './ProgressiveImage';
 
 interface BoardSelectorProps {
   pinId: string;
@@ -84,17 +85,15 @@ export const BoardSelector: React.FC<BoardSelectorProps> = ({
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg bg-muted overflow-hidden flex-shrink-0 border border-border/50 relative">
                     {board.coverImageUrl ? (
-                      <img 
-                        src={board.coverImageUrl} 
-                        alt={board.name} 
+                      <ProgressiveImage
+                        src={board.coverImageUrl}
+                        alt={board.name}
                         className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                        }}
+                        containerClassName="w-full h-full"
                       />
-                    ) : null}
-                    <div className={`w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 ${board.coverImageUrl ? 'hidden' : ''}`} />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5" />
+                    )}
                   </div>
                   <div className="min-w-0 flex flex-col items-start">
                     <p className="text-base font-bold text-foreground truncate">{board.name}</p>

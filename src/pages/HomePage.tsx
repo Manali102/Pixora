@@ -39,8 +39,8 @@ export const HomePage: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [hasMorePins, isLoadingMorePins, loadMorePins]);
 
-  // Only show the main loader if we have NO pins yet
-  if (isLoading && pins.length === 0) {
+  // Show the main loader while fetching pins (e.g., initial load or tab switch)
+  if (isLoading) {
     return (
       <div className="max-w-[2000px] mx-auto px-4 pt-20">
         <Masonry
@@ -114,6 +114,12 @@ export const HomePage: React.FC = () => {
         <div className="text-center py-20">
           <h2 className="text-2xl font-bold mb-2">No pins found</h2>
           <p className="text-muted-foreground">Start by creating something amazing!</p>
+        </div>
+      )}
+
+      {isLoadingMorePins && (
+        <div className="py-12 flex justify-center w-full">
+          <Loader text="Loading more pins..." />
         </div>
       )}
     </motion.div>

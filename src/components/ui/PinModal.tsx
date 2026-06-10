@@ -426,7 +426,7 @@ export const PinModal: React.FC = () => {
                   <Button
                     onClick={() => setDeleteTarget({ type: 'pin' })}
                     variant="outline"
-                    className="rounded-full px-6 h-12 font-bold transition-all text-base border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-950/30 mr-2"
+                    className="rounded-full ml-2 px-6 h-12 font-bold transition-all text-base border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-950/30 mr-2"
                   >
                     Delete
                   </Button>

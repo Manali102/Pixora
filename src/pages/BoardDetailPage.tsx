@@ -28,6 +28,7 @@ export const BoardDetailPage: React.FC = () => {
   const boardPins = useBoardStore((s) => s.boardPins);
   const fetchBoardPins = useBoardStore((s) => s.fetchBoardPins);
   const deleteBoard = useBoardStore((s) => s.deleteBoard);
+  const removePinFromBoard = useBoardStore((s) => s.removePinFromBoard);
 
   const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
@@ -77,7 +78,7 @@ export const BoardDetailPage: React.FC = () => {
       )}
 
       {/* Header */}
-      <div className="pt-8 pb-12 relative z-10">
+      <div className="pt-8 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <button
             onClick={() => navigate(-1)}
@@ -159,7 +160,11 @@ export const BoardDetailPage: React.FC = () => {
             columnClassName="pl-4 bg-clip-padding"
           >
             {boardPins.map((pin) => (
-              <PinCard key={pin.id} pin={pin} />
+              <PinCard 
+                key={pin.id} 
+                pin={pin} 
+                onRemove={(pinId) => removePinFromBoard(board.id, pinId)}
+              />
             ))}
           </Masonry>
         ) : (

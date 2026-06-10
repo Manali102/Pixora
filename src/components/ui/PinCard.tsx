@@ -10,12 +10,14 @@ import { useModalStore } from '../../store/useModalStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { Button } from './button';
 import { cn } from '../../lib/utils';
-import { Loader2 } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Avatar } from './Avatar';
 import { useNavigate } from 'react-router-dom';
+import { postService } from '@/services/postService';
 
 interface PinCardProps {
   pin: Pin;
+  onRemove?: (pinId: string) => void;
 }
 
 /**
@@ -23,11 +25,11 @@ interface PinCardProps {
  * @param pin - pin to display
  * @returns JSX.Element
  */
-export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
+export const PinCard: React.FC<PinCardProps> = ({ pin, onRemove }) => {
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
-  const { toggleLike, toggleSave, setSelectedPin, deletePin, setAutoOpenBoardSelector } = usePinStore();
-  const { addPinToBoard, removePinFromBoard, boards } = useBoardStore();
+  const { toggleLike, setSelectedPin, setAutoOpenBoardSelector } = usePinStore();
+  const { boards } = useBoardStore();
   const openModal = useModalStore((s) => s.openModal);
   const { user, followUser, unfollowUser } = useAuthStore();
 
@@ -35,26 +37,7 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
   const isOwnPin = user?.id === pin.authorId;
 
   const isSavedToAnyBoard = boards.some(b => b.pinIds.includes(pin.id));
-
-
-  /**
-   * Handles board selection for the pin
-   * @param boardId - board to add/remove pin from
-   */
-  const handleBoardSelect = async (boardId: string) => {
-    try {
-      const board = boards.find(board => board.id === boardId);
-      if (board?.pinIds.includes(pin.id)) {
-        await removePinFromBoard(boardId, pin.id);
-      } else {
-        await addPinToBoard(boardId, pin.id);
-      }
-      if (!pin.isSaved) toggleSave(pin.id);
-    } catch (error) {
-      // error is already toasted in the store
-    }
-  };
-
+  
   /**
    * Handles downloading of the pin image
    * @param event - event to stop propagation
@@ -62,7 +45,11 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
   const handleDownload = async (event: React.MouseEvent) => {
     event.stopPropagation();
     try {
-      const response = await fetch(pin.imageUrl);
+      // Fetch fresh pin data to get an unexpired pre-signed S3 URL
+      const postResponse = await postService.getPost(pin.id);
+      const freshUrl = postResponse?.data?.media_url || pin.imageUrl;
+
+      const response = await fetch(freshUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -74,6 +61,14 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error downloading image:', error);
+      // Fallback
+      try {
+        const postResponse = await postService.getPost(pin.id);
+        const freshUrl = postResponse?.data?.media_url || pin.imageUrl;
+        window.open(freshUrl, '_blank');
+      } catch {
+        window.open(pin.imageUrl, '_blank');
+      }
     }
   };
 
@@ -132,7 +127,18 @@ export const PinCard: React.FC<PinCardProps> = ({ pin }) => {
               className="absolute inset-0 bg-black/40 flex flex-col justify-between p-4"
             >
               {/* Top Row: Save Button */}
-              <div className="flex justify-end relative">
+              <div className="flex justify-end relative gap-2">
+                {onRemove && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemove(pin.id);
+                    }}
+                    className="w-10 h-10 bg-background/90 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-red-500 hover:text-white transition-colors group/remove shadow-md"
+                  >
+                    <X className="w-5 h-5 text-foreground group-hover/remove:text-white" />
+                  </button>
+                )}
                 <Button
                   onClick={(e) => {
                     e.stopPropagation();
