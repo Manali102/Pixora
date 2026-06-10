@@ -104,14 +104,14 @@ export const ForgotPasswordPage: React.FC = () => {
             <div className="space-y-2">
               <label className="text-sm font-semibold ml-1">Email Address</label>
               <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground transition-colors" />
                 <Input
                   type="email"
                   {...register('email')}
                   className={`pl-12 pr-4 py-4 rounded-2xl bg-secondary/50 border transition-all shadow-sm outline-none
                     ${errors.email
                       ? 'border-destructive focus:border-destructive bg-destructive/5'
-                      : 'border-transparent focus:border-primary focus:bg-background'
+                      : 'border-transparent focus:border-foreground/30 focus:bg-background'
                     }`}
                   placeholder="Enter your email"
                 />
@@ -120,7 +120,7 @@ export const ForgotPasswordPage: React.FC = () => {
                 <motion.p
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-1.5 text-destructive test-sm font-medium ml-1 mt-1"
+                  className="flex items-center gap-1.5 text-destructive text-sm font-medium ml-1 mt-1"
                 >
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   {errors.email.message}
@@ -132,7 +132,7 @@ export const ForgotPasswordPage: React.FC = () => {
               <motion.p
                 initial={{ opacity: 0, scale: 0.97 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex items-center gap-2 text-destructive test-sm font-bold bg-destructive/10 p-4 rounded-2xl border border-destructive/20"
+                className="flex items-center gap-2 text-destructive text-sm font-bold bg-destructive/10 p-4 rounded-2xl border border-destructive/20"
               >
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 {error}

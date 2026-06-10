@@ -82,7 +82,7 @@ export const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
             {board.name}
           </h3>
         </div>
-        <p className="text-muted-foreground test-sm font-medium">
+        <p className="text-muted-foreground text-sm font-medium">
           {board.totalPins ?? board.pinIds.length} {(board.totalPins ?? board.pinIds.length) === 1 ? 'Pin' : 'Pins'}
         </p>
       </div>

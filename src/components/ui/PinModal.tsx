@@ -240,12 +240,12 @@ export const PinModal: React.FC = () => {
             className="relative w-full max-w-5xl bg-white dark:bg-zinc-900 rounded-xl shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] flex flex-col md:flex-row h-[90vh] overflow-hidden"
           >
             {/* Close Button - Top Right Outside/Edge */}
-            <div className="absolute top-0 right-0 z-30">
+            <div className="absolute top-1 right-1 z-30">
               <Button 
                   onClick={() => setSelectedPin(null)}
                   variant="ghost" 
                   size="icon" 
-                  className="rounded-full h-10 w-10"
+                  className="rounded-full h-7 w-7"
               >
                   <X className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
               </Button>
@@ -282,7 +282,7 @@ export const PinModal: React.FC = () => {
             </div>
 
             {/* Right side: Details */}
-            <div className="w-full md:w-[40%] flex flex-col p-6 md:p-10 bg-white dark:bg-zinc-900 border-l border-zinc-100 dark:border-zinc-800 h-[90vh] overflow-hidden">
+            <div className="w-full md:w-[40%] flex flex-col p-6 bg-white dark:bg-zinc-900 border-l border-zinc-100 dark:border-zinc-800 h-[90vh] overflow-hidden">
               
               {/* Top Bar Actions - Fixed */}
               <div className="flex items-center justify-between mb-8">
@@ -294,7 +294,7 @@ export const PinModal: React.FC = () => {
                       className="rounded-full"
                       onClick={() => toggleLike(selectedPin.id)}
                     >
-                      <Heart className={cn("w-6 h-6 transition-all", selectedPin.isLiked ? 'fill-red-500 text-red-500' : '')} />
+                      <Heart className={cn("w-6 h-6 transition-all", selectedPin.isLiked ? 'fill-red-500 text-primary' : '')} />
                     </Button>
                   </Tooltip>
                   
@@ -400,7 +400,7 @@ export const PinModal: React.FC = () => {
                               <Button
                                 disabled={isDeleting}
                                 onClick={deleteTarget.type === 'pin' ? handleDelete : handleCommentDelete}
-                                className="rounded-full font-bold px-6 h-12 bg-red-600 hover:bg-red-700 text-white flex-1"
+                                className="rounded-full font-bold px-6 h-12 bg-primary hover:bg-primary/90 text-white flex-1"
                               >
                                 {isDeleting ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Delete'}
                               </Button>
@@ -426,7 +426,7 @@ export const PinModal: React.FC = () => {
                   <Button
                     onClick={() => setDeleteTarget({ type: 'pin' })}
                     variant="outline"
-                    className="rounded-full ml-2 px-6 h-12 font-bold transition-all text-base border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-950/30 mr-2"
+                    className="rounded-full ml-2 px-6 h-12 font-bold transition-all text-base border-red-200 text-primary hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-950/30 mr-2"
                   >
                     Delete
                   </Button>
@@ -439,7 +439,7 @@ export const PinModal: React.FC = () => {
                       "rounded-full px-8 h-12 font-bold transition-all text-base",
                       selectedPin.isSaved
                         ? "bg-zinc-900 text-white hover:bg-black dark:bg-white dark:text-black dark:hover:bg-zinc-200"
-                        : "bg-red-600 text-white hover:bg-red-700"
+                        : "bg-primary text-white hover:bg-primary/90"
                     )}
                   >
                     {selectedPin.isSaved ? 'Saved' : 'Save'}
@@ -465,7 +465,7 @@ export const PinModal: React.FC = () => {
 
               {/* Content */}
               <div className="flex-1">
-                <h1 className="text-4xl font-bold mb-4 tracking-tight leading-tight text-zinc-900 dark:text-zinc-100 font-serif">
+                <h1 className="text-4xl font-bold mb-4 tracking-tight leading-tight text-zinc-900 dark:text-zinc-100">
                   {selectedPin.title}
                 </h1>
                 <p className="text-zinc-600 dark:text-zinc-400 text-lg mb-8 leading-relaxed">
@@ -501,7 +501,7 @@ export const PinModal: React.FC = () => {
                         "rounded-full font-bold px-8 h-12 transition-all border-none",
                         isFollowing 
                           ? "bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100" 
-                          : "bg-red-600 text-white hover:bg-red-700"
+                          : "bg-primary text-white hover:bg-primary/90"
                       )}
                     >
                       {isFollowing ? 'Following' : 'Follow'}
@@ -585,7 +585,7 @@ export const PinModal: React.FC = () => {
                                         }
                                       }}
                                       disabled={!editingCommentText.trim() || editingCommentText === c.text}
-                                      className="h-7 text-xs bg-red-600 hover:bg-red-700 text-white"
+                                      className="h-7 text-xs bg-primary hover:bg-primary/90 text-white"
                                     >
                                       Save
                                     </Button>
@@ -616,7 +616,7 @@ export const PinModal: React.FC = () => {
                               <Tooltip content="Delete">
                                 <button 
                                   onClick={() => setDeleteTarget({ type: 'comment', id: c.id })}
-                                  className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                                  className="p-1.5 text-zinc-400 hover:text-primary hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
@@ -682,7 +682,7 @@ export const PinModal: React.FC = () => {
                           className={cn(
                             "p-2 rounded-full transition-all",
                             comment.trim() 
-                              ? "text-red-600 hover:bg-zinc-200 dark:hover:bg-zinc-700 opacity-100" 
+                              ? "text-primary hover:bg-zinc-200 dark:hover:bg-zinc-700 opacity-100" 
                               : "text-zinc-400 opacity-0 pointer-events-none"
                           )}
                         >

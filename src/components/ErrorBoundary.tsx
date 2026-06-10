@@ -41,7 +41,7 @@ function DefaultFallback({ error, reset }: { error: Error; reset: () => void }) 
 
         {/* Error detail (dev-friendly) */}
         <div className="bg-secondary/60 border border-secondary rounded-xl p-4 mb-6 text-left overflow-x-auto">
-          <p className="test-sm text-destructive font-mono break-all">{error.message}</p>
+          <p className="text-sm text-destructive font-mono break-all">{error.message}</p>
         </div>
 
         <div className="flex gap-3">

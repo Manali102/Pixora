@@ -1,15 +1,15 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  Home, 
-  PlusSquare, 
-  User, 
-  Users, 
-  Layout, 
-  CreditCard, 
+import {
+  Home,
+  PlusSquare,
+  User,
+  Users,
+  Layout,
+  CreditCard,
   LogOut,
   Crown,
-  Settings
+  Settings,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -22,8 +22,8 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const user = useAuthStore(state => state.user);
-  const logout = useAuthStore(state => state.logout);
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
 
   const navItems = [
     { label: 'Home', icon: Home, path: '/', active: location.pathname === '/' },
@@ -36,40 +36,44 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   ];
 
   return (
-    <aside 
+    <aside
       className={cn(
-        "fixed left-0 top-16 bottom-0 z-40 bg-background/80 backdrop-blur-xl border-r transition-all duration-300 hidden md:flex flex-col w-64",
+        'fixed left-0 top-16 bottom-0 z-40 hidden md:flex flex-col w-64',
+        'bg-background/85 backdrop-blur-xl border-r border-border/60',
         className
       )}
     >
-      <div className="flex-1 py-4 px-3 space-y-2 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex-1 py-5 px-3 space-y-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {navItems.map((item) => (
           <Link
             key={item.label}
             to={item.path}
             className={cn(
-              "flex items-center gap-3 px-3 py-3 rounded-2xl transition-all duration-200 group relative",
-              item.active 
-                ? "bg-primary text-primary-foreground shadow-[0_8px_16px_rgba(var(--primary),0.25)]" 
-                : "hover:bg-secondary text-muted-foreground hover:text-foreground"
+              'flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 group relative text-sm font-medium',
+              item.active
+                ? 'bg-foreground text-background shadow-[0_6px_18px_-8px_rgb(15_23_42_/_0.4)]'
+                : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
             )}
           >
-            <item.icon className={cn("w-5 h-5 shrink-0 transition-transform group-hover:scale-110", item.active ? "text-primary-foreground" : "text-muted-foreground group-hover:text-primary")} />
-            <span className="font-bold text-sm tracking-tight whitespace-nowrap">
-              {item.label}
-            </span>
+            <item.icon
+              className={cn(
+                'w-[18px] h-[18px] shrink-0 transition-transform group-hover:scale-105',
+                item.active ? 'text-background' : 'text-muted-foreground group-hover:text-foreground'
+              )}
+            />
+            <span className="tracking-tight whitespace-nowrap">{item.label}</span>
           </Link>
         ))}
       </div>
 
       {/* User Section */}
-      <div className="mt-auto p-4 space-y-4">
-        <div className="p-4 rounded-2xl bg-secondary/50 border border-border/50">
+      <div className="mt-auto p-3 space-y-2 border-t border-border/60">
+        <div className="p-3 rounded-2xl bg-secondary/60">
           <div className="flex items-center gap-3">
             <Avatar src={user?.avatar} name={user?.name} size="md" />
             <div className="min-w-0">
-              <p className="font-bold text-sm truncate">{user?.name}</p>
-              <div className="flex items-center gap-1 text-[10px] text-primary font-black uppercase">
+              <p className="font-semibold text-sm truncate tracking-tight">{user?.name}</p>
+              <div className="flex items-center gap-1 text-[10px] text-primary font-bold uppercase tracking-wider mt-0.5">
                 <Crown className="w-2.5 h-2.5" />
                 {user?.subscription}
               </div>
@@ -77,18 +81,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           </div>
         </div>
 
-        <div className="space-y-1 pb-4">
-          <button
-            onClick={() => {
-              logout();
-              navigate('/login');
-            }}
-            className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl transition-all text-destructive hover:bg-destructive/10 group"
-          >
-            <LogOut className="w-5 h-5 transition-transform group-hover:rotate-12" />
-            <span className="font-bold text-sm">Log Out</span>
-          </button>
-        </div>
+        <button
+          onClick={() => {
+            logout();
+            navigate('/login');
+          }}
+          className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors group"
+        >
+          <LogOut className="w-[18px] h-[18px] transition-transform group-hover:-translate-x-0.5" />
+          <span>Log Out</span>
+        </button>
       </div>
     </aside>
   );

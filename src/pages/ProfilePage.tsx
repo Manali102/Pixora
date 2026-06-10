@@ -218,7 +218,7 @@ const ProfilePage: React.FC = () => {
                     placeholder="Tell the world about yourself…"
                     className="w-full px-3 py-2.5 rounded-xl border border-border/80 bg-background text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition resize-none"
                   />
-                  <p className="test-sm text-muted-foreground mt-1 text-right">{editBio.length}/160</p>
+                  <p className="text-sm text-muted-foreground mt-1 text-right">{editBio.length}/160</p>
                 </div>
               </div>
 
@@ -319,7 +319,7 @@ const ProfilePage: React.FC = () => {
                   </button>
                 </Tooltip>
                 <Tooltip content="Apply avatar color">
-                  <Button onClick={handleSaveAvatar} className="px-6 py-2.5 rounded-xl font-bold bg-red-600 hover:bg-red-700 text-white shadow-lg active:scale-95 transition-all flex items-center gap-2 cursor-pointer">
+                  <Button onClick={handleSaveAvatar} className="px-6 py-2.5 rounded-xl font-bold bg-primary hover:bg-primary/90 text-white shadow-lg active:scale-95 transition-all flex items-center gap-2 cursor-pointer">
                     <Check className="w-4 h-4" /> Apply
                   </Button>
                 </Tooltip>
@@ -450,7 +450,7 @@ const ProfilePage: React.FC = () => {
               <span className="label-dim">Total Views</span>
             </div>
             <span className="stat-number text-foreground">{totalViews.toLocaleString()}</span>
-            <p className="text-muted-foreground test-sm mt-1">{userPins.length} active pins</p>
+            <p className="text-muted-foreground text-sm mt-1">{userPins.length} active pins</p>
           </div>
 
           {/* Engagement */}
@@ -482,7 +482,7 @@ const ProfilePage: React.FC = () => {
             <div className="relative z-10">
               <div className="flex items-center gap-2">
                 <span className="text-foreground font-display font-semibold">Member Tier</span>
-                <span className="px-2.5 py-0.5 rounded-md bg-primary/15 text-primary test-sm font-black uppercase tracking-wider">
+                <span className="px-2.5 py-0.5 rounded-md bg-primary/15 text-primary text-sm font-black uppercase tracking-wider">
                   {user?.subscription}
                 </span>
                 <span className="text-muted-foreground text-[10px] font-black uppercase italic">

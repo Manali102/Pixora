@@ -270,7 +270,7 @@ export const CreatePinPage: React.FC = () => {
           isAdmin
             ? 'bg-secondary/50 border-border text-foreground'
             : isNearLimit
-              ? 'bg-red-500/10 border-red-500/20 text-red-500'
+              ? 'bg-red-500/10 border-red-500/20 text-primary'
               : 'bg-green-500/10 border-green-500/20 text-green-600'
         }`}>
           <Shield className="w-3.5 h-3.5" />
@@ -360,7 +360,7 @@ export const CreatePinPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={removeFile}
-                      className="w-16 h-16 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white flex items-center justify-center hover:bg-red-600 hover:border-red-600 hover:scale-110 transition-all duration-200 shadow-2xl"
+                      className="w-16 h-16 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white flex items-center justify-center hover:bg-primary hover:border-red-600 hover:scale-110 transition-all duration-200 shadow-2xl"
                     >
                       <X className="w-8 h-8" strokeWidth={2.5} />
                     </button>

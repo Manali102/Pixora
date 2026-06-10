@@ -138,21 +138,21 @@ export const ResetPasswordPage: React.FC = () => {
               <label className="text-sm font-semibold ml-1">New Password</label>
               <div className="relative group">
                 <PasswordValidation password={passwordValue} />
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground transition-colors" />
                 <Input
                   type={showPassword ? 'text' : 'password'}
                   {...register('password')}
                   className={`pl-12 pr-12 py-4 rounded-2xl bg-secondary/50 border transition-all shadow-sm outline-none
                     ${errors.password
                       ? 'border-destructive focus:border-destructive bg-destructive/5'
-                      : 'border-transparent focus:border-primary focus:bg-background'
+                      : 'border-transparent focus:border-foreground/30 focus:bg-background'
                     }`}
                   placeholder="Enter new password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors focus:outline-none"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -161,7 +161,7 @@ export const ResetPasswordPage: React.FC = () => {
                 <motion.p
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-1.5 text-destructive test-sm font-medium ml-1 mt-1"
+                  className="flex items-center gap-1.5 text-destructive text-sm font-medium ml-1 mt-1"
                 >
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   {errors.password.message}
@@ -173,21 +173,21 @@ export const ResetPasswordPage: React.FC = () => {
             <div className="space-y-2">
               <label className="text-sm font-semibold ml-1">Confirm Password</label>
               <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground transition-colors" />
                 <Input
                   type={showConfirmPassword ? 'text' : 'password'}
                   {...register('confirmPassword')}
                   className={`pl-12 pr-12 py-4 rounded-2xl bg-secondary/50 border transition-all shadow-sm outline-none
                     ${errors.confirmPassword
                       ? 'border-destructive focus:border-destructive bg-destructive/5'
-                      : 'border-transparent focus:border-primary focus:bg-background'
+                      : 'border-transparent focus:border-foreground/30 focus:bg-background'
                     }`}
                   placeholder="Confirm new password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors focus:outline-none"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
                 >
                   {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -196,7 +196,7 @@ export const ResetPasswordPage: React.FC = () => {
                 <motion.p
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-1.5 text-destructive test-sm font-medium ml-1 mt-1"
+                  className="flex items-center gap-1.5 text-destructive text-sm font-medium ml-1 mt-1"
                 >
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   {errors.confirmPassword.message}
@@ -208,7 +208,7 @@ export const ResetPasswordPage: React.FC = () => {
               <motion.p
                 initial={{ opacity: 0, scale: 0.97 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex items-center gap-2 text-destructive test-sm font-bold bg-destructive/10 p-4 rounded-2xl border border-destructive/20"
+                className="flex items-center gap-2 text-destructive text-sm font-bold bg-destructive/10 p-4 rounded-2xl border border-destructive/20"
               >
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 {error}

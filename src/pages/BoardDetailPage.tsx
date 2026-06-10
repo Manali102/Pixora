@@ -78,16 +78,16 @@ export const BoardDetailPage: React.FC = () => {
       )}
 
       {/* Header */}
-      <div className="pt-8 relative z-10">
+      <div className="pt-2 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-8">
           <button
             onClick={() => navigate(-1)}
-            className="mb-4 w-12 h-12 rounded-full bg-background/50 backdrop-blur-xl flex items-center justify-center hover:bg-secondary transition-all group border border-border/50 shadow-sm"
+            className="w-12 h-12 rounded-full bg-background/50 backdrop-blur-xl flex items-center justify-center hover:bg-secondary transition-all group border border-border/50"
           >
             <ChevronLeft className="w-6 h-6 text-foreground group-hover:-translate-x-0.5 transition-transform" />
           </button>
 
-          <div className="flex flex-col items-center text-center mt-4">
+          <div className="flex flex-col items-center text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -95,7 +95,7 @@ export const BoardDetailPage: React.FC = () => {
               className="w-full max-w-4xl"
             >
               {board.coverImageUrl && (
-                <div className="w-32 h-32 md:w-40 md:h-40 mx-auto mb-8 rounded-[2.5rem] overflow-hidden border-[6px] border-background shadow-2xl ring-1 ring-border/30 bg-muted">
+                <div className="w-32 h-32 md:w-40 md:h-40 mx-auto mb-8 rounded-[2.5rem] overflow-hidden border-[6px] border-background ring-1 ring-border/30 bg-muted">
                   <ProgressiveImage 
                     src={board.coverImageUrl} 
                     alt={board.name} 
@@ -106,7 +106,7 @@ export const BoardDetailPage: React.FC = () => {
               )}
 
               <div className="flex items-center justify-center gap-4 mb-4">
-                <h1 className="font-display text-5xl sm:text-7xl font-black text-foreground tracking-tight drop-shadow-sm">
+                <h1 className="font-display text-5xl sm:text-7xl font-black text-foreground tracking-tight">
                   {board.name}
                 </h1>
               </div>
@@ -114,7 +114,7 @@ export const BoardDetailPage: React.FC = () => {
               <div className="flex items-center justify-center gap-3 mb-6">
                 <Button 
                   variant="secondary" 
-                  className="rounded-full font-bold px-6 border border-border/50 shadow-sm gap-2"
+                  className="rounded-full font-bold px-6 border border-border/50 gap-2"
                   onClick={() => setIsEditModalOpen(true)}
                 >
                   <Edit2 className="w-4 h-4" />
@@ -122,7 +122,7 @@ export const BoardDetailPage: React.FC = () => {
                 </Button>
                 <Button 
                   variant="outline" 
-                  className="rounded-full font-bold px-6 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-950/30 shadow-sm gap-2"
+                  className="rounded-full font-bold px-6 border-red-200 text-primary hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-950/30 gap-2"
                   onClick={() => setIsDeleteModalOpen(true)}
                 >
                   <Trash2 className="w-4 h-4" />
@@ -137,7 +137,7 @@ export const BoardDetailPage: React.FC = () => {
               )}
 
               <div className="flex items-center justify-center gap-4 mb-12 flex-wrap">
-                <div className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-secondary/80 backdrop-blur-md border border-border/50 shadow-sm">
+                <div className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-secondary/80 backdrop-blur-md border border-border/50">
                   <span className="text-sm font-black text-foreground">
                     {boardPins.length}
                   </span>
@@ -202,9 +202,9 @@ export const BoardDetailPage: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-md bg-card border border-border shadow-2xl rounded-[2rem] p-8 text-center"
+              className="relative w-full max-w-md bg-card border border-border rounded-[2rem] p-8 text-center"
             >
-              <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 mx-auto flex items-center justify-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 text-primary mx-auto flex items-center justify-center mb-6">
                 <Trash2 className="w-8 h-8" />
               </div>
               <h2 className="text-2xl font-black font-display mb-2 text-foreground">Delete this board?</h2>
@@ -222,7 +222,7 @@ export const BoardDetailPage: React.FC = () => {
                   Cancel
                 </Button>
                 <Button
-                  className="flex-1 rounded-full py-6 font-bold text-lg bg-red-600 hover:bg-red-700 text-white"
+                  className="flex-1 rounded-full py-6 font-bold text-lg bg-primary hover:bg-primary/90 text-white"
                   onClick={handleDelete}
                   disabled={isDeleting}
                 >

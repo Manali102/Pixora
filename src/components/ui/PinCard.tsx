@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { LazyVideo } from './LazyVideo';
-import { Download, Share2, Heart, Check, Trash2 } from 'lucide-react';
+import { X, Download, Share2, Heart, Check, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ProgressiveImage } from './ProgressiveImage';
 import { Pin } from '@/types/type';
@@ -10,9 +10,9 @@ import { useModalStore } from '../../store/useModalStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { Button } from './button';
 import { cn } from '../../lib/utils';
-import { X } from 'lucide-react';
 import { Avatar } from './Avatar';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { postService } from '@/services/postService';
 
 interface PinCardProps {
@@ -21,7 +21,7 @@ interface PinCardProps {
 }
 
 /**
- * PinCard component to display pin in grid
+ * PinCard component to display a single pin
  * @param pin - pin to display
  * @returns JSX.Element
  */
@@ -79,7 +79,7 @@ export const PinCard: React.FC<PinCardProps> = ({ pin, onRemove }) => {
   const handleShare = (event: React.MouseEvent) => {
     event.stopPropagation();
     navigator.clipboard.writeText(`${window.location.origin}/pin/${pin.id}`);
-    alert('Link copied to clipboard!');
+    toast.success('Link copied to clipboard!');
   };
 
   /**
@@ -89,20 +89,24 @@ export const PinCard: React.FC<PinCardProps> = ({ pin, onRemove }) => {
     setSelectedPin(pin);
   };
 
+
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      className="masonry-item group relative cursor-zoom-in"
-      onMouseEnter={() => setIsHovered(true)}
+      transition={{ duration: 0.2 }}
+      className="mb-4 break-inside-avoid relative group"
+      onMouseEnter={() => {
+        if (!openModal) setIsHovered(true);
+      }}
       onMouseLeave={() => {
         setIsHovered(false);
       }}
       onClick={handleOpenModal}
     >
-      <div className="relative overflow-hidden rounded-2xl bg-muted transition-all duration-300">
+      <div className="relative overflow-hidden rounded-2xl bg-muted transition-all duration-300 w-full">
         {pin.type === 'video' ? (
           <LazyVideo
             src={pin.imageUrl}
@@ -149,7 +153,7 @@ export const PinCard: React.FC<PinCardProps> = ({ pin, onRemove }) => {
                     "rounded-full px-6 h-10 font-bold transition-all shadow-md",
                     isSavedToAnyBoard
                       ? "bg-zinc-900 text-white hover:bg-black dark:bg-white dark:text-black dark:hover:bg-zinc-200"
-                      : "bg-red-600 text-white hover:bg-red-700"
+                      : "bg-primary text-white hover:bg-primary/90"
                   )}
                 >
                   {isSavedToAnyBoard ? 'Saved' : 'Save'}
@@ -206,8 +210,8 @@ export const PinCard: React.FC<PinCardProps> = ({ pin, onRemove }) => {
             </button>
           )}
         </div>
-        <div className="flex items-center gap-1 text-muted-foreground transition-colors hover:text-red-500 cursor-pointer" onClick={() => toggleLike(pin.id)}>
-          <Heart className={cn("w-3.5 h-3.5", pin.isLiked && "fill-current text-red-500")} />
+        <div className="flex items-center gap-1 text-muted-foreground transition-colors hover:text-primary cursor-pointer" onClick={() => toggleLike(pin.id)}>
+          <Heart className={cn("w-3.5 h-3.5", pin.isLiked && "fill-current text-primary")} />
           <span className="text-[10px] font-medium">{pin.likes}</span>
         </div>
       </div>

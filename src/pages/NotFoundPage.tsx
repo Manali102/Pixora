@@ -51,7 +51,7 @@ export const NotFoundPage: React.FC = () => {
 
           <Link
             to="/"
-            className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-red-600 text-white font-bold text-sm hover:bg-red-700 shadow-xl shadow-red-600/20 active:scale-95 transition-all"
+            className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-primary text-white font-bold text-sm hover:bg-primary/90 shadow-xl shadow-primary/25 active:scale-95 transition-all"
           >
             <Home className="w-4 h-4" />
             Back to Home

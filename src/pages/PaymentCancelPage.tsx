@@ -43,8 +43,8 @@ export const PaymentCancelPage: React.FC = () => {
         </motion.p>
 
         <div className="bg-red-500/5 border border-red-500/10 p-6 rounded-3xl mb-10 flex items-start gap-4 text-left">
-          <AlertTriangle className="w-6 h-6 text-red-500 shrink-0 mt-0.5" />
-          <p className="text-sm font-semibold text-red-600 dark:text-red-400">
+          <AlertTriangle className="w-6 h-6 text-primary shrink-0 mt-0.5" />
+          <p className="text-sm font-semibold text-primary dark:text-red-400">
             If this was a mistake, you can try again. If you're experiencing technical issues, please contact our support team.
           </p>
         </div>

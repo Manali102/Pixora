@@ -149,7 +149,7 @@ export const SignupPage: React.FC = () => {
         className="w-full max-w-2xl glass p-10 rounded-2xl shadow-xl border relative z-10"
       >
         <div className="text-center mb-10">
-          <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4 rotate-6 hover:rotate-0 transition-transform duration-500 shadow-lg">
+          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 rotate-6 hover:rotate-0 transition-transform duration-500 shadow-lg">
             <span className="text-white font-bold text-3xl">P</span>
           </div>
           <h1 className="text-3xl font-bold tracking-tight">Join Pixora</h1>
@@ -161,7 +161,7 @@ export const SignupPage: React.FC = () => {
           <div className="space-y-1">
             <label className="text-sm font-semibold ml-1">Full Name</label>
             <div className="relative group">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground transition-colors" />
               <Input
                 id="signup-name"
                 type="text"
@@ -170,7 +170,7 @@ export const SignupPage: React.FC = () => {
                 className={`pl-12 pr-4 py-4 rounded-2xl bg-secondary/50 border transition-all shadow-sm outline-none
                   ${errors.name
                     ? 'border-destructive focus:border-destructive bg-destructive/5'
-                    : 'border-transparent focus:border-primary focus:bg-background'
+                    : 'border-transparent focus:border-foreground/30 focus:bg-background'
                   }`}
                 placeholder="Enter your name"
               />
@@ -179,7 +179,7 @@ export const SignupPage: React.FC = () => {
               <motion.p
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-1.5 text-destructive test-sm font-medium ml-1 mt-1"
+                className="flex items-center gap-1.5 text-destructive text-sm font-medium ml-1 mt-1"
               >
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 {errors.name.message}
@@ -191,7 +191,7 @@ export const SignupPage: React.FC = () => {
           <div className="space-y-1">
             <label className="text-sm font-semibold ml-1">Email</label>
             <div className="relative group">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground transition-colors" />
               <Input
                 id="signup-email"
                 type="email"
@@ -200,7 +200,7 @@ export const SignupPage: React.FC = () => {
                 className={`pl-12 pr-4 py-4 rounded-2xl bg-secondary/50 border transition-all shadow-sm outline-none
                   ${errors.email
                     ? 'border-destructive focus:border-destructive bg-destructive/5'
-                    : 'border-transparent focus:border-primary focus:bg-background'
+                    : 'border-transparent focus:border-foreground/30 focus:bg-background'
                   }`}
                 placeholder="Enter your email"
               />
@@ -209,7 +209,7 @@ export const SignupPage: React.FC = () => {
               <motion.p
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-1.5 text-destructive test-sm font-medium ml-1 mt-1"
+                className="flex items-center gap-1.5 text-destructive text-sm font-medium ml-1 mt-1"
               >
                 <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 {errors.email.message}
@@ -222,7 +222,7 @@ export const SignupPage: React.FC = () => {
               <label className="text-sm font-semibold ml-1">Password</label>
               <div className="relative group">
                 <PasswordValidation password={passwordValue} />
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground transition-colors" />
                 <Input
                   id="signup-password"
                   type={showPassword ? 'text' : 'password'}
@@ -231,14 +231,14 @@ export const SignupPage: React.FC = () => {
                   className={`pl-12 pr-12 py-4 rounded-2xl bg-secondary/50 border transition-all shadow-sm outline-none
                   ${errors.password
                       ? 'border-destructive focus:border-destructive bg-destructive/5'
-                      : 'border-transparent focus:border-primary focus:bg-background'
+                      : 'border-transparent focus:border-foreground/30 focus:bg-background'
                     }`}
                   placeholder="Create a password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-4 cursor-pointer top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors focus:outline-none"
+                  className="absolute right-4 cursor-pointer top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -248,7 +248,7 @@ export const SignupPage: React.FC = () => {
                 <motion.p
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-1.5 text-destructive test-sm font-medium ml-1 mt-1"
+                  className="flex items-center gap-1.5 text-destructive text-sm font-medium ml-1 mt-1"
                 >
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   {passwordValue.length === 0 ? ERROR_MESSAGES.PASSWORD_REQUIRED : ERROR_MESSAGES.VALIDATION_REQUIREMENTS_NOT_MET}
@@ -270,7 +270,7 @@ export const SignupPage: React.FC = () => {
             <div className="space-y-1 flex-1">
               <label className="text-sm font-semibold ml-1">Confirm Password</label>
               <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground transition-colors" />
                 <Input
                   id="signup-confirm-password"
                   type={showConfirmPassword ? 'text' : 'password'}
@@ -279,14 +279,14 @@ export const SignupPage: React.FC = () => {
                   className={`pl-12 pr-12 py-4 rounded-2xl bg-secondary/50 border transition-all shadow-sm outline-none
                   ${errors.confirmPassword
                       ? 'border-destructive focus:border-destructive bg-destructive/5'
-                      : 'border-transparent focus:border-primary focus:bg-background'
+                      : 'border-transparent focus:border-foreground/30 focus:bg-background'
                     }`}
                   placeholder="Confirm your password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  className="absolute right-4 cursor-pointer top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors focus:outline-none"
+                  className="absolute right-4 cursor-pointer top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors focus:outline-none"
                   aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
                 >
                   {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -296,7 +296,7 @@ export const SignupPage: React.FC = () => {
                 <motion.p
                   initial={{ opacity: 0, y: -4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-1.5 text-destructive test-sm font-medium ml-1 mt-1"
+                  className="flex items-center gap-1.5 text-destructive text-sm font-medium ml-1 mt-1"
                 >
                   <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   {errors.confirmPassword.message}
@@ -320,7 +320,7 @@ export const SignupPage: React.FC = () => {
           <Button
             type="submit"
             disabled={signupMutation.isPending || isSubmitting}
-            className="w-full py-5 rounded-2xl cursor-pointer text-lg font-bold bg-red-600 hover:bg-red-700 shadow-xl shadow-red-600/20 active:scale-95 transition-all group"
+            className="w-full py-5 rounded-2xl cursor-pointer text-lg font-bold bg-primary hover:bg-primary/90 shadow-xl shadow-primary/25 active:scale-95 transition-all group"
           >
             {signupMutation.isPending || isSubmitting ? (
               <Loader size="sm" className="border-white" />

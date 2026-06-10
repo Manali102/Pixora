@@ -151,7 +151,7 @@ const CreatorProfilePage: React.FC = () => {
                 "rounded-xl font-bold px-8 h-10 transition-all",
                 isFollowing 
                   ? "bg-secondary text-foreground hover:bg-secondary/80" 
-                  : "bg-red-600 text-white hover:bg-red-700"
+                  : "bg-primary text-white hover:bg-primary/90"
               )}
             >
               {isFollowing ? 'Following' : 'Follow'}

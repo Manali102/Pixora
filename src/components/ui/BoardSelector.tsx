@@ -112,7 +112,7 @@ export const BoardSelector: React.FC<BoardSelectorProps> = ({
           })
         ) : (
           <div className="px-4 py-6 text-center">
-            <p className="test-sm text-muted-foreground">You don't have any boards yet.</p>
+            <p className="text-sm text-muted-foreground">You don't have any boards yet.</p>
           </div>
         )}
         
