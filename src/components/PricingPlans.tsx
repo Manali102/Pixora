@@ -149,7 +149,7 @@ export const PricingPlans: React.FC<PricingPlansProps> = ({ isModal = false, onP
               }`}
             >
               {isSameTier && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full z-30 shadow-lg shadow-green-500/20">
+                <div className="absolute text-center top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full z-30 shadow-lg shadow-green-500/20">
                   {isCurrentPlan ? 'Your Current Plan' : 'Your Tier'}
                 </div>
               )}

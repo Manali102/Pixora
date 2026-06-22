@@ -4,15 +4,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { usePinStore } from '../store/usePinStore';
 import { PinCard } from '../components/ui/PinCard';
-import { Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import Masonry from 'react-masonry-css';
-import { Tooltip } from '../components/ui/Tooltip';
 import { Button } from '../components/ui/button';
 import { userService } from '../services/userService';
 import { cn } from '../lib/utils';
 import { Loader } from '../components/ui/Loader';
-import { Avatar } from '../components/ui/Avatar';
+import { ProfileImage } from '../components/ui/ProfileImage';
 
 const breakpointColumnsObj = {
   default: 4,
@@ -62,15 +60,7 @@ const CreatorProfilePage: React.FC = () => {
     loadCreatorData();
   }, [id, isSelf, navigate]);
 
-  const handleShare = async () => {
-    const url = window.location.href;
-    try {
-      await navigator.clipboard.writeText(url);
-      toast.success('Profile link copied!');
-    } catch {
-      toast.error('Failed to copy link');
-    }
-  };
+
 
   const handleFollowToggle = async () => {
     if (!id) return;
@@ -115,7 +105,7 @@ const CreatorProfilePage: React.FC = () => {
           {/* Avatar */}
           <div className="relative group">
             <div className="w-28 h-28 rounded-2xl p-[3px] shadow-[var(--shadow-glow)] ring-2 ring-primary/50 overflow-hidden bg-muted">
-              <Avatar 
+              <ProfileImage 
                 src={creator.profile_url} 
                 name={creator.name} 
                 variant="square"
@@ -134,16 +124,7 @@ const CreatorProfilePage: React.FC = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-2.5 pb-1">
-            <Tooltip content="Share profile">
-              <button
-                onClick={handleShare}
-                className="btn-ghost-glass flex items-center gap-2 text-sm cursor-pointer"
-              >
-                <Share2 className="w-4 h-4" />
-                Share
-              </button>
-            </Tooltip>
-            
+
             <Button
               onClick={handleFollowToggle}
               variant={isFollowing ? "secondary" : "default"}

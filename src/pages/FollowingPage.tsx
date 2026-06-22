@@ -6,7 +6,7 @@ import { userService } from '../services/userService';
 import { Users, Search, UserMinus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Loader } from '../components/ui/Loader';
-import { Avatar } from '../components/ui/Avatar';
+import { ProfileImage } from '../components/ui/ProfileImage';
 import { Input } from '../components/ui/input';
 
 const FollowingPage: React.FC = () => {
@@ -26,7 +26,7 @@ const FollowingPage: React.FC = () => {
         const mapped = response.data.map((user: any) => ({
           ...user,
           id: user._id || user.id,
-          avatar: user.profile_url || user.avatar,
+          profile_url: user.profile_url || '',
         }));
         setFollowingList(mapped);
       }
@@ -96,8 +96,8 @@ const FollowingPage: React.FC = () => {
                   className="flex-1 flex items-center gap-4 cursor-pointer min-w-0"
                   onClick={() => navigate(`/creator/${creator.id}`)}
                 >
-                  <Avatar 
-                    src={creator.avatar} 
+                  <ProfileImage 
+                    src={creator.profile_url} 
                     name={creator.name} 
                     size="lg"
                     className="border-2 group-hover:border-primary/50 transition-colors" 

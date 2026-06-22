@@ -14,6 +14,7 @@ import { WhatsAppIcon, MessengerIcon, FacebookIcon, XIcon } from '../icons/Socia
 import { BoardSelector } from './BoardSelector';
 import { useModalStore } from '../../store/useModalStore';
 import { ProgressiveImage } from './ProgressiveImage';
+import { ProfileImage } from './ProfileImage';
 
 /**
  * PinModal component to display pin in modal
@@ -186,28 +187,21 @@ export const PinModal: React.FC = () => {
       icon: <WhatsAppIcon className="w-6 h-6" />, 
       bg: 'bg-[#25D366]', 
       color: 'text-white',
-      action: () => window.open(`https://wa.me/?text=${encodeURIComponent(selectedPin.title + ' ' + pinUrl)}`, '_blank')
+      action: () => window.open(`https://wa.me/?text=${encodeURIComponent(selectedPin.title + ' ' + selectedPin.imageUrl)}`, '_blank')
     },
     { 
       name: 'Messenger', 
       icon: <MessengerIcon className="w-6 h-6" />, 
       bg: 'bg-[#0084FF]', 
       color: 'text-white',
-      action: () => window.open(`https://www.facebook.com/dialog/send?link=${encodeURIComponent(pinUrl)}&app_id=614318355601247&redirect_uri=${encodeURIComponent(pinUrl)}`, '_blank')
-    },
-    { 
-      name: 'Facebook', 
-      icon: <FacebookIcon className="w-6 h-6" />, 
-      bg: 'bg-[#1877F2]', 
-      color: 'text-white',
-      action: () => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pinUrl)}`, '_blank')
+      action: () => window.open(`https://www.facebook.com/dialog/send?link=${encodeURIComponent(selectedPin.imageUrl)}&app_id=614318355601247&redirect_uri=${encodeURIComponent(pinUrl)}`, '_blank')
     },
     { 
       name: 'X', 
       icon: <XIcon className="w-6 h-6" />, 
       bg: 'bg-black', 
       color: 'text-white',
-      action: () => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(pinUrl)}&text=${encodeURIComponent(selectedPin.title)}`, '_blank')
+      action: () => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(selectedPin.imageUrl)}&text=${encodeURIComponent(selectedPin.title)}`, '_blank')
     },
   ];
 
@@ -280,7 +274,7 @@ export const PinModal: React.FC = () => {
               {/* Top Bar Actions - Fixed */}
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3 relative">
-                  <Tooltip content={selectedPin.isLiked ? "Unlike" : "Like"}>
+                  <Tooltip content={selectedPin.isLiked ? "Unlike" : "Like"} side="bottom">
                     <Button 
                       variant="ghost" 
                       size="icon" 
@@ -292,7 +286,7 @@ export const PinModal: React.FC = () => {
                   </Tooltip>
                   
                   <div className="relative">
-                    <Tooltip content="Share">
+                    <Tooltip content="Share" side="bottom">
                       <Button 
                         onClick={() => setShowShareMenu(!showShareMenu)}
                         variant="ghost" 
@@ -318,7 +312,7 @@ export const PinModal: React.FC = () => {
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[110] bg-white dark:bg-zinc-800 rounded-[32px] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)] p-8 w-[90%] max-w-[400px] border border-zinc-100 dark:border-zinc-700"
+                            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[110] bg-white dark:bg-zinc-800 rounded-[32px] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)] p-8 w-[90%] max-w-[320px] border border-zinc-100 dark:border-zinc-700"
                           >
                             <div className="flex items-center justify-between mb-8">
                                 <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 w-full text-center">Share</h3>
@@ -330,7 +324,7 @@ export const PinModal: React.FC = () => {
                                 </button>
                             </div>
                             
-                            <div className="grid grid-cols-4 gap-y-8 gap-x-4 mb-2">
+                            <div className="grid grid-cols-3 gap-y-8 gap-x-4 mb-2">
                               {shareOptions.map((option) => (
                                 <button
                                   key={option.name}
@@ -404,7 +398,7 @@ export const PinModal: React.FC = () => {
                     </AnimatePresence>
                   </div>
 
-                  <Tooltip content="Download">
+                  <Tooltip content="Download" side="bottom">
                     <Button 
                       onClick={handleDownload}
                       variant="ghost" 
@@ -430,12 +424,12 @@ export const PinModal: React.FC = () => {
                     onClick={() => setShowBoardSelect(!showBoardSelect)}
                     className={cn(
                       "rounded-full px-8 h-12 font-bold transition-all text-base",
-                      selectedPin.isSaved
+                      (selectedPin.isSaved || boards.some(board => board.pinIds.includes(selectedPin.id)))
                         ? "bg-zinc-900 text-white hover:bg-black dark:bg-white dark:text-black dark:hover:bg-zinc-200"
                         : "bg-primary text-white hover:bg-primary/90"
                     )}
                   >
-                    {selectedPin.isSaved ? 'Saved' : 'Save'}
+                    {(selectedPin.isSaved || boards.some(board => board.pinIds.includes(selectedPin.id))) ? 'Saved' : 'Save'}
                   </Button>
 
                   <AnimatePresence>
@@ -474,10 +468,10 @@ export const PinModal: React.FC = () => {
                       navigate(isOwnPin ? '/profile' : `/creator/${selectedPin.authorId}`);
                     }}
                   >
-                    <img 
-                      src={selectedPin.authorAvatar} 
-                      alt={selectedPin.authorName} 
-                      className="w-12 h-12 rounded-full border border-zinc-100 dark:border-zinc-800 group-hover:opacity-80 transition-opacity"
+                    <ProfileImage 
+                      src={selectedPin.author_profile_url} 
+                      name={selectedPin.authorName} 
+                      className="w-12 h-12 border border-zinc-100 dark:border-zinc-800 group-hover:opacity-80 transition-opacity"
                     />
                     <div>
                       <p className="font-bold text-zinc-900 dark:text-zinc-100 group-hover:underline">
@@ -527,10 +521,10 @@ export const PinModal: React.FC = () => {
                   >
                       {selectedPin.comments.map((c: any) => (
                         <div key={c.id} className="flex gap-3 group/comment relative">
-                          <img 
-                            src={c.userAvatar} 
-                            alt={c.userName} 
-                            className="w-10 h-10 rounded-full flex-shrink-0 object-cover"
+                          <ProfileImage 
+                            src={c.user_profile_url} 
+                            name={c.userName} 
+                            className="w-10 h-10 flex-shrink-0"
                           />
                           <div className="flex-1">
                             <div className="flex flex-col">
@@ -630,10 +624,10 @@ export const PinModal: React.FC = () => {
 
               {/* Comment Input Pinned to Bottom */}
               <div className="flex gap-3 shrink-0 pt-6 mt-auto bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800 relative z-10">
-                    <img 
-                      src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop" 
-                      alt="User Avatar" 
-                      className="w-12 h-12 rounded-full flex-shrink-0 object-cover"
+                    <ProfileImage 
+                      src={user?.profile_url} 
+                      name={user?.name || "User"} 
+                      className="w-12 h-12 flex-shrink-0"
                     />
                     <div className="flex-1 relative group">
                       <textarea

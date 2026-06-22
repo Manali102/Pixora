@@ -33,9 +33,18 @@ export const AdminPage: React.FC = () => {
   const [sortOrder, setSortOrder] = React.useState('desc');
 
   const [userSearchTerm, setUserSearchTerm] = React.useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = React.useState('');
   const statusFilter = 'All';
   const planFilter = 'All';
   const [dateRangeFilter, setDateRangeFilter] = React.useState('MTD');
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(userSearchTerm);
+      setCurrentPage(1); // Reset page on new search
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [userSearchTerm]);
 
   React.useEffect(() => {
     const fetchUsers = async () => {
@@ -44,6 +53,7 @@ export const AdminPage: React.FC = () => {
         const usersRes = await userService.getAllUsers({
           page: currentPage,
           limit: 10,
+          search: debouncedSearchTerm,
           sortBy,
           sortOrder
         } as any);
@@ -60,7 +70,7 @@ export const AdminPage: React.FC = () => {
       }
     };
     fetchUsers();
-  }, [currentPage, sortBy, sortOrder]);
+  }, [currentPage, sortBy, sortOrder, debouncedSearchTerm]);
 
   const handleSort = (field: string) => {
     if (sortBy === field) {
@@ -137,7 +147,7 @@ export const AdminPage: React.FC = () => {
     id: u._id || u.id,
     name: u.name || u.full_name || u.username || 'Unknown',
     email: u.email || '',
-    avatar: u.profile_url || u.profile_picture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.email || 'user')}`,
+    profile_url: u.profile_url || u.profile_picture || '',
     hasProfilePicture: !!(u.profile_url || u.profile_picture),
     plan: u.plan_type || u.plan || 'Free',
     status: u.is_active ? 'Active' : (u.subscription_status || 'Active'),
@@ -145,12 +155,9 @@ export const AdminPage: React.FC = () => {
   }));
 
   const filteredUsers = displayUsers.filter((user) => {
-    const matchesSearch =
-      (user.name || '').toLowerCase().includes((userSearchTerm || '').toLowerCase()) ||
-      (user.email || '').toLowerCase().includes((userSearchTerm || '').toLowerCase());
     const matchesStatus = statusFilter === 'All' || user.status === statusFilter;
     const matchesPlan = planFilter === 'All' || user.plan === planFilter;
-    return matchesSearch && matchesStatus && matchesPlan;
+    return matchesStatus && matchesPlan;
   });
 
   const dynamicStats = [
@@ -387,7 +394,7 @@ export const AdminPage: React.FC = () => {
                             <TableCell className="px-6 py-4">
                               <div className="flex items-center gap-3">
                                 {user.hasProfilePicture ? (
-                                  <img src={user.avatar} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
+                                  <img src={user.profile_url} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0" />
                                 ) : (
                                   <div className="w-10 h-10 bg-red-50 text-[#E60023] rounded-lg flex items-center justify-center shrink-0">
                                     <User className="w-5 h-5" />

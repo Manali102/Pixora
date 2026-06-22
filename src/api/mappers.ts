@@ -17,7 +17,7 @@ export const userMapper = {
       id: apiUser._id,
       name: apiUser.name,
       email: apiUser.email,
-      avatar: apiUser.profile_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(apiUser.email)}`,
+      profile_url: apiUser.profile_url || '',
       role: (apiUser.role === 'admin' ? 'admin' : 'user') as 'user' | 'admin',
       subscription: (apiUser.plan_type || 'free') as 'free' | 'starter' | 'pro' | 'enterprise',
       storageUsed: apiUser.storage_used || 0,

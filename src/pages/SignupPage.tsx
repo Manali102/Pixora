@@ -105,8 +105,14 @@ export const SignupPage: React.FC = () => {
             setShowPricingModal(false);
             return;
           } else if (response.data.url) {
-            // Set user session locally before redirecting to ensure we stay logged in upon return
-            setAuth(signedUpUser);
+            // Set user session locally in storage without triggering React state update
+            // This prevents the PublicRoute from immediately redirecting to "/" while waiting for Stripe to load
+            const stateToSave = { 
+              state: { user: signedUpUser, isAuthenticated: true, isLoading: false }, 
+              version: 0 
+            };
+            localStorage.setItem('pixora_auth', JSON.stringify(stateToSave));
+            
             // Redirect to Stripe checkout
             window.location.href = response.data.url;
             return;

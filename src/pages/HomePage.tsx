@@ -18,11 +18,20 @@ const breakpointColumnsObj = {
 
 export const HomePage: React.FC = () => {
   const filteredPins = useFilteredPins();
-  const { isLoading, fetchPins, feedType, setFeedType, hasMorePins, isLoadingMorePins, loadMorePins } = usePinStore();
+  const { isLoading, fetchPins, feedType, setFeedType, hasMorePins, isLoadingMorePins, loadMorePins, searchQuery } = usePinStore();
+
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = React.useState(searchQuery);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
     fetchPins();
-  }, [fetchPins]);
+  }, [fetchPins, debouncedSearchQuery]);
 
   useEffect(() => {
     const handleScroll = () => {

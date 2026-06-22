@@ -3,7 +3,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  avatar: string;
+  profile_url: string;
   bio: string;
   role: 'user' | 'admin';
   subscription: 'free' | 'starter' | 'pro' | 'enterprise';
@@ -20,7 +20,7 @@ export interface Comment {
   id: string;
   userId: string;
   userName: string;
-  userAvatar: string;
+  user_profile_url: string;
   text: string;
   createdAt: string;
 }
@@ -32,7 +32,7 @@ export interface Pin {
   imageUrl: string;
   authorId: string;
   authorName: string;
-  authorAvatar: string;
+  author_profile_url: string;
   likes: number;
   isLiked?: boolean;
   isSaved?: boolean;

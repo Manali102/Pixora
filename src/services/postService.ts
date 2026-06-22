@@ -15,10 +15,12 @@ export const postService = {
    * @param limit - Number of items per page.
    * @returns List of posts.
    */
-  getAllPosts: async (page: number = 1, limit: number = 20): Promise<CreatePostResponse> => {
-    const { data } = await apiClient.get<CreatePostResponse>(
-      `${ENDPOINTS.POSTS.GET_ALL}?page=${page}&limit=${limit}`
-    );
+  getAllPosts: async (page: number = 1, limit: number = 20, search?: string): Promise<CreatePostResponse> => {
+    let url = `${ENDPOINTS.POSTS.GET_ALL}?page=${page}&limit=${limit}`;
+    if (search) {
+      url += `&search=${encodeURIComponent(search)}`;
+    }
+    const { data } = await apiClient.get<CreatePostResponse>(url);
     return data;
   },
 

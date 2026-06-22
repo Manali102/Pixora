@@ -26,7 +26,7 @@ export const Navbar: React.FC = () => {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-foreground transition-colors" />
           <Input
             type="text"
-            placeholder="Search ideas, creators, boards…"
+            placeholder="Search ideas, creators, users"
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);

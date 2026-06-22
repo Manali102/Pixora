@@ -31,7 +31,7 @@ const transformBackendUser = (backendUser: any): User => {
     id: backendUser._id || backendUser.id,
     name: backendUser.name,
     email: backendUser.email,
-    avatar: backendUser.profile_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${backendUser.email}`,
+    profile_url: backendUser.profile_url || '',
     bio: backendUser.bio || '',
     role: backendUser.role || 'user',
     storageUsed: Number((backendUser.storage_used / (1024 * 1024)).toFixed(2)) || 0,

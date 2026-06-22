@@ -5,12 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ProgressiveImage } from './ProgressiveImage';
 import { Pin } from '@/types/type';
 import { usePinStore } from '../../store/usePinStore';
-import { useBoardStore } from '../../store/useBoardStore';
 import { useModalStore } from '../../store/useModalStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { Button } from './button';
 import { cn } from '../../lib/utils';
-import { Avatar } from './Avatar';
+import { ProfileImage } from './ProfileImage';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { postService } from '@/services/postService';
@@ -29,14 +28,13 @@ export const PinCard: React.FC<PinCardProps> = ({ pin, onRemove }) => {
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
   const { toggleLike, setSelectedPin, setAutoOpenBoardSelector } = usePinStore();
-  const { boards } = useBoardStore();
   const openModal = useModalStore((s) => s.openModal);
   const { user, followUser, unfollowUser } = useAuthStore();
 
   const isFollowing = user?.followingIds?.includes(pin.authorId) || false;
   const isOwnPin = user?.id === pin.authorId;
 
-  const isSavedToAnyBoard = boards.some(b => b.pinIds.includes(pin.id));
+  const isSavedToAnyBoard = pin.isSaved;
   
   /**
    * Handles downloading of the pin image
@@ -186,8 +184,8 @@ export const PinCard: React.FC<PinCardProps> = ({ pin, onRemove }) => {
           className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
           onClick={() => navigate(isOwnPin ? '/profile' : `/creator/${pin.authorId}`)}
         >
-          <Avatar 
-            src={pin.authorAvatar} 
+          <ProfileImage 
+            src={pin.author_profile_url} 
             name={pin.authorName} 
             size="sm" 
             className="w-7 h-7 shadow-sm" 

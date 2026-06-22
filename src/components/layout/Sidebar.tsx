@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useAuthStore } from '../../store/useAuthStore';
-import { Avatar } from '../ui/Avatar';
+import { ProfileImage } from '../ui/ProfileImage';
 
 interface SidebarProps {
   className?: string;
@@ -33,7 +33,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
     { label: 'Create Pin', icon: PlusSquare, path: '/create', active: location.pathname === '/create' },
     { label: 'My Pins', icon: User, path: '/my-pins', active: location.pathname === '/my-pins' },
     { label: 'My Boards', icon: Layout, path: '/my-boards', active: location.pathname === '/my-boards' || location.pathname.startsWith('/board/') },
-    { label: 'Following', icon: Users, path: '/following', active: location.pathname === '/following' || location.pathname.startsWith('/creator/') },
+    { label: 'Following', icon: Users, path: '/following', active: location.pathname === '/following' },
     { label: 'Profile', icon: Settings, path: '/profile', active: location.pathname === '/profile' },
     ...(user?.role !== 'admin'
       ? [{ label: 'Pricing', icon: CreditCard, path: '/pricing', active: location.pathname === '/pricing' }]
@@ -75,7 +75,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className }) => {
       <div className="mt-auto p-3 space-y-2 border-t border-border/60">
         <div className="p-3 rounded-2xl bg-secondary/60">
           <div className="flex items-center gap-3">
-            <Avatar src={user?.avatar} name={user?.name} size="md" />
+            <ProfileImage src={user?.profile_url} name={user?.name} size="md" />
             <div className="min-w-0">
               <p className="font-semibold text-sm truncate tracking-tight">{user?.name}</p>
               <div className="flex items-center gap-1 text-[10px] text-primary font-bold uppercase tracking-wider mt-0.5">

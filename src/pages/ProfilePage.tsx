@@ -10,24 +10,13 @@ import { Tooltip } from '../components/ui/Tooltip';
 import { Button } from '../components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Loader } from '../components/ui/Loader';
-import { Avatar } from '../components/ui/Avatar';
-
-// Avatar colour options
-const AVATAR_COLORS = [
-  { from: 'hsl(221,83%,53%)', to: 'hsl(262,83%,58%)' },
-  { from: 'hsl(346,84%,60%)', to: 'hsl(15,90%,55%)' },
-  { from: 'hsl(160,84%,39%)', to: 'hsl(198,85%,45%)' },
-  { from: 'hsl(47,95%,50%)', to: 'hsl(25,95%,53%)' },
-  { from: 'hsl(280,75%,55%)', to: 'hsl(320,80%,55%)' },
-  { from: 'hsl(0,0%,30%)', to: 'hsl(0,0%,55%)' },
-];
+import { ProfileImage } from '../components/ui/ProfileImage';
 
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const fetchProfile = useAuthStore((s) => s.fetchProfile);
   const updateUserApi = useAuthStore((s) => s.updateProfileApi);
-  const updateUser = useAuthStore((s) => s.updateUser);
   const { userPins, fetchUserPins } = usePinStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -41,13 +30,11 @@ const ProfilePage: React.FC = () => {
 
   // ── UI state ──────────────────────────────────────────────
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [editName, setEditName] = useState(user?.name ?? '');
   const [editBio, setEditBio] = useState(user?.bio ?? '');
   const [saving, setSaving] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(user?.avatar ?? '');
-  const [avatarColorIdx, setAvatarColorIdx] = useState(0);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(user?.profile_url ?? '');
 
   // ── Derived ───────────────────────────────────────────────
   const storageData = [
@@ -91,21 +78,11 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  const handleSaveAvatar = () => {
-    // Store the selected colour index in user's avatar field as a seed marker
-    const color = AVATAR_COLORS[avatarColorIdx];
-    updateUser({ avatar: color.from }); // used as a signal; ProfilePage reads avatarColorIdx from local state
-    setShowAvatarModal(false);
-  };
-
   const openEditModal = () => {
     setEditName(user?.name ?? '');
     setEditBio(user?.bio ?? '');
     setShowEditModal(true);
   };
-
-  // gradient shown in avatar based on selected colour
-  const avatarGradient = `linear-gradient(135deg, ${AVATAR_COLORS[avatarColorIdx].from}, ${AVATAR_COLORS[avatarColorIdx].to})`;
 
   return (
     <div className="w-full pt-10">
@@ -147,8 +124,8 @@ const ProfilePage: React.FC = () => {
                 <div className="relative group">
                   <div className="w-24 h-24 rounded-2xl overflow-hidden border-2 border-primary/20 shadow-lg">
                     <img 
-                      src={previewUrl || user?.avatar} 
-                      alt="Avatar Preview" 
+                      src={previewUrl || user?.profile_url} 
+                      alt="Profile Preview" 
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -219,87 +196,7 @@ const ProfilePage: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* ── Avatar colour picker modal ───────────────── */}
-      <AnimatePresence>
-        {showAvatarModal && (
-          <motion.div
-            key="avatar-modal-backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
-            onClick={() => setShowAvatarModal(false)}
-          >
-            <motion.div
-              key="avatar-modal"
-              initial={{ opacity: 0, scale: 0.92, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.92, y: 20 }}
-              transition={{ type: 'spring', stiffness: 320, damping: 28 }}
-              className="w-full max-w-sm bg-card border border-border/90 rounded-2xl p-6 shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="font-display text-lg font-bold text-foreground">Choose Avatar Color</h2>
-                <Tooltip content="Close">
-                  <button
-                    onClick={() => setShowAvatarModal(false)}
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-secondary transition-colors cursor-pointer"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </Tooltip>
-              </div>
 
-              {/* Preview */}
-              <div className="flex justify-center mb-5">
-                <div
-                  className="w-20 h-20 rounded-2xl p-[3px] shadow-lg"
-                  style={{ background: avatarGradient }}
-                >
-                  <div className="w-full h-full rounded-[13px] bg-card flex items-center justify-center">
-                    <span className="font-display text-2xl font-bold" style={{ background: avatarGradient, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                      {user?.name?.charAt(0)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Color swatches */}
-              <div className="grid grid-cols-3 gap-3 mb-6">
-                {AVATAR_COLORS.map((c, i) => (
-                  <Tooltip key={i} content={`Color ${i + 1}`} side="bottom">
-                    <button
-                      onClick={() => setAvatarColorIdx(i)}
-                      className="relative h-12 w-full rounded-xl transition-transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
-                      style={{ background: `linear-gradient(135deg, ${c.from}, ${c.to})` }}
-                    >
-                      {avatarColorIdx === i && (
-                        <span className="absolute inset-0 flex items-center justify-center">
-                          <Check className="w-5 h-5 text-white drop-shadow" />
-                        </span>
-                      )}
-                    </button>
-                  </Tooltip>
-                ))}
-              </div>
-
-              <div className="flex items-center justify-end gap-2.5">
-                <Tooltip content="Discard changes">
-                  <button onClick={() => setShowAvatarModal(false)} className="px-4 py-2 rounded-xl text-sm text-muted-foreground hover:bg-secondary transition-colors cursor-pointer">
-                    Cancel
-                  </button>
-                </Tooltip>
-                <Tooltip content="Apply avatar color">
-                  <Button onClick={handleSaveAvatar} className="px-6 py-2.5 rounded-xl font-bold bg-primary hover:bg-primary/90 text-white shadow-lg active:scale-95 transition-all flex items-center gap-2 cursor-pointer">
-                    <Check className="w-4 h-4" /> Apply
-                  </Button>
-                </Tooltip>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* ── Page body ────────────────────────────────── */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
@@ -312,21 +209,14 @@ const ProfilePage: React.FC = () => {
           {/* Avatar */}
           <div className="relative group">
             <div className="w-28 h-28 rounded-2xl p-[3px] shadow-[var(--shadow-glow)] ring-2 ring-primary/50 overflow-hidden bg-muted">
-              <Avatar 
-                src={user?.avatar} 
+              <ProfileImage 
+                src={user?.profile_url} 
                 name={user?.name} 
                 variant="square"
                 className="w-full h-full rounded-[13px] border-none"
               />
             </div>
-            <Tooltip content="Change avatar color" side="bottom">
-              <button
-                onClick={() => setShowAvatarModal(true)}
-                className="absolute -bottom-1 -right-1 w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary/80 cursor-pointer"
-              >
-                <Camera className="w-3.5 h-3.5" />
-              </button>
-            </Tooltip>
+
           </div>
 
           {/* Info */}
@@ -466,38 +356,6 @@ const ProfilePage: React.FC = () => {
             </button>
           </motion.div>
         )}
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.45, duration: 0.5 }}
-          className="mt-12 pb-16 text-center"
-        >
-          <div className="glass-card border border-border/80 rounded-3xl p-12">
-            <h3 className="font-display text-xl font-bold mb-2">Account Settings</h3>
-            <p className="text-muted-foreground text-sm mb-8">Manage your public profile and account preferences</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
-              <button 
-                onClick={() => setShowEditModal(true)}
-                className="flex items-center gap-4 p-4 rounded-2xl bg-secondary/50 hover:bg-secondary transition-all border border-border/50 group"
-              >
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                  <Edit3 className="w-5 h-5" />
-                </div>
-                <span className="font-bold text-sm">Edit Profile</span>
-              </button>
-              <button 
-                onClick={() => setShowAvatarModal(true)}
-                className="flex items-center gap-4 p-4 rounded-2xl bg-secondary/50 hover:bg-secondary transition-all border border-border/50 group"
-              >
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                  <Camera className="w-5 h-5" />
-                </div>
-                <span className="font-bold text-sm">Update Avatar</span>
-              </button>
-            </div>
-          </div>
-        </motion.div>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
 
-interface AvatarProps {
+interface ProfileImageProps {
   src?: string;
   name?: string;
   className?: string;
@@ -9,7 +9,7 @@ interface AvatarProps {
   variant?: 'circle' | 'square';
 }
 
-export const Avatar: React.FC<AvatarProps> = ({ 
+export const ProfileImage: React.FC<ProfileImageProps> = ({ 
   src, 
   name, 
   className,

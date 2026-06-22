@@ -110,7 +110,7 @@ export const CreatePinPage: React.FC = () => {
           imageUrl: preview || '', // Use local blob URL — backend media_url is 'processing' at this point
           authorId: rd?.user_id?._id || rd?.user_id || user?.id || 'u1',
           authorName: user?.name || 'Anonymous',
-          authorAvatar: user?.avatar || '',
+          author_profile_url: user?.profile_url || '',
           likes: 0,
           category: rd?.category || category || 'General',
           createdAt: rd?.created_at || new Date().toISOString(),

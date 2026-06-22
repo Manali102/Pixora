@@ -13,13 +13,13 @@ export const transformBackendPin = (post: any): Pin => ({
   imageUrl: post.media_url,
   authorId: post.user_id?._id || 'unknown',
   authorName: post.user_id?.name || 'Anonymous',
-  authorAvatar: post.user_id?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post._id}`,
+  author_profile_url: post.user_id?.profile_url || '',
   likes: post.totalLikes || 0,
   category: post.category || 'General',
   createdAt: post.created_at,
   type: post.resource_type === 'video' ? 'video' : post.media_url?.toLowerCase().includes('.gif') ? 'gif' : 'image',
-  isLiked: false,
-  isSaved: false,
+  isLiked: !!post.isLikedByCurrentUser,
+  isSaved: !!post.isAddedToBoardsByCurrentUser,
   comments: [],
   authorFollowers: post.authorFollowers || 0,
   views: post.views || 0,
@@ -75,11 +75,11 @@ export const usePinStore = create<PinState>()((set, get) => ({
   isLoadingMorePins: false,
 
   fetchPins: async () => {
-    const { feedType } = get();
+    const { feedType, searchQuery } = get();
     set({ isLoading: true, pinsPage: 1, hasMorePins: false });
     try {
       const response = feedType === 'all' 
-        ? await postService.getAllPosts(1)
+        ? await postService.getAllPosts(1, 20, searchQuery)
         : await postService.getFollowingPosts(1);
       
       if (response.success && response.data?.posts) {
@@ -102,7 +102,7 @@ export const usePinStore = create<PinState>()((set, get) => ({
   },
 
   loadMorePins: async () => {
-    const { hasMorePins, pinsPage, isLoadingMorePins, feedType } = get();
+    const { hasMorePins, pinsPage, isLoadingMorePins, feedType, searchQuery } = get();
     
     if (!hasMorePins || isLoadingMorePins) return;
 
@@ -111,7 +111,7 @@ export const usePinStore = create<PinState>()((set, get) => ({
     try {
       const nextPage = pinsPage + 1;
       const response = feedType === 'all' 
-        ? await postService.getAllPosts(nextPage)
+        ? await postService.getAllPosts(nextPage, 20, searchQuery)
         : await postService.getFollowingPosts(nextPage);
       
       if (response.success && response.data?.posts) {
@@ -169,6 +169,15 @@ export const usePinStore = create<PinState>()((set, get) => ({
       if (postResponse.success && postResponse.data?.post) {
         const post = postResponse.data.post;
         const transformedPin: Pin = transformBackendPin(post);
+        
+        // Preserve isSaved and isLiked from existing state if missing from single-post fetch
+        const previousPin = get().selectedPin?.id === id ? get().selectedPin : get().pins.find(p => p.id === id);
+        if (post.isAddedToBoardsByCurrentUser === undefined && previousPin) {
+          transformedPin.isSaved = previousPin.isSaved;
+        }
+        if (post.isLikedByCurrentUser === undefined && previousPin) {
+          transformedPin.isLiked = previousPin.isLiked;
+        }
 
         let mappedComments: import('@/types/type').Comment[] = [];
         const responseData = (commentsResponse as any).data;
@@ -177,7 +186,7 @@ export const usePinStore = create<PinState>()((set, get) => ({
             id: c.id || c._id,
             userId: c.user?.id || c.user_id?._id || 'unknown',
             userName: c.user?.name || c.user_id?.name || 'Anonymous',
-            userAvatar: c.user?.avatar || c.user_id?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${c.id || c._id}`,
+            user_profile_url: c.user?.profile_url || c.user_id?.profile_url || '',
             text: c.comment_text || c.comments_text,
             createdAt: c.created_at || new Date().toISOString(),
           }));
@@ -217,7 +226,7 @@ export const usePinStore = create<PinState>()((set, get) => ({
           id: c.id || c._id,
           userId: c.user?.id || c.user_id?._id || 'unknown',
           userName: c.user?.name || c.user_id?.name || 'Anonymous',
-          userAvatar: c.user?.avatar || c.user_id?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${c.id || c._id}`,
+          user_profile_url: c.user?.profile_url || c.user_id?.profile_url || '',
           text: c.comment_text || c.comments_text,
           createdAt: c.created_at || new Date().toISOString(),
         }));
@@ -270,7 +279,7 @@ export const usePinStore = create<PinState>()((set, get) => ({
       id: tempId,
       userId: userId,
       userName: user?.name || 'Anonymous',
-      userAvatar: user?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`,
+      user_profile_url: user?.profile_url || '',
       text,
       createdAt: new Date().toISOString(),
     };
@@ -398,8 +407,15 @@ export const usePinStore = create<PinState>()((set, get) => ({
         ? { ...state.selectedPin, isLiked: !state.selectedPin.isLiked, likes: state.selectedPin.isLiked ? state.selectedPin.likes - 1 : state.selectedPin.likes + 1 }
         : state.selectedPin;
 
+      const updatedUserPins = state.userPins.map((pin) =>
+        pin.id === id
+          ? { ...pin, isLiked: !pin.isLiked, likes: pin.isLiked ? pin.likes - 1 : pin.likes + 1 }
+          : pin
+      );
+
       return {
         pins: updatedPins,
+        userPins: updatedUserPins,
         selectedPin: updatedSelectedPin
       };
     });
@@ -426,8 +442,15 @@ export const usePinStore = create<PinState>()((set, get) => ({
           ? { ...state.selectedPin, isLiked: !state.selectedPin.isLiked, likes: state.selectedPin.isLiked ? state.selectedPin.likes - 1 : state.selectedPin.likes + 1 }
           : state.selectedPin;
 
+        const updatedUserPins = state.userPins.map((pin) =>
+          pin.id === id
+            ? { ...pin, isLiked: !pin.isLiked, likes: pin.isLiked ? pin.likes - 1 : pin.likes + 1 }
+            : pin
+        );
+
         return {
           pins: updatedPins,
+          userPins: updatedUserPins,
           selectedPin: updatedSelectedPin
         };
       });
@@ -444,8 +467,13 @@ export const usePinStore = create<PinState>()((set, get) => ({
         ? { ...state.selectedPin, isSaved: !state.selectedPin.isSaved }
         : state.selectedPin;
 
+      const updatedUserPins = state.userPins.map((pin) =>
+        pin.id === id ? { ...pin, isSaved: !pin.isSaved } : pin
+      );
+
       return {
         pins: updatedPins,
+        userPins: updatedUserPins,
         selectedPin: updatedSelectedPin
       };
     }),
@@ -455,8 +483,12 @@ export const usePinStore = create<PinState>()((set, get) => ({
 export const useFilteredPins = () => {
   const pins = usePinStore((state) => state.pins);
   const searchQuery = usePinStore((state) => state.searchQuery);
+  const feedType = usePinStore((state) => state.feedType);
 
   return React.useMemo(() => {
+    // Backend handles search for the 'all' feed
+    if (feedType === 'all') return pins;
+
     const query = searchQuery.toLowerCase().trim();
     if (!query) return pins;
 
@@ -466,5 +498,5 @@ export const useFilteredPins = () => {
         pin.category.toLowerCase().includes(query) ||
         pin.description.toLowerCase().includes(query)
     );
-  }, [pins, searchQuery]);
+  }, [pins, searchQuery, feedType]);
 };
