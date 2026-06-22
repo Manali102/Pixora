@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/button';
-import { Check } from 'lucide-react';
-import { Loader } from './ui/Loader';
+import { Check, Loader2 } from 'lucide-react';
 import { userService } from '@/services/userService';
 import { ERROR_MESSAGES } from '@/config/constants';
 
@@ -121,7 +120,7 @@ export const InterestSelectionModal: React.FC<InterestSelectionModalProps> = ({ 
               disabled={isLoading || selectedInterests.length === 0}
               className="flex-1 py-6 rounded-2xl text-base font-bold bg-primary cursor-pointer hover:bg-primary/90 shadow-xl shadow-primary/20"
             >
-              {isLoading ? <Loader size="sm" className="border-white" /> : 'Continue'}
+              {isLoading ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : 'Continue'}
             </Button>
           </div>
         </motion.div>

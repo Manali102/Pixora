@@ -161,7 +161,7 @@ export const LoginPage: React.FC = () => {
             className="w-full py-5 rounded-2xl cursor-pointer text-lg font-bold bg-primary hover:bg-primary/90 shadow-xl shadow-primary/25 active:scale-95 transition-all group"
           >
             {loginMutation.isPending || isSubmitting ? (
-              <Loader size="sm" className="border-white" />
+              <Loader size="sm" className="text-white" />
             ) : (
               <span className="flex items-center gap-2">
                 Log In <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

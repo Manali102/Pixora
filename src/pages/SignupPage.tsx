@@ -4,14 +4,13 @@ import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '../components/ui/button';
-import { Mail, Lock, User, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 import { signupSchema, type SignupFormData } from '../lib/validationSchemas';
 import { Input } from '../components/ui/input';
 import { PasswordValidation } from '../components/PasswordValidation';
 import { useSignupMutation } from '@/hooks/mutations/useSignupMutation';
 import { getErrorMessage } from '@/api/utils';
 import { ERROR_MESSAGES } from '../config/constants';
-import { Loader } from '../components/ui/Loader';
 import { useAuthStore } from '@/store/useAuthStore';
 import { InterestSelectionModal } from '../components/InterestSelectionModal';
 import { PricingSelectionModal } from '../components/PricingSelectionModal';
@@ -328,7 +327,7 @@ export const SignupPage: React.FC = () => {
             className="w-full py-5 rounded-2xl cursor-pointer text-lg font-bold bg-primary hover:bg-primary/90 shadow-xl shadow-primary/25 active:scale-95 transition-all group"
           >
             {signupMutation.isPending || isSubmitting ? (
-              <Loader size="sm" className="border-white" />
+              <Loader2 className="w-6 h-6 animate-spin mx-auto" />
             ) : (
               <span className="flex items-center gap-2">
                 Create Account <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
