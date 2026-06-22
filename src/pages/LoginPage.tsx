@@ -152,6 +152,7 @@ export const LoginPage: React.FC = () => {
             >
               <AlertCircle className="w-4 h-4 shrink-0" />
               {apiErrorMessage}
+              
             </motion.p>
           )}
 
