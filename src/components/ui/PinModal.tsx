@@ -10,7 +10,7 @@ import { Button } from './button';
 import { Badge } from './badge';
 import { cn } from '../../lib/utils';
 import { Tooltip } from './Tooltip';
-import { WhatsAppIcon, MessengerIcon, FacebookIcon, XIcon } from '../icons/SocialIcons';
+import { WhatsAppIcon, MessengerIcon, XIcon } from '../icons/SocialIcons';
 import { BoardSelector } from './BoardSelector';
 import { useModalStore } from '../../store/useModalStore';
 import { ProgressiveImage } from './ProgressiveImage';
