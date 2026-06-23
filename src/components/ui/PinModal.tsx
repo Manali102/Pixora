@@ -37,6 +37,7 @@ export const PinModal: React.FC = () => {
   const [isEditingPin, setIsEditingPin] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
   const boardSelectRef = React.useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -497,17 +498,23 @@ export const PinModal: React.FC = () => {
                     <div className="flex justify-end gap-2 mt-2">
                       <Button variant="ghost" onClick={() => setIsEditingPin(false)} className="rounded-full font-bold">Cancel</Button>
                       <Button 
+                        disabled={isSavingEdit}
                         onClick={async () => {
+                          setIsSavingEdit(true);
                           try {
                             await updatePin(selectedPin.id, { title: editTitle, description: editDescription });
                             setIsEditingPin(false);
                             toast.success("Pin updated successfully");
                           } catch (error) {
                             toast.error("Failed to update pin");
+                          } finally {
+                            setIsSavingEdit(false);
                           }
                         }}
-                        className="rounded-full font-bold px-6 bg-primary hover:bg-primary/90 text-white"
-                      >Save</Button>
+                        className="rounded-full font-bold px-6 bg-primary hover:bg-primary/90 text-white min-w-[90px]"
+                      >
+                        {isSavingEdit ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : "Save"}
+                      </Button>
                     </div>
                   </div>
                 ) : (
