@@ -44,13 +44,59 @@ export const CreatePinPage: React.FC = () => {
     }
   }, []);
 
+  /**
+   * Extracts a single frame from a video File at `seekTime` seconds.
+   * Returns a JPEG File that can be sent to the AI metadata endpoint.
+   */
+  const extractVideoFrame = (videoFile: File, seekTime = 1): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.muted = true;
+      video.src = URL.createObjectURL(videoFile);
+
+      video.addEventListener('loadeddata', () => {
+        video.currentTime = Math.min(seekTime, video.duration || seekTime);
+      });
+
+      video.addEventListener('seeked', () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { reject(new Error('Could not get canvas context')); return; }
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(video.src);
+        canvas.toBlob((blob) => {
+          if (!blob) { reject(new Error('Canvas toBlob failed')); return; }
+          resolve(new File([blob], 'frame.jpg', { type: 'image/jpeg' }));
+        }, 'image/jpeg', 0.85);
+      });
+
+      video.addEventListener('error', () => reject(new Error('Failed to load video for frame extraction')));
+    });
+  };
+
   const handleAIGenerate = async () => {
     if (!file) return;
     setIsGeneratingAI(true);
     setMetadataMode('ai');
 
     try {
-      const response = await postService.suggestMetadata(file);
+      // For videos, extract a frame first so we only upload a small JPEG
+      const isVideo = file.type.startsWith('video/');
+      let fileToSend = file;
+      if (isVideo) {
+        try {
+          toast.info('Extracting video frame for AI analysis...');
+          fileToSend = await extractVideoFrame(file);
+        } catch (frameErr) {
+          console.warn('Frame extraction failed, falling back to original file:', frameErr);
+          fileToSend = file;
+        }
+      }
+
+      const response = await postService.suggestMetadata(fileToSend);
       const taskId = response.data?.suggestionId || response.data?.taskId;
       if (response.success && taskId) {
         // Start polling with timeout safety
