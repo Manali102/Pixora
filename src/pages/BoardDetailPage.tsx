@@ -31,12 +31,12 @@ export const BoardDetailPage: React.FC = () => {
   const deleteBoard = useBoardStore((s) => s.deleteBoard);
   const removePinFromBoard = useBoardStore((s) => s.removePinFromBoard);
   const isLoading = useBoardStore((s) => s.isLoading);
-  const isLoadingPins = useBoardStore((s) => s.isLoadingPins);
 
   const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
   const [isInitialLoad, setIsInitialLoad] = React.useState(!board);
+  const [isPinsFetched, setIsPinsFetched] = React.useState(false);
 
   const handleDelete = async () => {
     if (!board) return;
@@ -52,11 +52,13 @@ export const BoardDetailPage: React.FC = () => {
 
   React.useEffect(() => {
     if (id) {
+      setIsPinsFetched(false);
       Promise.all([
         fetchBoardById(id),
         fetchBoardPins(id)
       ]).finally(() => {
         setIsInitialLoad(false);
+        setIsPinsFetched(true);
       });
     }
   }, [id]);
@@ -170,7 +172,7 @@ export const BoardDetailPage: React.FC = () => {
 
       {/* Grid */}
       <div className="max-w-[1600px] mx-auto px-4 sm:px-8">
-        {isLoadingPins ? (
+        {!isPinsFetched ? (
           <div className="py-20 flex justify-center">
             <Loader text="Loading pins..." size="md" />
           </div>
