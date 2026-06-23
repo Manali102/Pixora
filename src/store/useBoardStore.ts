@@ -15,6 +15,7 @@ interface BoardState {
   boards: Board[];
   boardPins: Pin[];
   isLoading: boolean;
+  isLoadingPins: boolean;
   fetchBoards: () => Promise<void>;
   fetchBoardPins: (boardId: string) => Promise<void>;
   fetchBoardById: (boardId: string) => Promise<void>;
@@ -50,6 +51,7 @@ export const useBoardStore = create<BoardState>()((set, get) => ({
   boards: [],
   boardPins: [],
   isLoading: false,
+  isLoadingPins: false,
   hasMoreBoards: false,
   boardsPage: 1,
   isLoadingMoreBoards: false,
@@ -127,7 +129,7 @@ export const useBoardStore = create<BoardState>()((set, get) => ({
   },
 
   fetchBoardPins: async (boardId: string) => {
-    set({ isLoading: true, boardPins: [] });
+    set({ isLoadingPins: true, boardPins: [] });
     try {
       const response = await boardService.getBoardPins(boardId);
       if (response.success && response.data?.pins) {
@@ -137,7 +139,7 @@ export const useBoardStore = create<BoardState>()((set, get) => ({
       console.error('Failed to fetch board pins:', error);
       toast.error(getErrorMessage(error));
     } finally {
-      set({ isLoading: false });
+      set({ isLoadingPins: false });
     }
   },
 
