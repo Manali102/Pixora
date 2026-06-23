@@ -169,7 +169,11 @@ export const BoardDetailPage: React.FC = () => {
 
       {/* Grid */}
       <div className="max-w-[1600px] mx-auto px-4 sm:px-8">
-        {boardPins.length > 0 ? (
+        {isLoading ? (
+          <div className="py-20 flex justify-center">
+            <Loader text="Loading pins..." size="md" />
+          </div>
+        ) : boardPins.length > 0 ? (
           <Masonry
             breakpointCols={breakpointColumnsObj}
             className="flex -ml-4 w-auto"
