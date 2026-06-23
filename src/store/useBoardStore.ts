@@ -17,6 +17,7 @@ interface BoardState {
   isLoading: boolean;
   fetchBoards: () => Promise<void>;
   fetchBoardPins: (boardId: string) => Promise<void>;
+  fetchBoardById: (boardId: string) => Promise<void>;
   createBoard: (name: string, description?: string, isPrivate?: boolean, coverImage?: File) => Promise<string | void>;
   deleteBoard: (id: string) => Promise<void>;
   addPinToBoard: (boardId: string, pinId: string) => Promise<void>;
@@ -96,6 +97,32 @@ export const useBoardStore = create<BoardState>()((set, get) => ({
     } catch (error) {
       console.error('Failed to load more boards:', error);
       set({ isLoadingMoreBoards: false });
+    }
+  },
+
+  fetchBoardById: async (boardId: string) => {
+    set({ isLoading: true });
+    try {
+      const response = await boardService.getBoardById(boardId);
+      if (response.success) {
+        const backendBoard = response.data?.board || response.data;
+        if (backendBoard && backendBoard._id || backendBoard.id) {
+          const newBoard = mapBackendBoard(backendBoard);
+          set((state) => {
+            const boardExists = state.boards.some(b => b.id === newBoard.id);
+            return {
+              boards: boardExists 
+                ? state.boards.map(b => b.id === newBoard.id ? newBoard : b)
+                : [...state.boards, newBoard]
+            };
+          });
+        }
+      }
+    } catch (error: any) {
+      console.error('Failed to fetch board:', error);
+      toast.error(getErrorMessage(error));
+    } finally {
+      set({ isLoading: false });
     }
   },
 

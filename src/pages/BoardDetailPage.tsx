@@ -8,6 +8,7 @@ import { PinCard } from '@/components/ui/PinCard';
 import { Button } from '@/components/ui/button';
 import { EditBoardModal } from '@/components/ui/EditBoardModal';
 import { ProgressiveImage } from '@/components/ui/ProgressiveImage';
+import { Loader } from '@/components/ui/Loader';
 import { AnimatePresence } from 'framer-motion';
 import { Trash2, Edit2, Loader2, X } from 'lucide-react';
 
@@ -26,12 +27,15 @@ export const BoardDetailPage: React.FC = () => {
   const board = useBoardStore((s) => s.boards.find((b) => b.id === id));
   const boardPins = useBoardStore((s) => s.boardPins);
   const fetchBoardPins = useBoardStore((s) => s.fetchBoardPins);
+  const fetchBoardById = useBoardStore((s) => s.fetchBoardById);
   const deleteBoard = useBoardStore((s) => s.deleteBoard);
   const removePinFromBoard = useBoardStore((s) => s.removePinFromBoard);
+  const isLoading = useBoardStore((s) => s.isLoading);
 
   const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
   const [isDeleting, setIsDeleting] = React.useState(false);
+  const [isInitialLoad, setIsInitialLoad] = React.useState(!board);
 
   const handleDelete = async () => {
     if (!board) return;
@@ -47,10 +51,23 @@ export const BoardDetailPage: React.FC = () => {
 
   React.useEffect(() => {
     if (id) {
-      fetchBoardPins(id);
+      Promise.all([
+        fetchBoardById(id),
+        fetchBoardPins(id)
+      ]).finally(() => {
+        setIsInitialLoad(false);
+      });
     }
   }, [id]);
   
+  if (isInitialLoad || (isLoading && !board)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center pt-20">
+        <Loader text="Loading board details..." size="lg" />
+      </div>
+    );
+  }
+
   if (!board) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
