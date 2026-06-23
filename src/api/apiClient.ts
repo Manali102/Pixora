@@ -17,7 +17,7 @@ interface CustomRequestConfig extends InternalAxiosRequestConfig {
 // response unwrapping, and centralized error handling.
 const apiClient = axios.create({
   baseURL: ENV.API_BASE_URL,
-  timeout: 15000,
+  timeout: 30000,
   withCredentials: true,
 });
 

@@ -11,10 +11,13 @@ const MyBoardsPage: React.FC = () => {
   const user = useAuthStore((s) => s.user);
   const { boards, isLoading } = useBoardStore();
   const openModal = useModalStore((s) => s.openModal);
+  const [isInitialLoad, setIsInitialLoad] = React.useState(boards.length === 0);
 
   useEffect(() => {
     if (user?.id) {
-      useBoardStore.getState().fetchBoards();
+      useBoardStore.getState().fetchBoards().finally(() => {
+        setIsInitialLoad(false);
+      });
     }
   }, [user?.id]);
 
@@ -41,7 +44,7 @@ const MyBoardsPage: React.FC = () => {
           </button>
         </div>
 
-        {isLoading ? (
+        {isLoading || isInitialLoad ? (
           <Loader text="Loading your boards..." className="py-20" size="lg" />
         ) : boards.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
