@@ -43,6 +43,7 @@ export const postService = {
       ENDPOINTS.POSTS.CREATE,
       formData,
       {
+        timeout: 5 * 60 * 1000, // 5 minutes — large video uploads need time to transfer
         onUploadProgress: (progressEvent) => {
           if (onProgress && progressEvent.total) {
             const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
