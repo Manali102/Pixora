@@ -61,7 +61,10 @@ const CreatorProfilePage: React.FC = () => {
   }, [id, isSelf, navigate]);
 
 
-
+ /**
+  * Handles the follow toggle for the current user.
+  * @returns void
+  */
   const handleFollowToggle = async () => {
     if (!id) return;
     if (isFollowing) {

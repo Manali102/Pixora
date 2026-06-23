@@ -70,6 +70,10 @@ export const SignupPage: React.FC = () => {
     });
   };
 
+  /**
+   * Handle interest selection completion
+   * @returns void
+   */
   const handleInterestSelectionComplete = () => {
     setShowInterestModal(false);
     if (signedUpUser) {
@@ -77,6 +81,11 @@ export const SignupPage: React.FC = () => {
     }
   };
 
+  /**
+   * Handle pricing selection completion
+   * @param planData Plan data containing subscription and billing cycle
+   * @returns void
+   */
   const handlePricingSelectionComplete = async (planData?: any) => {
     if (!signedUpUser) {
       setShowPricingModal(false);

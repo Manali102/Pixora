@@ -38,6 +38,10 @@ export const BoardDetailPage: React.FC = () => {
   const [isInitialLoad, setIsInitialLoad] = React.useState(!board);
   const [isPinsFetched, setIsPinsFetched] = React.useState(false);
 
+  /**
+   * Handles the deletion of the current board.
+   * @returns void
+   */
   const handleDelete = async () => {
     if (!board) return;
     setIsDeleting(true);

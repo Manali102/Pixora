@@ -77,6 +77,10 @@ export const CreatePinPage: React.FC = () => {
     });
   };
 
+  /**
+   * Handles the AI generation of pin metadata.
+   * @returns void
+   */
   const handleAIGenerate = async () => {
     if (!file) return;
     setIsGeneratingAI(true);
@@ -147,12 +151,18 @@ export const CreatePinPage: React.FC = () => {
     }
   };
 
+  // dropzone for file upload
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: { 'image/*': [], 'video/*': [] },
     multiple: false,
   });
 
+  /**
+   * Handles the upload of the pin.
+   * @param e - the form submission event
+   * @returns void
+   */
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return;
@@ -211,6 +221,9 @@ export const CreatePinPage: React.FC = () => {
     }
   };
 
+  /**
+   * Removes the current file from the state.
+   */
   const removeFile = () => {
     setFile(null);
     setPreview(null);
@@ -220,7 +233,6 @@ export const CreatePinPage: React.FC = () => {
     setCategory('General');
   };
 
-  /* ─── Success Screen ──────────────────────────────────────────── */
   if (success) {
     return (
       <div className="min-h-[80vh] flex flex-col items-center justify-center gap-8 py-10">
@@ -301,7 +313,6 @@ export const CreatePinPage: React.FC = () => {
     );
   }
 
-  /* ─── Storage Badge ───────────────────────────────────────────── */
   const storagePct = ((user?.storageUsed || 0) / (user?.storageLimit || 1)) * 100;
   const isNearLimit = storagePct > 90;
   const isAdmin = user?.role === 'admin';

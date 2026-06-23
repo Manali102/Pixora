@@ -12,6 +12,13 @@ interface EditBoardModalProps {
   board: Board | null;
 }
 
+/**
+ * Edit board modal
+ * @param isOpen - modal is open
+ * @param onClose - close modal
+ * @param board - board to edit
+ * @returns JSX.Element
+ */
 export const EditBoardModal: React.FC<EditBoardModalProps> = ({ isOpen, onClose, board }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -29,16 +36,24 @@ export const EditBoardModal: React.FC<EditBoardModalProps> = ({ isOpen, onClose,
     }
   }, [board, isOpen]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+  /**
+   * Handle image change event
+   * @param event - image change event
+   */
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
       setCoverImage(file);
       setImagePreview(URL.createObjectURL(file));
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  /**
+   * Handle form submission
+   * @param event - form submission event
+   */
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     if (!name.trim() || !board) return;
     setIsSubmitting(true);
     try {

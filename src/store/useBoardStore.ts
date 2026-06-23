@@ -30,21 +30,21 @@ interface BoardState {
   loadMoreBoards: () => Promise<void>;
 }
 
-const mapBackendBoard = (b: any): Board => ({
-  id: b.id || b._id,
-  name: b.name,
-  description: b.description,
-  coverImageUrl: b.cover_image_url || b.cover_image,
-  pinIds: Array.isArray(b.pins) && typeof b.pins[0] === 'string' ? b.pins : (b.pins?.map((p: any) => p.id || p._id) || []),
-  pins: Array.isArray(b.pins) && typeof b.pins[0] === 'object' ? b.pins.map((p: any) => ({
-    id: p.id || p._id,
-    imageUrl: p.media_url || p.imageUrl,
-    title: p.title
+const mapBackendBoard = (board: any): Board => ({
+  id: board.id || board._id,
+  name: board.name,
+  description: board.description,
+  coverImageUrl: board.cover_image_url || board.cover_image,
+  pinIds: Array.isArray(board.pins) && typeof board.pins[0] === 'string' ? board.pins : (board.pins?.map((pin: any) => pin.id || pin._id) || []),
+  pins: Array.isArray(board.pins) && typeof board.pins[0] === 'object' ? board.pins.map((pin: any) => ({
+    id: pin.id || pin._id,
+    imageUrl: pin.media_url || pin.imageUrl,
+    title: pin.title
   })) : [],
-  totalPins: b.totalPins || 0,
-  userId: b.user_id,
-  isPrivate: b.isPrivate || false,
-  createdAt: b.created_at || new Date().toISOString(),
+  totalPins: board.totalPins || 0,
+  userId: board.user_id,
+  isPrivate: board.isPrivate || false,
+  createdAt: board.created_at || new Date().toISOString(),
 });
 
 export const useBoardStore = create<BoardState>()((set, get) => ({
@@ -111,10 +111,10 @@ export const useBoardStore = create<BoardState>()((set, get) => ({
         if (backendBoard && backendBoard._id || backendBoard.id) {
           const newBoard = mapBackendBoard(backendBoard);
           set((state) => {
-            const boardExists = state.boards.some(b => b.id === newBoard.id);
+            const boardExists = state.boards.some(board => board.id === newBoard.id);
             return {
               boards: boardExists 
-                ? state.boards.map(b => b.id === newBoard.id ? newBoard : b)
+                ? state.boards.map(board => board.id === newBoard.id ? newBoard : board)
                 : [...state.boards, newBoard]
             };
           });
@@ -162,7 +162,7 @@ export const useBoardStore = create<BoardState>()((set, get) => ({
 
   deleteBoard: async (id) => {
     const prev = get().boards;
-    set((state) => ({ boards: state.boards.filter((b) => b.id !== id) }));
+    set((state) => ({ boards: state.boards.filter((board) => board.id !== id) }));
     try {
       const response = await boardService.deleteBoard(id);
       toast.success(response.message || 'Board deleted successfully');
@@ -177,8 +177,8 @@ export const useBoardStore = create<BoardState>()((set, get) => ({
     try {
       const response = await boardService.savePinToBoard(boardId, pinId);
       set((state) => ({
-        boards: state.boards.map((b) =>
-          b.id === boardId ? { ...b, pinIds: Array.from(new Set([...b.pinIds, pinId])) } : b
+        boards: state.boards.map((board) =>
+          board.id === boardId ? { ...board, pinIds: Array.from(new Set([...board.pinIds, pinId])) } : board
         ),
       }));
       toast.success(response.message || 'Saved to board');
@@ -193,10 +193,10 @@ export const useBoardStore = create<BoardState>()((set, get) => ({
     try {
       const response = await boardService.removePinFromBoard(boardId, pinId);
       set((state) => ({
-        boards: state.boards.map((b) =>
-          b.id === boardId ? { ...b, pinIds: b.pinIds.filter((id) => id !== pinId) } : b
+        boards: state.boards.map((board) =>
+          board.id === boardId ? { ...board, pinIds: board.pinIds.filter((id) => id !== pinId) } : board
         ),
-        boardPins: state.boardPins.filter((p) => p.id !== pinId),
+        boardPins: state.boardPins.filter((pin) => pin.id !== pinId),
       }));
       toast.success(response.message || 'Removed from board');
     } catch (error: any) {
@@ -209,8 +209,8 @@ export const useBoardStore = create<BoardState>()((set, get) => ({
   updateBoard: async (id, updates) => {
     const prev = get().boards;
     set((state) => ({
-      boards: state.boards.map((b) =>
-        b.id === id ? { ...b, ...updates } : b
+      boards: state.boards.map((board) =>
+        board.id === id ? { ...board, ...updates } : board
       ),
     }));
     try {

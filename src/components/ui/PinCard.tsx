@@ -58,7 +58,6 @@ export const PinCard: React.FC<PinCardProps> = ({ pin, onRemove }) => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error('Error downloading image:', error);
       // Fallback
       try {
         const postResponse = await postService.getPost(pin.id);
@@ -115,7 +114,7 @@ export const PinCard: React.FC<PinCardProps> = ({ pin, onRemove }) => {
             src={pin.imageUrl}
             alt={pin.title}
             className={`w-full h-auto object-cover transition-transform duration-700 ${isHovered ? 'scale-110 blur-[2px]' : 'scale-100'}`}
-            containerClassName="w-full h-full min-h-[250px]"
+            containerClassName="w-full h-full"
           />
         )}
         

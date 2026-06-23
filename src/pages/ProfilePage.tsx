@@ -28,7 +28,6 @@ const ProfilePage: React.FC = () => {
     }
   }, [user?.id]);
 
-  // ── UI state ──────────────────────────────────────────────
   const [showEditModal, setShowEditModal] = useState(false);
   const [editName, setEditName] = useState(user?.name ?? '');
   const [editBio, setEditBio] = useState(user?.bio ?? '');
@@ -36,7 +35,6 @@ const ProfilePage: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(user?.profile_url ?? '');
 
-  // ── Derived ───────────────────────────────────────────────
   const storageData = [
     { name: 'Used', value: user?.storageUsed || 0 },
     { name: 'Available', value: (user?.storageLimit || 0) - (user?.storageUsed || 0) },
@@ -45,6 +43,11 @@ const ProfilePage: React.FC = () => {
   const totalViews = userPins.reduce((s, p) => s + p.views, 0);
   const totalLikes = userPins.reduce((s, p) => s + p.likes, 0);
 
+  /**
+   * Handle file change event
+   * @param e File change event
+   * @returns void
+   */
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -54,6 +57,10 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  /**
+   * Handle profile save event
+   * @returns void
+   */
   const handleSaveProfile = async () => {
     if (!editName.trim()) return;
     setSaving(true);
@@ -78,6 +85,9 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  /**
+   * Open edit profile modal
+   */
   const openEditModal = () => {
     setEditName(user?.name ?? '');
     setEditBio(user?.bio ?? '');
@@ -86,9 +96,6 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div className="w-full pt-10">
-      {/* ── Page Content ────────────────────────────── */}
-
-      {/* ── Edit Profile modal ───────────────────────── */}
       <AnimatePresence>
         {showEditModal && (
           <motion.div
@@ -196,9 +203,6 @@ const ProfilePage: React.FC = () => {
         )}
       </AnimatePresence>
 
-
-
-      {/* ── Page body ────────────────────────────────── */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 30 }}

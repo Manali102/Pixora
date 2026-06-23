@@ -17,6 +17,10 @@ const FollowingPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
+  /**
+   * Fetch following list from API
+   * @returns void
+   */
   const fetchFollowing = async () => {
     if (!user?.id) return;
     setLoading(true);
@@ -42,6 +46,11 @@ const FollowingPage: React.FC = () => {
     fetchFollowing();
   }, [user?.id]);
 
+  /**
+   * Handle unfollow action
+   * @param userId User ID to unfollow
+   * @returns void
+   */
   const handleUnfollow = async (userId: string) => {
     try {
       await unfollowUser(userId);
@@ -52,8 +61,13 @@ const FollowingPage: React.FC = () => {
     }
   };
 
-  const filteredFollowing = followingList.filter(f => 
-    f.name.toLowerCase().includes(searchQuery.toLowerCase())
+  /**
+   * Filter following list based on search query
+   * @param searchQuery Search query to filter by
+   * @returns Array of filtered following
+   */
+  const filteredFollowing = followingList.filter(following => 
+    following.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (

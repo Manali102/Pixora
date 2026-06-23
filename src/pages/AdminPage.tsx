@@ -19,8 +19,10 @@ import { CustomSelect } from '@/components/ui/CustomSelect';
 import { userService } from '@/services/userService';
 import { paymentService } from '@/services/paymentService';
 
-
-
+/**
+ * Admin page to display admin data
+ * @returns JSX.Element
+ */
 export const AdminPage: React.FC = () => {
   const [users, setUsers] = React.useState<any[]>([]);
   const [analytics, setAnalytics] = React.useState<any>(null);
@@ -72,6 +74,10 @@ export const AdminPage: React.FC = () => {
     fetchUsers();
   }, [currentPage, sortBy, sortOrder, debouncedSearchTerm]);
 
+  /**
+   * Handles the sorting of users.
+   * @param field - the field to sort by
+   */
   const handleSort = (field: string) => {
     if (sortBy === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -142,24 +148,27 @@ export const AdminPage: React.FC = () => {
   if (!analytics) {
     return <Loader fullPage size="xl" text="Loading dashboard..." />;
   }
-
-  const displayUsers = users.map((u: any) => ({
-    id: u._id || u.id,
-    name: u.name || u.full_name || u.username || 'Unknown',
-    email: u.email || '',
-    profile_url: u.profile_url || u.profile_picture || '',
-    hasProfilePicture: !!(u.profile_url || u.profile_picture),
-    plan: u.plan_type || u.plan || 'Free',
-    status: u.is_active ? 'Active' : (u.subscription_status || 'Active'),
-    joined: new Date(u.created_at || Date.now()).toLocaleDateString()
+ 
+  // display users data to display in table
+  const displayUsers = users.map((user: any) => ({
+    id: user._id || user.id,
+    name: user.name || user.full_name || user.username || 'Unknown',
+    email: user.email || '',
+    profile_url: user.profile_url || user.profile_picture || '',
+    hasProfilePicture: !!(user.profile_url || user.profile_picture),
+    plan: user.plan_type || user.plan || 'Free',
+    status: user.is_active ? 'Active' : (user.subscription_status || 'Active'),
+    joined: new Date(user.created_at || Date.now()).toLocaleDateString()
   }));
 
+  // filter users by status and plan
   const filteredUsers = displayUsers.filter((user) => {
     const matchesStatus = statusFilter === 'All' || user.status === statusFilter;
     const matchesPlan = planFilter === 'All' || user.plan === planFilter;
     return matchesStatus && matchesPlan;
   });
 
+  // dynamic stats for dashboard
   const dynamicStats = [
     { label: 'Total Revenue', value: `$${analytics.revenueMetrics.totalRevenue}`, change: `Net: $${analytics.revenueMetrics.netRevenue}`, icon: Zap, color: '#E60023', trend: 'up' },
     { label: 'Total Bills Paid', value: analytics.billMetrics.totalBillsPaid, change: `Avg: $${analytics.billMetrics.averageBillAmount}`, icon: Activity, color: '#E60023', trend: 'stable' },
@@ -167,6 +176,7 @@ export const AdminPage: React.FC = () => {
     { label: 'Annual Run Rate', value: `$${analytics.growthMetrics.arr}`, change: `MRR: $${analytics.growthMetrics.mrr}`, icon: ShieldCheck, color: '#E60023', trend: 'up' },
   ];
 
+  // dynamic views data for graph
   const dynamicViewsData = graphData.map((dp: any) => ({
     name: dp.xAxisLabel,
     Payments: dp.payments,

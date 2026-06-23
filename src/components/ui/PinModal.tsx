@@ -73,6 +73,10 @@ export const PinModal: React.FC = () => {
     };
   }, [showBoardSelect]);
 
+  /**
+   * Handle comments scroll event
+   * @param e - comments scroll event
+   */
   const handleCommentsScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     if (scrollHeight - scrollTop - clientHeight < 50) {
@@ -94,10 +98,14 @@ export const PinModal: React.FC = () => {
     };
   }, [selectedPin]);
 
+  /**
+   * Handle board select event
+   * @param boardId - board id
+   */
   const handleBoardSelect = async (boardId: string) => {
     if (!selectedPin) return;
     try {
-      const board = boards.find(b => b.id === boardId);
+      const board = boards.find(board => board.id === boardId);
       if (board?.pinIds.includes(selectedPin.id)) {
         await removePinFromBoard(boardId, selectedPin.id);
       } else {
@@ -155,7 +163,6 @@ export const PinModal: React.FC = () => {
       setSelectedPin(null);
       navigate('/');
     } catch (error: any) {
-      console.error("Failed to delete pin:", error);
       toast.error(error?.message || "Failed to delete pin");
       setDeleteTarget(null);
     } finally {
@@ -163,6 +170,9 @@ export const PinModal: React.FC = () => {
     }
   };
 
+  /**
+   * Handles deleting the comment
+   */
   const handleCommentDelete = async () => {
     if (deleteTarget?.type !== 'comment' || !deleteTarget.id) return;
     setIsDeleting(true);

@@ -111,7 +111,7 @@ export const HomePage: React.FC = () => {
         className="flex w-auto -ml-6"
         columnClassName="pl-6 space-y-6 bg-clip-padding"
       >
-        {filteredPins.map((pin) => (
+        {filteredPins.filter(pin => !!pin.imageUrl).map((pin) => (
           <PinCard key={pin.id} pin={pin} />
         ))}
         {isLoadingMorePins && [250, 350, 280, 400, 300].map((h, i) => (

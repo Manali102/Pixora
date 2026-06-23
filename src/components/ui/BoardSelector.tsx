@@ -11,20 +11,32 @@ interface BoardSelectorProps {
   onCreateBoard: () => void;
 }
 
+/**
+ * Board selector is used to select a board to save a pin to
+ * @param pinId - pin id to save
+ * @param onClose - close the board selector
+ * @param onBoardSelect - select a board
+ * @param onCreateBoard - create a board
+ * @returns JSX.Element
+ */
 export const BoardSelector: React.FC<BoardSelectorProps> = ({ 
   pinId, 
   onClose, 
   onBoardSelect,
   onCreateBoard 
 }) => {
-  const boards = useBoardStore((s) => s.boards);
-  const hasMoreBoards = useBoardStore((s) => s.hasMoreBoards);
-  const isLoadingMoreBoards = useBoardStore((s) => s.isLoadingMoreBoards);
-  const loadMoreBoards = useBoardStore((s) => s.loadMoreBoards);
+  const boards = useBoardStore((store) => store.boards);
+  const hasMoreBoards = useBoardStore((store) => store.hasMoreBoards);
+  const isLoadingMoreBoards = useBoardStore((store) => store.isLoadingMoreBoards);
+  const loadMoreBoards = useBoardStore((store) => store.loadMoreBoards);
   const [savingBoardId, setSavingBoardId] = React.useState<string | null>(null);
 
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+  /**
+   * Handle scroll event to load more boards
+   * @param event - scroll event
+   */
+  const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = event.currentTarget;
     if (scrollHeight - scrollTop - clientHeight < 50) {
       if (hasMoreBoards && !isLoadingMoreBoards) {
         loadMoreBoards();
@@ -49,7 +61,7 @@ export const BoardSelector: React.FC<BoardSelectorProps> = ({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
         className="relative z-10 w-full max-w-sm bg-card border border-border/80 shadow-2xl rounded-[2rem] overflow-hidden py-4"
-        onClick={(e) => e.stopPropagation()}
+        onClick={(event) => event.stopPropagation()}
       >
       <button 
         onClick={onClose}

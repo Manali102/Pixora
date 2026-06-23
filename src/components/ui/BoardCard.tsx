@@ -9,6 +9,11 @@ interface BoardCardProps {
   board: Board;
 }
 
+/**
+ * Board card component to display a board
+ * @param board - board to display
+ * @returns JSX.Element
+ */
 export const BoardCard: React.FC<BoardCardProps> = ({ board }) => {
   const navigate = useNavigate();
 

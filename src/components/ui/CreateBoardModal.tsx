@@ -12,27 +12,41 @@ interface CreateBoardModalProps {
   onClose: () => void;
 }
 
+/**
+ * Create board modal
+ * @param isOpen - modal is open
+ * @param onClose - close modal
+ * @returns JSX.Element
+ */
 export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onClose }) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const createBoard = useBoardStore((s) => s.createBoard);
-  const addPinToBoard = useBoardStore((s) => s.addPinToBoard);
-  const selectedPin = usePinStore((s) => s.selectedPin);
-  const toggleSave = usePinStore((s) => s.toggleSave);
+  const createBoard = useBoardStore((store) => store.createBoard);
+  const addPinToBoard = useBoardStore((store) => store.addPinToBoard);
+  const selectedPin = usePinStore((store) => store.selectedPin);
+  const toggleSave = usePinStore((store) => store.toggleSave);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+  /**
+   * Handle image change event
+   * @param event - image change event
+   */
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
       setCoverImage(file);
       setImagePreview(URL.createObjectURL(file));
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  /**
+   * Handle form submission
+   * @param event - form submission event
+   */
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     if (!name.trim()) return;
     setIsSubmitting(true);
     try {
@@ -66,7 +80,7 @@ export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onCl
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             className="w-full max-w-md bg-card border border-border/90 rounded-3xl p-8 shadow-2xl relative"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(event) => event.stopPropagation()}
           >
             <div className="text-center mb-8">
               <h2 className="font-display text-2xl font-bold text-foreground">Create Board</h2>
@@ -100,7 +114,7 @@ export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onCl
                 <Input
                   type="text"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(event) => setName(event.target.value)}
                   placeholder='Like "Places to Go" or "Recipes"'
                   required
                 />
@@ -110,7 +124,7 @@ export const CreateBoardModal: React.FC<CreateBoardModalProps> = ({ isOpen, onCl
                 <label className="block text-sm font-semibold text-foreground/80 mb-2 ml-1">Description (Optional)</label>
                 <textarea
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={(event) => setDescription(event.target.value)}
                   placeholder="What is this board about?"
                   rows={3}
                   className="w-full px-4 py-3 rounded-2xl border border-border/80 bg-background text-foreground text-base placeholder:text-muted-foreground focus:outline-none transition resize-none"

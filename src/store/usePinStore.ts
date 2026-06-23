@@ -172,7 +172,7 @@ export const usePinStore = create<PinState>()((set, get) => ({
         const transformedPin: Pin = transformBackendPin(post);
         
         // Preserve isSaved and isLiked from existing state if missing from single-post fetch
-        const previousPin = get().selectedPin?.id === id ? get().selectedPin : get().pins.find(p => p.id === id);
+        const previousPin = get().selectedPin?.id === id ? get().selectedPin : get().pins.find(pin => pin.id === id);
         if (post.isAddedToBoardsByCurrentUser === undefined && previousPin) {
           transformedPin.isSaved = previousPin.isSaved;
         }
@@ -183,13 +183,13 @@ export const usePinStore = create<PinState>()((set, get) => ({
         let mappedComments: import('@/types/type').Comment[] = [];
         const responseData = (commentsResponse as any).data;
         if (commentsResponse.success && responseData?.comments) {
-          mappedComments = responseData.comments.map((c: any) => ({
-            id: c.id || c._id,
-            userId: c.user?.id || c.user_id?._id || 'unknown',
-            userName: c.user?.name || c.user_id?.name || 'Anonymous',
-            user_profile_url: c.user?.profile_url || c.user_id?.profile_url || '',
-            text: c.comment_text || c.comments_text,
-            createdAt: c.created_at || new Date().toISOString(),
+          mappedComments = responseData.comments.map((comment: any) => ({
+            id: comment.id || comment._id,
+            userId: comment.user?.id || comment.user_id?._id || 'unknown',
+            userName: comment.user?.name || comment.user_id?.name || 'Anonymous',
+            user_profile_url: comment.user?.profile_url || comment.user_id?.profile_url || '',
+            text: comment.comment_text || comment.comments_text,
+            createdAt: comment.created_at || new Date().toISOString(),
           }));
         }
 
@@ -238,13 +238,13 @@ export const usePinStore = create<PinState>()((set, get) => ({
       
       const responseData = (commentsResponse as any).data;
       if (commentsResponse.success && responseData?.comments) {
-        const newComments = responseData.comments.map((c: any) => ({
-          id: c.id || c._id,
-          userId: c.user?.id || c.user_id?._id || 'unknown',
-          userName: c.user?.name || c.user_id?.name || 'Anonymous',
-          user_profile_url: c.user?.profile_url || c.user_id?.profile_url || '',
-          text: c.comment_text || c.comments_text,
-          createdAt: c.created_at || new Date().toISOString(),
+        const newComments = responseData.comments.map((comment: any) => ({
+          id: comment.id || comment._id,
+          userId: comment.user?.id || comment.user_id?._id || 'unknown',
+          userName: comment.user?.name || comment.user_id?.name || 'Anonymous',
+          user_profile_url: comment.user?.profile_url || comment.user_id?.profile_url || '',
+          text: comment.comment_text || comment.comments_text,
+          createdAt: comment.created_at || new Date().toISOString(),
         }));
 
         set((state) => ({
@@ -355,7 +355,7 @@ export const usePinStore = create<PinState>()((set, get) => ({
       if (realId) {
         set((state) => {
           const updateCommentId = (comments: import('@/types/type').Comment[] = []) =>
-            comments.map(c => c.id === tempId ? { ...c, id: realId } : c);
+            comments.map(comment => comment.id === tempId ? { ...comment, id: realId } : comment);
 
           return {
             pins: state.pins.map(pin => pin.id === pinId ? { ...pin, comments: updateCommentId(pin.comments) } : pin),
@@ -367,7 +367,7 @@ export const usePinStore = create<PinState>()((set, get) => ({
       console.error('Failed to add comment:', error);
       // Revert optimistic update
       set((state) => {
-        const removeComment = (comments: import('@/types/type').Comment[] = []) => comments.filter(c => c.id !== tempId);
+        const removeComment = (comments: import('@/types/type').Comment[] = []) => comments.filter(comment => comment.id !== tempId);
         return {
           pins: state.pins.map(pin => pin.id === pinId ? { ...pin, comments: removeComment(pin.comments) } : pin),
           selectedPin: state.selectedPin?.id === pinId ? { ...state.selectedPin, comments: removeComment(state.selectedPin.comments) } : state.selectedPin,
@@ -388,7 +388,7 @@ export const usePinStore = create<PinState>()((set, get) => ({
     // Optimistic update
     set((state) => {
       const updateCommentText = (comments: import('@/types/type').Comment[] = []) =>
-        comments.map(c => c.id === commentId ? { ...c, text } : c);
+        comments.map(comment => comment.id === commentId ? { ...comment, text } : comment);
 
       return {
         pins: state.pins.map(pin => ({ ...pin, comments: updateCommentText(pin.comments) })),
