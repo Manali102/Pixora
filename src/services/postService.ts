@@ -135,4 +135,18 @@ export const postService = {
     );
     return data;
   },
+
+  /**
+   * Update a post by ID.
+   * @param id - The post ID.
+   * @param updateData - The data to update (e.g. title, description).
+   * @returns The updated post data.
+   */
+  updatePost: async (id: string, updateData: { title?: string; description?: string }): Promise<CreatePostResponse> => {
+    const { data } = await apiClient.patch<CreatePostResponse>(
+      ENDPOINTS.POSTS.UPDATE(id),
+      updateData
+    );
+    return data;
+  },
 };

@@ -22,7 +22,7 @@ import { ProfileImage } from './ProfileImage';
  */
 export const PinModal: React.FC = () => {
   const navigate = useNavigate();
-  const { selectedPin, setSelectedPin, toggleLike, toggleSave, addComment, editComment, deleteComment, deletePin, fetchPinById, hasMoreComments, isLoadingMoreComments, loadMoreComments, totalComments, autoOpenBoardSelector, setAutoOpenBoardSelector } = usePinStore();
+  const { selectedPin, setSelectedPin, toggleLike, toggleSave, addComment, editComment, deleteComment, deletePin, fetchPinById, hasMoreComments, isLoadingMoreComments, loadMoreComments, totalComments, autoOpenBoardSelector, setAutoOpenBoardSelector, updatePin } = usePinStore();
   const { boards, addPinToBoard, removePinFromBoard, fetchBoards } = useBoardStore();
   const { user, followUser, unfollowUser } = useAuthStore();
   const openModal = useModalStore(s => s.openModal);
@@ -33,6 +33,10 @@ export const PinModal: React.FC = () => {
   const [showBoardSelect, setShowBoardSelect] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editingCommentText, setEditingCommentText] = useState('');
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [isEditingPin, setIsEditingPin] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
   const boardSelectRef = React.useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -408,16 +412,35 @@ export const PinModal: React.FC = () => {
                       <Download className="w-6 h-6" />                  
                     </Button>
                   </Tooltip>
+                  {isOwnPin && (
+                    <>
+                      <Tooltip content="Edit" side="bottom">
+                        <Button
+                          onClick={() => {
+                            setIsEditingPin(true);
+                            setEditTitle(selectedPin.title);
+                            setEditDescription(selectedPin.description);
+                          }}
+                          variant="ghost"
+                          size="icon"
+                          className="rounded-full"
+                        >
+                          <Edit2 className="w-6 h-6" />
+                        </Button>
+                      </Tooltip>
+                      <Tooltip content="Delete" side="bottom">
+                        <Button
+                          onClick={() => setDeleteTarget({ type: 'pin' })}
+                          variant="ghost"
+                          size="icon"
+                          className="rounded-full text-zinc-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                        >
+                          <Trash2 className="w-6 h-6" />
+                        </Button>
+                      </Tooltip>
+                    </>
+                  )}
                 </div>
-                {isOwnPin && (
-                  <Button
-                    onClick={() => setDeleteTarget({ type: 'pin' })}
-                    variant="outline"
-                    className="rounded-full ml-2 px-6 h-12 font-bold transition-all text-base border-red-200 text-primary hover:bg-red-50 dark:border-red-900/30 dark:hover:bg-red-950/30 mr-2"
-                  >
-                    Delete
-                  </Button>
-                )}
                 
                 <div className="relative" ref={boardSelectRef}>
                   <Button
@@ -450,14 +473,68 @@ export const PinModal: React.FC = () => {
                 </div>
               </div>
 
-              {/* Content */}
-              <div className="flex-1">
-                <h1 className="text-4xl font-bold mb-4 tracking-tight leading-tight text-zinc-900 dark:text-zinc-100">
-                  {selectedPin.title}
-                </h1>
-                <p className="text-zinc-600 dark:text-zinc-400 text-lg mb-8 leading-relaxed">
-                  {selectedPin.description}
-                </p>
+              <div 
+                className="flex flex-col flex-1 overflow-y-auto pr-4 -mr-4 [scrollbar-width:thin]"
+                onScroll={handleCommentsScroll}
+              >
+                {/* Content */}
+                <div className="shrink-0 pb-2">
+                {isEditingPin ? (
+                  <div className="mb-6 space-y-4 pr-2">
+                    <input
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      className="w-full text-4xl font-bold bg-transparent border-b-2 border-transparent hover:border-zinc-200 focus:border-zinc-900 dark:focus:border-zinc-100 focus:outline-none transition-colors pb-2 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400"
+                      placeholder="Add a title"
+                    />
+                    <textarea
+                      value={editDescription}
+                      onChange={(e) => setEditDescription(e.target.value)}
+                      className="w-full text-lg leading-relaxed bg-transparent border-b-2 border-transparent hover:border-zinc-200 focus:border-zinc-900 dark:focus:border-zinc-100 focus:outline-none resize-none transition-colors pb-2 text-zinc-600 dark:text-zinc-400 placeholder:text-zinc-400"
+                      rows={4}
+                      placeholder="Add a detailed description"
+                    />
+                    <div className="flex justify-end gap-2 mt-2">
+                      <Button variant="ghost" onClick={() => setIsEditingPin(false)} className="rounded-full font-bold">Cancel</Button>
+                      <Button 
+                        onClick={async () => {
+                          try {
+                            await updatePin(selectedPin.id, { title: editTitle, description: editDescription });
+                            setIsEditingPin(false);
+                            toast.success("Pin updated successfully");
+                          } catch (error) {
+                            toast.error("Failed to update pin");
+                          }
+                        }}
+                        className="rounded-full font-bold px-6 bg-primary hover:bg-primary/90 text-white"
+                      >Save</Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <h1 className="text-4xl font-bold mb-4 tracking-tight leading-tight text-zinc-900 dark:text-zinc-100">
+                      {selectedPin.title}
+                    </h1>
+                    <div className="mb-6">
+                      <div 
+                        className={cn(
+                          "text-zinc-600 dark:text-zinc-400 text-lg leading-relaxed whitespace-pre-wrap",
+                          !isDescriptionExpanded ? "line-clamp-3" : ""
+                        )}
+                      >
+                        {selectedPin.description}
+                      </div>
+                      {selectedPin.description && selectedPin.description.length > 120 && (
+                        <button 
+                          onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                          className="text-zinc-900 dark:text-zinc-100 font-bold text-sm mt-1 hover:underline text-left inline-block"
+                        >
+                          {isDescriptionExpanded ? 'less' : 'more'}
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
 
                 {/* Author Info */}
                 <div className="flex items-center justify-between mb-10">
@@ -505,7 +582,7 @@ export const PinModal: React.FC = () => {
               </div>
 
               {/* Comments Section */}
-              <div className="flex flex-col flex-1 min-h-0 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+              <div className="flex flex-col shrink-0 pt-4 border-t border-zinc-100 dark:border-zinc-800">
                 <div className="flex items-center justify-between shrink-0 mb-4">
                   <div className="flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
                     <h3 className="text-xl font-bold">Comments</h3>
@@ -513,12 +590,9 @@ export const PinModal: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Comments List - Scrollable */}
+                {/* Comments List */}
                 {selectedPin.comments && selectedPin.comments.length > 0 && (
-                  <div 
-                    className="flex flex-col gap-6 flex-1 overflow-y-auto pr-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-                    onScroll={handleCommentsScroll}
-                  >
+                  <div className="flex flex-col gap-6 shrink-0 pb-4">
                       {selectedPin.comments.map((c: any) => (
                         <div key={c.id} className="flex gap-3 group/comment relative">
                           <ProfileImage 
@@ -621,8 +695,9 @@ export const PinModal: React.FC = () => {
                     </div>
                   )}
               </div>
+            </div>
 
-              {/* Comment Input Pinned to Bottom */}
+            {/* Comment Input Pinned to Bottom */}
               <div className="flex gap-3 shrink-0 pt-6 mt-auto bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800 relative z-10">
                     <ProfileImage 
                       src={user?.profile_url} 

@@ -51,22 +51,43 @@ export const CreatePinPage: React.FC = () => {
 
     try {
       const response = await postService.suggestMetadata(file);
-      if (response.success && response.data?.taskId) {
-        // Start polling
+      const taskId = response.data?.suggestionId || response.data?.taskId;
+      if (response.success && taskId) {
+        // Start polling with timeout safety
+        let attempts = 0;
+        const MAX_ATTEMPTS = 30; // 60 seconds maximum
+
         const pollInterval = setInterval(async () => {
-          const statusResponse = await postService.getSuggestionStatus(response.data.taskId);
-          if (statusResponse.success && statusResponse.data?.status === 'completed') {
+          attempts++;
+
+          if (attempts >= MAX_ATTEMPTS) {
             clearInterval(pollInterval);
-            const { title, description, category } = statusResponse.data.suggestion;
-            setTitle(title || '');
-            setDescription(description || '');
-            setCategory(category || 'General');
-            setIsGeneratingAI(false);
-          } else if (statusResponse.data?.status === 'failed') {
-            clearInterval(pollInterval);
-            alert('AI generation failed. Please try manual entry.');
+            toast.error('AI generation took too long. Please enter details manually.');
             setMetadataMode('manual');
             setIsGeneratingAI(false);
+            return;
+          }
+
+          try {
+            const statusResponse = await postService.getSuggestionStatus(taskId);
+            const suggestionData = statusResponse.data?.suggestion;
+
+            if (statusResponse.success && suggestionData?.status === 'completed') {
+              clearInterval(pollInterval);
+              const { title, description, category } = suggestionData.suggestions || suggestionData;
+              setTitle(title || '');
+              setDescription(description || '');
+              setCategory(category || 'General');
+              setIsGeneratingAI(false);
+            } else if (suggestionData?.status === 'failed') {
+              clearInterval(pollInterval);
+              toast.error('AI generation failed. Please enter details manually.');
+              setMetadataMode('manual');
+              setIsGeneratingAI(false);
+            }
+          } catch (pollError) {
+             // Let it retry on temporary network errors until MAX_ATTEMPTS is reached
+             console.error('Polling error:', pollError);
           }
         }, 2000);
       } else {
@@ -74,7 +95,7 @@ export const CreatePinPage: React.FC = () => {
       }
     } catch (error) {
       console.error('AI Suggestion failed:', error);
-      alert('AI generation failed. Please try manual entry.');
+      toast.error('AI generation failed. Please try manual entry.');
       setMetadataMode('manual');
       setIsGeneratingAI(false);
     }

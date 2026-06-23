@@ -40,6 +40,7 @@ interface PinState {
   setSelectedPin: (pin: Pin | null) => void;
   setAutoOpenBoardSelector: (autoOpen: boolean) => void;
   addPin: (pin: Pin) => void;
+  updatePin: (id: string, updateData: { title?: string; description?: string }) => Promise<void>;
   deletePin: (id: string) => Promise<void>;
   toggleLike: (id: string) => Promise<void>;
   toggleSave: (id: string) => void;
@@ -193,19 +194,34 @@ export const usePinStore = create<PinState>()((set, get) => ({
         }
 
         transformedPin.comments = mappedComments;
-        set({ 
-          selectedPin: transformedPin, 
-          isLoading: false,
-          hasMoreComments: responseData?.pagination?.hasNextPage || false,
-          commentsPage: 1,
-          totalComments: responseData?.pagination?.totalComments || mappedComments.length
-        });
+        
+        // Prevent reopening if the user closed the modal or selected a different pin before the API returned
+        if (get().selectedPin?.id === id) {
+          set({ 
+            selectedPin: transformedPin, 
+            isLoading: false,
+            hasMoreComments: responseData?.pagination?.hasNextPage || false,
+            commentsPage: 1,
+            totalComments: responseData?.pagination?.totalComments || mappedComments.length
+          });
+        } else {
+          set({ isLoading: false });
+        }
       } else {
-        set({ selectedPin: null, isLoading: false });
+        // Only null out if we are still looking at this pin
+        if (get().selectedPin?.id === id) {
+          set({ selectedPin: null, isLoading: false });
+        } else {
+          set({ isLoading: false });
+        }
       }
     } catch (error) {
       console.error('Failed to fetch pin:', error);
-      set({ selectedPin: null, isLoading: false });
+      if (get().selectedPin?.id === id) {
+        set({ selectedPin: null, isLoading: false });
+      } else {
+        set({ isLoading: false });
+      }
     }
   },
 
@@ -251,6 +267,28 @@ export const usePinStore = create<PinState>()((set, get) => ({
 
   addPin: (pin: Pin) =>
     set((state) => ({ pins: [pin, ...state.pins] })),
+
+  updatePin: async (id: string, updateData: { title?: string; description?: string }) => {
+    const previousState = get();
+
+    set((state) => {
+      const updatePinFields = (pin: Pin) => (pin.id === id ? { ...pin, ...updateData } : pin);
+      return {
+        pins: state.pins.map(updatePinFields),
+        userPins: state.userPins.map(updatePinFields),
+        selectedPin: state.selectedPin?.id === id ? { ...state.selectedPin, ...updateData } : state.selectedPin
+      };
+    });
+
+    try {
+      const response = await postService.updatePost(id, updateData);
+      if (!response.success) throw new Error('API failed to update pin');
+    } catch (error) {
+      console.error('Failed to update pin:', error);
+      set({ pins: previousState.pins, userPins: previousState.userPins, selectedPin: previousState.selectedPin });
+      throw error;
+    }
+  },
 
   deletePin: async (id: string) => {
     try {
