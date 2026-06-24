@@ -21,7 +21,7 @@ export const transformBackendPin = (post: any): Pin => ({
   isLiked: !!post.isLikedByCurrentUser,
   isSaved: !!post.isAddedToBoardsByCurrentUser,
   comments: [],
-  authorFollowers: post.authorFollowers || 0,
+  authorFollowers: post.authorTotalFollowers || post.authorFollowers || 0,
   views: post.views || 0,
 });
 

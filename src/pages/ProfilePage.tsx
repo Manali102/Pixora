@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
 import { usePinStore } from '../store/usePinStore';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import { Check, Camera, Heart, Eye, X, Crown, Edit3, HardDrive } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
+import { Check, Camera, Heart, X, Crown, Edit3, HardDrive } from 'lucide-react';
 import { toast } from 'sonner';
 import { Tooltip } from '../components/ui/Tooltip';
 import { Button } from '../components/ui/button';
@@ -35,13 +35,23 @@ const ProfilePage: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(user?.profile_url ?? '');
 
-  const storageData = [
-    { name: 'Used', value: user?.storageUsed || 0 },
-    { name: 'Available', value: (user?.storageLimit || 0) - (user?.storageUsed || 0) },
-  ];
-  const COLORS = ['hsl(0, 84%, 60%)', 'hsl(240, 4%, 20%)'];
-  const totalViews = userPins.reduce((s, p) => s + p.views, 0);
-  const totalLikes = userPins.reduce((s, p) => s + p.likes, 0);
+  const storageData = React.useMemo(() => {
+    const used = user?.storageUsed || 0;
+    const limit = user?.storageLimit || 0;
+    
+    if (user?.role === 'admin' || limit === 0) {
+      // Show as mostly empty (grey) since it's unlimited, but with a tiny sliver of used
+      return [
+        { name: 'Used', value: used > 0 ? 1 : 0, tooltipValue: used },
+        { name: 'Available', value: 100, tooltipValue: 'Unlimited' },
+      ];
+    }
+    return [
+      { name: 'Used', value: used, tooltipValue: used },
+      { name: 'Available', value: Math.max(0, limit - used), tooltipValue: Math.max(0, limit - used) },
+    ];
+  }, [user?.storageUsed, user?.storageLimit, user?.role]);
+  const COLORS = React.useMemo(() => ['hsl(0, 84%, 60%)', 'hsl(240, 4%, 20%)'], []);
 
   /**
    * Handle file change event
@@ -288,7 +298,15 @@ const ProfilePage: React.FC = () => {
             <div className="w-24 h-24 shrink-0">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={storageData} cx="50%" cy="50%" innerRadius={28} outerRadius={42} dataKey="value" strokeWidth={0}>
+                  <RechartsTooltip 
+                    formatter={(_value, name, props) => {
+                      const val = props.payload.tooltipValue;
+                      return [val === 'Unlimited' ? val : `${val} MB`, name];
+                    }}
+                    contentStyle={{ borderRadius: '12px', border: '1px solid var(--border)', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '8px 12px' }}
+                    itemStyle={{ fontSize: '13px', fontWeight: 600 }}
+                  />
+                  <Pie data={storageData} cx="50%" cy="50%" innerRadius={28} outerRadius={42} dataKey="value" strokeWidth={0} cornerRadius={8} paddingAngle={2}>
                     {storageData.map((_, index) => (
                       <Cell key={index} fill={COLORS[index]} />
                     ))}
@@ -298,28 +316,16 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Total Views */}
-          <div className="glass-card-hover border border-border/90 rounded-2xl p-5">
-            <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Eye className="w-4.5 h-4.5 text-primary" />
-              </div>
-              <span className="label-dim">Total Views</span>
-            </div>
-            <span className="stat-number text-foreground">{totalViews.toLocaleString()}</span>
-            <p className="text-muted-foreground text-sm mt-1">{userPins.length} active pins</p>
-          </div>
-
           {/* Engagement */}
-          <div className="glass-card-hover border border-border/90 rounded-2xl p-5">
+          <div className="glass-card-hover border border-border/90 rounded-2xl p-5 sm:col-span-2 lg:col-span-2">
             <div className="flex items-center gap-2.5 mb-3">
               <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
                 <Heart className="w-4.5 h-4.5 text-primary" />
               </div>
               <span className="label-dim">Engagement</span>
             </div>
-            <span className="stat-number text-foreground">{totalLikes.toLocaleString()}</span>
-            <div className="flex gap-4 mt-1">
+            <div className="flex gap-4 mt-2">
+              <p className="text-muted-foreground text-sm">{userPins.length} {userPins.length === 1 ? 'pin' : 'pins'}</p>
               <p className="text-muted-foreground text-sm">{user?.followers?.toLocaleString()} followers</p>
               <p className="text-muted-foreground text-sm">{user?.following?.toLocaleString()} following</p>
             </div>
