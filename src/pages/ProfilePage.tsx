@@ -140,11 +140,20 @@ const ProfilePage: React.FC = () => {
               <div className="flex flex-col items-center mb-6">
                 <div className="relative group">
                   <div className="w-24 h-24 rounded-2xl overflow-hidden border-2 border-primary/20 shadow-lg">
-                    <img 
-                      src={previewUrl || user?.profile_url} 
-                      alt="Profile Preview" 
-                      className="w-full h-full object-cover"
-                    />
+                    {selectedFile && previewUrl ? (
+                      <img 
+                        src={previewUrl} 
+                        alt="Profile Preview" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <ProfileImage 
+                        src={user?.profile_url} 
+                        name={user?.name} 
+                        variant="square"
+                        className="w-full h-full rounded-none border-none text-2xl"
+                      />
+                    )}
                   </div>
                   <button
                     onClick={() => fileInputRef.current?.click()}

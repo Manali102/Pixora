@@ -54,8 +54,8 @@ export const HomePage: React.FC = () => {
       <div className="max-w-[2000px] mx-auto px-4 pt-20">
         <Masonry
           breakpointCols={breakpointColumnsObj}
-          className="flex w-auto -ml-6"
-          columnClassName="pl-6 space-y-6 bg-clip-padding"
+          className="flex w-auto -ml-4"
+          columnClassName="pl-4 bg-clip-padding"
         >
           {[300, 250, 400, 350, 200, 380, 260, 420, 280, 320].map((h, i) => (
             <PinSkeleton key={`skel-init-${i}`} height={`${h}px`} />
@@ -108,8 +108,8 @@ export const HomePage: React.FC = () => {
       </div>
       <Masonry
         breakpointCols={breakpointColumnsObj}
-        className="flex w-auto -ml-6"
-        columnClassName="pl-6 space-y-6 bg-clip-padding"
+        className="flex w-auto -ml-4"
+        columnClassName="pl-4 bg-clip-padding"
       >
         {filteredPins.filter(pin => !!pin.imageUrl).map((pin) => (
           <PinCard key={pin.id} pin={pin} />

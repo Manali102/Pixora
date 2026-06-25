@@ -281,7 +281,7 @@ export const AdminPage: React.FC = () => {
           <div className="flex flex-row items-center justify-between mb-10">
             <div>
               <h3 className="text-3xl font-black text-[#111111]">Platform Traffic</h3>
-              <p className="text-base font-bold text-gray-500">Weekly engagement analysis</p>
+              <p className="text-base font-bold text-gray-500">Engagement analysis</p>
             </div>
           </div>
           <div className="h-[300px]">

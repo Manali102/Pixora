@@ -15,6 +15,17 @@ export default defineConfig({
     tailwindcss(),
   ],
 
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'https://pixora-517u.vercel.app',
+        changeOrigin: true,
+        secure: true,
+      }
+    }
+  },
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

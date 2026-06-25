@@ -89,11 +89,10 @@ export const PinCard: React.FC<PinCardProps> = ({ pin, onRemove }) => {
 
   return (
     <motion.div
-      layout
-      initial={{ opacity: 0, scale: 0.9 }}
+      initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ duration: 0.2 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ duration: 0.3 }}
       className="mb-4 break-inside-avoid relative group"
       onMouseEnter={() => {
         if (!openModal) setIsHovered(true);

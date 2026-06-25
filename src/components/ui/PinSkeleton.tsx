@@ -6,7 +6,7 @@ interface PinSkeletonProps {
 
 export const PinSkeleton: React.FC<PinSkeletonProps> = ({ height = '300px' }) => {
   return (
-    <div className="masonry-item animate-pulse w-full">
+    <div className="mb-4 break-inside-avoid animate-pulse w-full">
       <div 
         className="relative overflow-hidden rounded-2xl bg-secondary/60 w-full"
         style={{ height }}
