@@ -93,19 +93,27 @@ export const PricingPlans: React.FC<PricingPlansProps> = ({ isModal = false, onP
     setProcessing(null);
   };
 
+  const visiblePlans = plans.filter((plan) => {
+    // Hide the Free plan on the pricing page for paid users
+    if (!isModal && user?.subscription && user.subscription !== 'free' && plan.tier === 'free') {
+      return false;
+    }
+    return true;
+  });
+
+  const lgColsClass = visiblePlans.length === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3';
+
   return (
     <>
       <div className="flex justify-center text-center">
         {/* Billing Switch (Radix-like Radio Group) */}
         <div className="mt-8 inline-flex p-1 w-full max-w-[340px] bg-white border-2 border-border/60 shadow-sm rounded-full relative overflow-hidden dark:bg-background">
-          {/* Sliding Highlight */}
+          {/* Animated Background Pill */}
           <motion.div
-            className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-black rounded-full z-0 shadow-md dark:bg-white"
+            className="absolute top-1 bottom-1 w-[calc(50%-4px)] bg-black dark:bg-white rounded-full shadow-md z-0"
             initial={false}
-            animate={{
-              left: isAnnual ? '50%' : '4px',
-            }}
-            transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+            animate={{ left: isAnnual ? 'calc(50% + 2px)' : '4px' }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
           />
 
           <button
@@ -135,16 +143,8 @@ export const PricingPlans: React.FC<PricingPlansProps> = ({ isModal = false, onP
         </div>
       </div>
 
-      <div className={`grid grid-cols-1 md:grid-cols-2 ${isModal ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-8 ${isModal ? 'mt-8' : 'mt-12'}`}>
-        {plans
-          .filter((plan) => {
-            // Hide the Free plan on the pricing page for paid users
-            if (!isModal && user?.subscription && user.subscription !== 'free' && plan.tier === 'free') {
-              return false;
-            }
-            return true;
-          })
-          .map((plan) => {
+      <div className={`grid grid-cols-1 md:grid-cols-2 ${lgColsClass} gap-8 ${isModal ? 'mt-8' : 'mt-12'}`}>
+        {visiblePlans.map((plan) => {
           // If modal, user config doesn't matter (they are choosing first time).
           // If page, check if it's the current tier and current plan
           const isSameTier = !isModal && user?.subscription === plan.tier;

@@ -46,7 +46,7 @@ export const PricingPage: React.FC = () => {
           const cycleLabel = planDetails.billingCycle === 'yearly' ? 'Annual' : 'Monthly';
           
           if (isDowngrade) {
-            toast.success(`Plan downgraded to ${planDetails.subscription.charAt(0).toUpperCase() + planDetails.subscription.slice(1)} (${cycleLabel}). Unused time has been prorated.`);
+            toast.success(`Plan downgraded to ${planDetails.subscription.charAt(0).toUpperCase() + planDetails.subscription.slice(1)} (${cycleLabel}). Any unused balance has been applied as credit.`);
           } else {
             toast.success(`Plan upgraded to ${planDetails.subscription.charAt(0).toUpperCase() + planDetails.subscription.slice(1)} (${cycleLabel}) successfully!`);
           }

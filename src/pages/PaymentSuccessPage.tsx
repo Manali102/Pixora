@@ -93,7 +93,7 @@ export const PaymentSuccessPage: React.FC = () => {
         title: `Downgraded from ${oldLabel} to ${newLabel}`,
         details: [
           `Your plan has been changed from ${oldLabel} to ${newLabel} (${newCycleLabel}) with immediate effect.`,
-          'The unused time from your previous plan has been prorated and credited toward your new billing cycle.',
+          'The unused balance from your previous plan has been prorated and credited toward your new billing cycle.',
           `Your storage limit and features have been adjusted to the ${newLabel} plan.`,
         ],
       };
