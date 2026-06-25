@@ -121,6 +121,14 @@ export const SignupPage: React.FC = () => {
             };
             localStorage.setItem('pixora_auth', JSON.stringify(stateToSave));
             
+            // Save plan context for the success page
+            sessionStorage.setItem('previousPlan', JSON.stringify({
+              subscription: 'free',
+              billingCycle: 'monthly',
+              newPlan: planData.subscription,
+              newBillingCycle: planData.billingCycle,
+            }));
+
             // Redirect to Stripe checkout
             window.location.href = response.data.url;
             return;

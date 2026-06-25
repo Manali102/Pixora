@@ -16,6 +16,13 @@ interface PricingPlansProps {
   onPlanSelect: (planDetails: PlanDetails) => Promise<void> | void;
 }
 
+const TIER_RANK: Record<string, number> = {
+  free: 0,
+  starter: 1,
+  pro: 2,
+  enterprise: 3,
+};
+
 export const PricingPlans: React.FC<PricingPlansProps> = ({ isModal = false, onPlanSelect }) => {
   const user = useAuthStore((store) => store.user);
   const [isAnnual, setIsAnnual] = useState(user?.billingCycle === 'yearly');
@@ -128,8 +135,16 @@ export const PricingPlans: React.FC<PricingPlansProps> = ({ isModal = false, onP
         </div>
       </div>
 
-      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 ${isModal ? 'mt-8' : 'mt-12'}`}>
-        {plans.map((plan) => {
+      <div className={`grid grid-cols-1 md:grid-cols-2 ${isModal ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-8 ${isModal ? 'mt-8' : 'mt-12'}`}>
+        {plans
+          .filter((plan) => {
+            // Hide the Free plan on the pricing page for paid users
+            if (!isModal && user?.subscription && user.subscription !== 'free' && plan.tier === 'free') {
+              return false;
+            }
+            return true;
+          })
+          .map((plan) => {
           // If modal, user config doesn't matter (they are choosing first time).
           // If page, check if it's the current tier and current plan
           const isSameTier = !isModal && user?.subscription === plan.tier;
@@ -137,6 +152,9 @@ export const PricingPlans: React.FC<PricingPlansProps> = ({ isModal = false, onP
             plan.tier === 'free' || 
             (isAnnual ? user?.billingCycle === 'yearly' : user?.billingCycle === 'monthly')
           );
+          const isDowngrade = !isModal && user?.subscription
+            ? TIER_RANK[plan.tier] < TIER_RANK[user.subscription]
+            : false;
           
           return (
             <motion.div
@@ -211,6 +229,8 @@ export const PricingPlans: React.FC<PricingPlansProps> = ({ isModal = false, onP
                   isAnnual ? 'Switch to Annual' : 'Switch to Monthly'
                 ) : isModal ? (
                   plan.tier === 'free' ? 'Start Free' : 'Select Plan'
+                ) : isDowngrade ? (
+                  'Downgrade'
                 ) : (
                   'Upgrade'
                 )}

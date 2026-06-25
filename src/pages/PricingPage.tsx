@@ -39,10 +39,25 @@ export const PricingPage: React.FC = () => {
 
       if (response.success) {
         if (response.data.upgraded) {
-          // Immediate upgrade handled by backend
+          // Immediate plan change handled by backend (both upgrade & downgrade)
           await useAuthStore.getState().fetchProfile();
-          toast.success('Subscription upgraded successfully!');
+          const TIER_RANK: Record<string, number> = { free: 0, starter: 1, pro: 2, enterprise: 3 };
+          const isDowngrade = TIER_RANK[planDetails.subscription] < TIER_RANK[user.subscription];
+          const cycleLabel = planDetails.billingCycle === 'yearly' ? 'Annual' : 'Monthly';
+          
+          if (isDowngrade) {
+            toast.success(`Plan downgraded to ${planDetails.subscription.charAt(0).toUpperCase() + planDetails.subscription.slice(1)} (${cycleLabel}). Unused time has been prorated.`);
+          } else {
+            toast.success(`Plan upgraded to ${planDetails.subscription.charAt(0).toUpperCase() + planDetails.subscription.slice(1)} (${cycleLabel}) successfully!`);
+          }
         } else if (response.data.url) {
+          // Save previous plan context for the success page
+          sessionStorage.setItem('previousPlan', JSON.stringify({
+            subscription: user.subscription,
+            billingCycle: user.billingCycle,
+            newPlan: planDetails.subscription,
+            newBillingCycle: planDetails.billingCycle,
+          }));
           // Redirect to Stripe checkout
           window.location.href = response.data.url;
         }
