@@ -20,8 +20,15 @@ export const userMapper = {
       profile_url: apiUser.profile_url || '',
       role: (apiUser.role === 'admin' ? 'admin' : 'user') as 'user' | 'admin',
       subscription: (apiUser.plan_type || 'free') as 'free' | 'starter' | 'pro' | 'enterprise',
-      storageUsed: apiUser.storage_used || 0,
-      storageLimit: apiUser.plan_type === 'pro' ? 1024 : 20, // Example: 1GB for pro, 20MB for free
+      storageUsed: Number(((apiUser.storage_used || 0) / (1024 * 1024)).toFixed(2)),
+      storageLimit: (() => {
+        const plan = (apiUser.plan_type || 'free').toLowerCase();
+        const cycle = (apiUser.billing_period || 'monthly').toLowerCase();
+        if (plan === 'starter') return cycle === 'yearly' ? 500 : 300;
+        if (plan === 'pro') return cycle === 'yearly' ? 800 : 600;
+        if (plan === 'enterprise') return cycle === 'yearly' ? 1024 : 900;
+        return 150; // Default for free
+      })(),
       bio: '', // Backend doesn't provide bio yet
       followers: 0,
       following: 0,

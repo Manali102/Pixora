@@ -326,12 +326,12 @@ export const usePinStore = create<PinState>()((set, get) => ({
     set((state) => {
       const updatedPins = state.pins.map((pin) =>
         pin.id === pinId 
-          ? { ...pin, comments: [...(pin.comments || []), newComment] }
+          ? { ...pin, comments: [newComment, ...(pin.comments || [])] }
           : pin
       );
 
       const updatedSelectedPin = state.selectedPin?.id === pinId
-        ? { ...state.selectedPin, comments: [...(state.selectedPin.comments || []), newComment] }
+        ? { ...state.selectedPin, comments: [newComment, ...(state.selectedPin.comments || [])] }
         : state.selectedPin;
 
       return {
@@ -351,7 +351,7 @@ export const usePinStore = create<PinState>()((set, get) => ({
       if (!response.success) throw new Error('API failed to create comment');
 
       // Replace temp ID with real ID from backend
-      const realId = response.data?.id || response.data?.comment?.id || response.data?._id;
+      const realId = response.data?.comment?._id || response.data?.comment?.id || response.data?.id || response.data?._id;
       if (realId) {
         set((state) => {
           const updateCommentId = (comments: import('@/types/type').Comment[] = []) =>

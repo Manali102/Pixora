@@ -38,6 +38,7 @@ export interface UserProfile {
   email: string;
   is_email_verified: boolean;
   plan_type: string;
+  billing_period?: string;
   storage_used: number;
   role: string;
   last_logged_in: string | null;

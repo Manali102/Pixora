@@ -22,7 +22,7 @@ import { ProfileImage } from './ProfileImage';
  */
 export const PinModal: React.FC = () => {
   const navigate = useNavigate();
-  const { selectedPin, setSelectedPin, toggleLike, toggleSave, addComment, editComment, deleteComment, deletePin, fetchPinById, hasMoreComments, isLoadingMoreComments, loadMoreComments, totalComments, autoOpenBoardSelector, setAutoOpenBoardSelector, updatePin } = usePinStore();
+  const { selectedPin, setSelectedPin, toggleLike, toggleSave, addComment, editComment, deleteComment, deletePin, fetchPinById, hasMoreComments, isLoadingMoreComments, loadMoreComments, totalComments, autoOpenBoardSelector, setAutoOpenBoardSelector, updatePin, isLoading } = usePinStore();
   const { boards, addPinToBoard, removePinFromBoard, fetchBoards } = useBoardStore();
   const { user, followUser, unfollowUser } = useAuthStore();
   const openModal = useModalStore(s => s.openModal);
@@ -608,9 +608,13 @@ export const PinModal: React.FC = () => {
                 </div>
 
                 {/* Comments List */}
-                {selectedPin.comments && selectedPin.comments.length > 0 && (
+                {isLoading ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-zinc-400" />
+                  </div>
+                ) : selectedPin.comments && selectedPin.comments.length > 0 && (
                   <div className="flex flex-col gap-6 shrink-0 pb-4">
-                      {selectedPin.comments.map((c: any) => (
+                      {[...selectedPin.comments].reverse().map((c: any) => (
                         <div key={c.id} className="flex gap-3 group/comment relative">
                           <ProfileImage 
                             src={c.user_profile_url} 

@@ -71,7 +71,7 @@ export const PaymentSuccessPage: React.FC = () => {
           `You have access to all ${newLabel} features including increased storage.`,
           newCycleLabel === 'Annual'
             ? 'You\'re saving 20% with annual billing.'
-            : 'You\'ll be billed at the start of each month.',
+            : 'You\'ll be billed monthly on this date.',
         ],
       };
     }
@@ -83,7 +83,7 @@ export const PaymentSuccessPage: React.FC = () => {
           `You switched your ${newLabel} plan from ${oldCycleLabel} to ${newCycleLabel} billing.`,
           planContext.newBillingCycle === 'yearly'
             ? 'Your annual subscription is now active. You\'ll save 20% compared to monthly billing.'
-            : 'Your monthly billing cycle starts now. You\'ll be charged at the beginning of each month.',
+            : 'Your monthly billing cycle starts now. You\'ll be billed monthly on this date.',
         ],
       };
     }

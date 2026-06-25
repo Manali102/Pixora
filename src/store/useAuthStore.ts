@@ -22,10 +22,10 @@ const transformBackendUser = (backendUser: any): User => {
   const plan = backendUser.plan_type?.toLowerCase() || 'free';
   const cycle = backendUser.billing_period?.toLowerCase() || 'monthly';
   
-  let storageLimit = 5; // Default for Free
-  if (plan === 'starter') storageLimit = cycle === 'yearly' ? 25 : 10;
-  else if (plan === 'pro') storageLimit = cycle === 'yearly' ? 30 : 15;
-  else if (plan === 'enterprise') storageLimit = cycle === 'yearly' ? 40 : 20;
+  let storageLimit = 150; // Default for Free
+  if (plan === 'starter') storageLimit = cycle === 'yearly' ? 500 : 300;
+  else if (plan === 'pro') storageLimit = cycle === 'yearly' ? 800 : 600;
+  else if (plan === 'enterprise') storageLimit = cycle === 'yearly' ? 1024 : 900;
 
   return {
     id: backendUser._id || backendUser.id,

@@ -40,33 +40,33 @@ export const PricingPlans: React.FC<PricingPlansProps> = ({ isModal = false, onP
       monthlyPrice: 0,
       annualPrice: 0,
       description: 'The foundation for your journey.',
-      features: ['5 MB Total Storage', 'Core Features', 'Community Support'],
+      features: ['150 MB Total Storage', 'Core Features', 'Community Support'],
       icon: <Sparkles className="w-6 h-6 text-green-500" />,
       tier: 'free',
-      storageMonthly: 5,
-      storageAnnual: 5
+      storageMonthly: 150,
+      storageAnnual: 150
     },
     {
       name: 'Starter',
       monthlyPrice: 10,
       annualPrice: 96,
       description: 'Ideal for casual creators.',
-      features: [`${isAnnual ? '25' : '10'} MB Total Storage`, 'Monthly Reset', 'Basic Support'],
+      features: [`${isAnnual ? '500' : '300'} MB Total Storage`, 'Monthly Reset', 'Basic Support'],
       icon: <Zap className="w-6 h-6 text-blue-500" />,
       tier: 'starter',
-      storageMonthly: 10,
-      storageAnnual: 25
+      storageMonthly: 300,
+      storageAnnual: 500
     },
     {
       name: 'Pro',
       monthlyPrice: 20,
       annualPrice: 192,
       description: 'For power users and pros.',
-      features: [`${isAnnual ? '30' : '15'} MB Total Storage`, 'Monthly Reset', 'Priority Support'],
+      features: [`${isAnnual ? '800' : '600'} MB Total Storage`, 'Monthly Reset', 'Priority Support'],
       icon: <Rocket className="w-6 h-6 text-purple-500" />,
       tier: 'pro',
-      storageMonthly: 15,
-      storageAnnual: 30,
+      storageMonthly: 600,
+      storageAnnual: 800,
       popular: true
     },
     {
@@ -74,11 +74,11 @@ export const PricingPlans: React.FC<PricingPlansProps> = ({ isModal = false, onP
       monthlyPrice: 50,
       annualPrice: 480,
       description: 'Massive storage for brands.',
-      features: [`${isAnnual ? '40' : '20'} MB Total Storage`, 'Monthly Reset', 'API Access'],
+      features: [isAnnual ? '1 GB Total Storage' : '900 MB Total Storage', 'Monthly Reset', 'API Access'],
       icon: <Crown className="w-6 h-6 text-amber-500" />,
       tier: 'enterprise',
-      storageMonthly: 20,
-      storageAnnual: 40
+      storageMonthly: 900,
+      storageAnnual: 1024
     }
   ];
 
