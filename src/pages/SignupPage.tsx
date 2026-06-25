@@ -127,6 +127,7 @@ export const SignupPage: React.FC = () => {
               billingCycle: 'monthly',
               newPlan: planData.subscription,
               newBillingCycle: planData.billingCycle,
+              isNewSignup: true,
             }));
 
             // Redirect to Stripe checkout

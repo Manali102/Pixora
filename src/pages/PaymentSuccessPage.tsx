@@ -23,6 +23,7 @@ interface PreviousPlanContext {
   billingCycle: 'monthly' | 'yearly';
   newPlan: string;
   newBillingCycle: 'monthly' | 'yearly';
+  isNewSignup?: boolean;
 }
 
 export const PaymentSuccessPage: React.FC = () => {
@@ -43,7 +44,9 @@ export const PaymentSuccessPage: React.FC = () => {
     return null;
   }, []);
 
-  const isDowngrade = planContext
+  const isNewSignup = planContext?.isNewSignup ?? false;
+
+  const isDowngrade = !isNewSignup && planContext
     ? TIER_RANK[planContext.newPlan] < TIER_RANK[planContext.subscription]
     : false;
 
@@ -58,6 +61,20 @@ export const PaymentSuccessPage: React.FC = () => {
     const newLabel = PLAN_LABELS[planContext.newPlan] || planContext.newPlan;
     const newCycleLabel = planContext.newBillingCycle === 'yearly' ? 'Annual' : 'Monthly';
     const oldCycleLabel = planContext.billingCycle === 'yearly' ? 'Annual' : 'Monthly';
+
+    // New signup — welcome message, no "upgraded from" language
+    if (isNewSignup) {
+      return {
+        title: `${newLabel} Plan Activated`,
+        details: [
+          `Your ${newLabel} (${newCycleLabel}) plan is now active. Welcome to Pixora!`,
+          `You have access to all ${newLabel} features including increased storage.`,
+          newCycleLabel === 'Annual'
+            ? 'You\'re saving 20% with annual billing.'
+            : 'You\'ll be billed at the start of each month.',
+        ],
+      };
+    }
 
     if (isBillingCycleChange) {
       return {
@@ -82,7 +99,7 @@ export const PaymentSuccessPage: React.FC = () => {
       };
     }
 
-    // Upgrade
+    // Upgrade (existing user going to a higher tier)
     return {
       title: `Upgraded from ${oldLabel} to ${newLabel}`,
       details: [
@@ -91,7 +108,7 @@ export const PaymentSuccessPage: React.FC = () => {
         `You now have access to all ${newLabel} features including increased storage.`,
       ],
     };
-  }, [planContext, isDowngrade, isBillingCycleChange]);
+  }, [planContext, isNewSignup, isDowngrade, isBillingCycleChange]);
 
   useEffect(() => {
     // Refresh profile to get updated plan status immediately
